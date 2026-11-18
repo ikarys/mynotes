@@ -17,7 +17,8 @@ export interface NoteActions {
 class Workspace {
 	tabs = $state<Tab[]>([]);
 	activeId = $state<number | null>(null);
-	actions = $state<NoteActions | null>(null);
+	// Raw so editors can compare their own object by identity when unregistering.
+	actions = $state.raw<NoteActions | null>(null);
 	toast = $state<string | null>(null);
 	private suppressPersist = false;
 	private toastTimer: number | undefined;

@@ -8,6 +8,20 @@ A Windows notepad that starts instantly and remembers your notes without
 files, with rich text, pasted images and mind maps. Built with Tauri 2 and
 Svelte 5.
 
+## Use
+
+- `Ctrl+N` new note, `Ctrl+Shift+M` new mind map, `Ctrl+W` close tab,
+  `Ctrl+Tab` next tab, `Ctrl+P` find a note (full-text search).
+- Select text to format it; paste images or Markdown directly.
+- Mind map: `Tab` adds a child, `Enter` a sibling, `F2` renames,
+  right-click for more.
+- The `…` menu copies or exports the note as Markdown and switches between
+  system, light and dark themes.
+- `Ctrl+Alt+Space` shows or hides the window from anywhere; closing the
+  window keeps mynotes in the tray.
+
+Notes are saved automatically in `%APPDATA%\mynotes`.
+
 AI assistance: this project is written with AI help, see [VIBECODING.md](VIBECODING.md).
 
 ## Develop (from WSL)
@@ -22,5 +36,8 @@ just test
 just lint
 just build   # release exe
 ```
+
+How it is built and verified: [VERIFICATION.md](VERIFICATION.md).
+Security: [SECURITY.md](SECURITY.md).
 
 Licence: MIT.

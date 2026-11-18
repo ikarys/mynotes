@@ -5,6 +5,7 @@
 	import TabBar from './lib/TabBar.svelte';
 	import QuickSwitcher from './lib/QuickSwitcher.svelte';
 	import DocEditor from './lib/DocEditor.svelte';
+	import MindMapEditor from './lib/MindMapEditor.svelte';
 	import Toast from './lib/Toast.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Workflow from '@lucide/svelte/icons/workflow';
@@ -66,7 +67,9 @@
 			<DocEditor id={active.id} />
 		{/key}
 	{:else if active?.kind === 'mindmap'}
-		<div class="pane-empty"></div>
+		{#key active.id}
+			<MindMapEditor id={active.id} />
+		{/key}
 	{:else}
 		<div class="empty-state">
 			<div class="empty-title">No note open</div>

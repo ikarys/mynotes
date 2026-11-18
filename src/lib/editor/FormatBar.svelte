@@ -30,7 +30,9 @@
 		const current = editor;
 		if (!current) return;
 
-		const update = ({ transaction }: { transaction: { selectionSet: boolean } }) => {
+		// Focus/blur transactions are skipped: blur fires during Svelte's DOM teardown on tab switch, where a state write throws.
+		const update = ({ transaction }: { transaction: { selectionSet: boolean; docChanged: boolean } }) => {
+			if (!transaction.selectionSet && !transaction.docChanged) return;
 			if (transaction.selectionSet) linkMode = false;
 			version++;
 		};

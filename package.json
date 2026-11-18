@@ -35,6 +35,7 @@
     "@tiptap/extensions": "^3.34.0",
     "@tiptap/markdown": "^3.34.0",
     "@tiptap/pm": "^3.34.0",
-    "@tiptap/starter-kit": "^3.34.0"
+    "@tiptap/starter-kit": "^3.34.0",
+    "mind-elixir": "^6.0.3"
   }
 }
