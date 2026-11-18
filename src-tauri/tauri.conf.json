@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "ovh.iks-homelab.mynotes",
   "build": {
-    "devUrl": "http://127.0.0.1:5173",
+    "devUrl": "http://127.0.0.1:5791",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
@@ -26,7 +26,7 @@
           "$APPDATA/images/*"
         ]
       },
-      "devCsp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost ws://127.0.0.1:5173"
+      "devCsp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost ws://127.0.0.1:5791"
     }
   },
   "bundle": {
