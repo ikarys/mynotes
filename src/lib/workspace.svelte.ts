@@ -8,10 +8,19 @@ export interface Tab {
 	empty: boolean;
 }
 
+export interface NoteActions {
+	copyMarkdown(): Promise<void>;
+	exportMarkdown?(): Promise<void>;
+	exportPng?(): Promise<void>;
+}
+
 class Workspace {
 	tabs = $state<Tab[]>([]);
 	activeId = $state<number | null>(null);
+	actions = $state<NoteActions | null>(null);
+	toast = $state<string | null>(null);
 	private suppressPersist = false;
+	private toastTimer: number | undefined;
 
 	get active(): Tab | undefined {
 		return this.tabs.find((tab) => tab.id === this.activeId);
@@ -22,15 +31,11 @@ class Workspace {
 		try {
 			const session = await getSession();
 			const notes = await listNotes();
-
 			const tabs: Tab[] = [];
 			for (const id of session.open_tabs) {
 				const note = notes.find((n) => n.id === id);
-				if (note) {
-					tabs.push({ id: note.id, kind: note.kind, title: note.title, empty: false });
-				}
+				if (note) tabs.push({ id: note.id, kind: note.kind, title: note.title, empty: false });
 			}
-
 			this.tabs = tabs;
 			this.activeId =
 				session.active_tab !== null && tabs.some((tab) => tab.id === session.active_tab)
@@ -74,7 +79,6 @@ class Workspace {
 	cycle(step: 1 | -1): void {
 		const length = this.tabs.length;
 		if (length === 0) return;
-
 		const index = this.tabs.findIndex((tab) => tab.id === this.activeId);
 		const nextIndex = index === -1 ? (step === 1 ? 0 : length - 1) : (index + step + length) % length;
 		const next = this.tabs[nextIndex];
@@ -87,17 +91,13 @@ class Workspace {
 	async close(id: number): Promise<void> {
 		const index = this.tabs.findIndex((tab) => tab.id === id);
 		if (index === -1) return;
-
 		const wasEmpty = this.tabs[index]?.empty ?? false;
 		const remaining = this.tabs.filter((tab) => tab.id !== id);
-
 		this.tabs = remaining;
 		const neighbour = remaining[index] ?? remaining[index - 1] ?? null;
 		this.activeId = neighbour?.id ?? null;
 		this.persist();
-
 		await tick();
-
 		if (wasEmpty) {
 			try {
 				await deleteNote(id);
@@ -113,12 +113,24 @@ class Workspace {
 		if (tab) Object.assign(tab, patch);
 	}
 
+	setActions(a: NoteActions | null): void {
+		this.actions = a;
+	}
+
+	notify(message: string): void {
+		this.toast = message;
+		if (this.toastTimer !== undefined) clearTimeout(this.toastTimer);
+		this.toastTimer = setTimeout(() => {
+			this.toast = null;
+			this.toastTimer = undefined;
+		}, 1600);
+	}
+
 	private persist(): void {
 		if (this.suppressPersist) return;
-		setSession({
-			open_tabs: this.tabs.map((tab) => tab.id),
-			active_tab: this.activeId
-		}).catch((err) => console.error(err));
+		setSession({ open_tabs: this.tabs.map((tab) => tab.id), active_tab: this.activeId }).catch((err) =>
+			console.error(err)
+		);
 	}
 }
 

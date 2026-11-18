@@ -1,21 +1,29 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
-	import { Editor } from '@tiptap/core';
-	import StarterKit from '@tiptap/starter-kit';
-	import { TaskItem, TaskList } from '@tiptap/extension-list';
-	import Highlight from '@tiptap/extension-highlight';
+	import { onDestroy, onMount, tick } from 'svelte';
+	import { Editor, Extension, type JSONContent } from '@tiptap/core';
 	import { Placeholder } from '@tiptap/extensions';
+	import BubbleMenu from '@tiptap/extension-bubble-menu';
+	import { invoke } from '@tauri-apps/api/core';
 	import { loadNote, saveNote } from './api';
 	import { titleFrom } from './text';
 	import { createAutosave, type Autosave } from './autosave';
-	import { workspace } from './workspace.svelte';
+	import { workspace, type NoteActions } from './workspace.svelte';
+	import { baseExtensions } from './editor/extensions';
+	import { inliningClipboardSerializer, primeImages, rewriteMarkdownImages } from './editor/assets';
+	import { PasteHandling } from './editor/paste';
+	import { LinkClick } from './editor/links';
+	import { selectionMarkdown } from './editor/markdown';
+	import FormatBar from './editor/FormatBar.svelte';
+	import './editor/editor.css';
 
 	let { id }: { id: number } = $props();
 
 	let element: HTMLDivElement | undefined = $state(undefined);
-	let editor: Editor | undefined;
+	let editor: Editor | undefined = $state(undefined);
+	let barEl: HTMLDivElement | undefined = $state(undefined);
 	let autosave: Autosave | undefined;
 	let destroyed = false;
+	let actions: NoteActions | null = null;
 
 	function flush(): void {
 		void autosave?.flush();
@@ -25,37 +33,114 @@
 		if (document.visibilityState === 'hidden') flush();
 	}
 
+	function primeEditorImages(e: Editor): void {
+		const srcs: string[] = [];
+		e.state.doc.descendants((node) => {
+			if (node.type.name === 'image') {
+				const src = node.attrs.src;
+				if (typeof src === 'string') srcs.push(src);
+			}
+		});
+		primeImages(srcs);
+	}
+
+	async function copyMarkdown(): Promise<void> {
+		if (!editor) return;
+		try {
+			await navigator.clipboard.writeText(selectionMarkdown(editor));
+			workspace.notify('Copied as Markdown');
+		} catch (err) {
+			console.error(err);
+		}
+	}
+
+	async function exportMarkdown(): Promise<void> {
+		if (!editor) return;
+		try {
+			await autosave?.flush();
+			const md = rewriteMarkdownImages(editor.getMarkdown());
+			const text = editor.getText({ blockSeparator: '\n' });
+			const title = titleFrom(text) || 'note';
+			const bytes = new TextEncoder().encode(md);
+
+			const ok = await invoke<boolean>(
+				'export_file',
+				bytes,
+				{
+					headers: {
+						'x-file-name': encodeURIComponent(title),
+						'x-file-ext': 'md'
+					}
+				}
+			);
+
+			if (ok) workspace.notify('Exported');
+		} catch (err) {
+			console.error(err);
+			workspace.notify('Export failed');
+		}
+	}
+
 	onMount(async () => {
 		try {
 			const note = await loadNote(id);
 			if (destroyed || !element) return;
 
-			let content: string | object = '';
+			let content: string | JSONContent = '';
 			if (note?.content) {
 				try {
-					content = JSON.parse(note.content);
+					content = JSON.parse(note.content) as JSONContent;
 				} catch (err) {
 					console.error(err);
 				}
 			}
 
+			if (!barEl) await tick();
+			if (destroyed || !element || !barEl) return;
+
+			const CopyMarkdownKey = Extension.create({
+				name: 'copyMarkdownKey',
+				addKeyboardShortcuts() {
+					return {
+						'Mod-Shift-c': () => {
+							void copyMarkdown();
+							return true;
+						}
+					};
+				}
+			});
+
+			const extensions = [
+				...baseExtensions(),
+				Placeholder.configure({ placeholder: 'Write something…' }),
+				PasteHandling,
+				LinkClick,
+				CopyMarkdownKey,
+				BubbleMenu.configure({
+					element: barEl,
+					shouldShow: ({ editor, state }) =>
+						!state.selection.empty &&
+						editor.isEditable &&
+						!editor.isActive('image') &&
+						!editor.isActive('codeBlock'),
+					options: {
+						placement: 'top',
+						offset: 8
+					}
+				})
+			];
+
 			editor = new Editor({
 				element,
-				extensions: [
-					StarterKit.configure({
-						link: {
-							openOnClick: false,
-							autolink: true,
-							defaultProtocol: 'https'
-						}
-					}),
-					Highlight,
-					TaskList,
-					TaskItem.configure({ nested: true }),
-					Placeholder.configure({ placeholder: 'Write something…' })
-				],
+				extensions,
 				content,
 				autofocus: 'end'
+			});
+
+			editor.setOptions({
+				editorProps: {
+					clipboardSerializer: inliningClipboardSerializer(editor.schema)
+				}
 			});
 
 			workspace.update(id, {
@@ -75,10 +160,16 @@
 					empty: e.isEmpty
 				});
 				autosave?.schedule();
+				primeEditorImages(e);
 			});
+
+			primeEditorImages(editor);
 
 			window.addEventListener('blur', flush);
 			document.addEventListener('visibilitychange', onVisibilityChange);
+
+			actions = { copyMarkdown, exportMarkdown };
+			workspace.setActions(actions);
 		} catch (err) {
 			console.error(err);
 		}
@@ -86,14 +177,20 @@
 
 	onDestroy(() => {
 		destroyed = true;
-		// The editor must outlive a save still queued behind an in-flight one.
+
 		const last = editor;
 		void (autosave?.flush() ?? Promise.resolve()).finally(() => last?.destroy());
+
 		window.removeEventListener('blur', flush);
 		document.removeEventListener('visibilitychange', onVisibilityChange);
+
+		if (actions && workspace.actions === actions) {
+			workspace.setActions(null);
+		}
 	});
 </script>
 
 <div class="doc-scroll">
+	<FormatBar bind:el={barEl} {editor} />
 	<div class="doc" bind:this={element}></div>
 </div>

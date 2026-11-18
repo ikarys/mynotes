@@ -27,6 +27,7 @@ sha2 = "0.11.1"
 tauri-plugin-single-instance = "2.5.5"
 tauri-plugin-global-shortcut = "2.4.1"
 tauri-plugin-autostart = "2.7.0"
+rfd = "0.18"
 
 
 [profile.release]

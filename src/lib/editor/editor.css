@@ -1,0 +1,117 @@
+/* Hidden until BubbleMenu positions it; its inline style takes over. */
+.formatbar {
+	position: absolute;
+	visibility: hidden;
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 4px;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	z-index: 20;
+}
+
+.formatbar button {
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--muted);
+	display: grid;
+	place-items: center;
+	cursor: default;
+}
+
+.formatbar button:hover {
+	background: var(--hover);
+	color: var(--text);
+}
+
+.formatbar button.on {
+	color: var(--accent-text);
+	background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.formatbar .sep {
+	width: 1px;
+	height: 18px;
+	background: var(--line);
+	margin: 0 3px;
+}
+
+.formatbar .link-input {
+	width: 240px;
+	height: 28px;
+	border: none;
+	background: transparent;
+	color: var(--text);
+	font-size: 13px;
+	font-family: inherit;
+	padding: 0 8px;
+	outline: none;
+}
+
+.formatbar .link-input.invalid {
+	color: #d64545;
+}
+
+.tiptap img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+	display: block;
+}
+
+.tiptap img.ProseMirror-selectednode,
+[data-resize-container]:has(> img.ProseMirror-selectednode) {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+[data-resize-container] {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+}
+
+[data-resize-handle] {
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background: var(--accent);
+	border: 2px solid var(--bg);
+	border-radius: 3px;
+	opacity: 0;
+}
+
+[data-resize-container]:hover [data-resize-handle],
+[data-resize-container]:has(> img.ProseMirror-selectednode) [data-resize-handle] {
+	opacity: 1;
+}
+
+[data-resize-handle="top-left"] {
+	top: -5px;
+	left: -5px;
+	cursor: nwse-resize;
+}
+
+[data-resize-handle="top-right"] {
+	top: -5px;
+	right: -5px;
+	cursor: nesw-resize;
+}
+
+[data-resize-handle="bottom-left"] {
+	bottom: -5px;
+	left: -5px;
+	cursor: nesw-resize;
+}
+
+[data-resize-handle="bottom-right"] {
+	bottom: -5px;
+	right: -5px;
+	cursor: nwse-resize;
+}

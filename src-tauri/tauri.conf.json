@@ -15,18 +15,21 @@
         "title": "mynotes",
         "width": 1000,
         "height": 700,
-        "visible": false
+        "visible": false,
+        "decorations": false,
+        "minWidth": 420,
+        "minHeight": 300
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost",
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost http://asset.localhost asset:",
       "assetProtocol": {
         "enable": true,
         "scope": [
           "$APPDATA/images/*"
         ]
       },
-      "devCsp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost ws://127.0.0.1:5791"
+      "devCsp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost http://asset.localhost asset: ws://127.0.0.1:5791"
     }
   },
   "bundle": {

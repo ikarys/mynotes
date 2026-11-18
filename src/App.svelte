@@ -5,7 +5,10 @@
 	import TabBar from './lib/TabBar.svelte';
 	import QuickSwitcher from './lib/QuickSwitcher.svelte';
 	import DocEditor from './lib/DocEditor.svelte';
-	import Icon from './lib/Icon.svelte';
+	import Toast from './lib/Toast.svelte';
+	import Plus from '@lucide/svelte/icons/plus';
+	import Workflow from '@lucide/svelte/icons/workflow';
+	import './lib/theme.svelte';
 
 	let switcherOpen = $state(false);
 	let active = $derived(workspace.active);
@@ -69,11 +72,11 @@
 			<div class="empty-title">No note open</div>
 			<div class="empty-actions">
 				<button class="empty-button" onclick={() => void workspace.newNote('doc')}>
-					<Icon name="plus" />
+					<Plus size={16} />
 					New note
 				</button>
 				<button class="empty-button" onclick={() => void workspace.newNote('mindmap')}>
-					<Icon name="mindmap" />
+					<Workflow size={16} />
 					New mind map
 				</button>
 			</div>
@@ -87,3 +90,4 @@
 </main>
 
 <QuickSwitcher bind:open={switcherOpen} />
+<Toast />

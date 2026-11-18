@@ -2,7 +2,7 @@
 	import { workspace } from './workspace.svelte';
 	import { search, type NoteMeta } from './api';
 	import { relativeTime } from './text';
-	import Icon from './Icon.svelte';
+	import KindIcon from './KindIcon.svelte';
 
 	let { open = $bindable(false) }: { open: boolean } = $props();
 
@@ -94,7 +94,7 @@
 						open = false;
 					}}
 				>
-					<Icon name={meta.kind} />
+					<KindIcon kind={meta.kind} />
 					<span class="option-title">{meta.title || 'Untitled'}</span>
 					<span class="option-time">{relativeTime(meta.updated_at)}</span>
 				</div>

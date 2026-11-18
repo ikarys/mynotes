@@ -1,4 +1,5 @@
 mod commands;
+mod export;
 mod images;
 mod shell;
 mod storage;
@@ -79,6 +80,7 @@ pub fn run() {
             commands::set_session,
             commands::save_image,
             shell::app_ready,
+            export::export_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
