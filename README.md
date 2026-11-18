@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" alt="mynotes logo: a fennec fox hugging a notebook" width="320"></p>
+
 # mynotes
 
 [![Vibecoding Convention](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ikarys/mynotes/main/audit/status.json)](VIBECODING.md)
