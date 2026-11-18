@@ -5,7 +5,7 @@ exe := "src-tauri/target/" + target + "/debug/mynotes.exe"
 dev:
     #!/usr/bin/env bash
     set -euo pipefail
-    npx vite & trap "kill $!" EXIT
+    node_modules/.bin/vite & trap "kill $!" EXIT
     (cd src-tauri && cargo xwin build --target {{target}})
     {{exe}}
 
