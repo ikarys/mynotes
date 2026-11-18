@@ -6,7 +6,7 @@ caret, selection, focus), never as decoration.
 ## Type
 
 Segoe UI Variable (the Windows system face), one family. UI 13px; editor body 15px /
-1.6 with a 72ch measure; headings 1.6 / 1.3 / 1.1 rem, weight 600.
+1.6, full window width (the maintainer wants the whole window to write in); headings 1.6 / 1.3 / 1.1 rem, weight 600.
 
 ## Colour
 
