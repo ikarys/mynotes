@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { getCurrentWindow } from '@tauri-apps/api/window'
+  import { invoke } from '@tauri-apps/api/core'
 
   // The window starts hidden to avoid a white flash; show it after first paint.
   onMount(() => {
-    requestAnimationFrame(() => getCurrentWindow().show())
+    requestAnimationFrame(() => invoke('app_ready'))
   })
 </script>
 
