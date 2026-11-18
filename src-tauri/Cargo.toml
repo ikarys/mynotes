@@ -3,6 +3,7 @@ name = "mynotes"
 version = "0.1.0"
 description = "A fast notepad with rich text and mind maps"
 authors = ["Ikarys <bikarys@proton.me>"]
+license = "MIT"
 edition = "2024"
 
 

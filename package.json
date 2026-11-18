@@ -1,5 +1,7 @@
 {
   "name": "mynotes",
+  "license": "MIT",
+  "author": "Ikarys <bikarys@proton.me>",
   "private": true,
   "version": "0.0.0",
   "type": "module",
