@@ -3,7 +3,7 @@
   "license": "MIT",
   "author": "Ikarys <bikarys@proton.me>",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,7 @@
     "vitest": "^5.1.1"
   },
   "dependencies": {
-    "@lucide/svelte": "^1.75.0",
+    "@lucide/svelte": "^1.76.0",
     "@tauri-apps/api": "^2.12.5",
     "@tauri-apps/plugin-opener": "^2.7.3",
     "@tiptap/core": "^3.34.0",

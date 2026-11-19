@@ -56,6 +56,12 @@ maintainers accept this. To the maintainers' knowledge, no verbatim
 reproduction of licence-incompatible code was included. Safeguards used:
 human check of long generated blocks.
 
+## Dependencies held back
+
+- `typescript` stays on 6.x: `svelte-check` 4.7.8 accepts TypeScript `^5 || ^6`
+  only; move to 7 once it does.
+- `@types/node` stays on 24.x to match the Node 24 LTS runtime used to build.
+
 ## Status
 
 active. Security reports are acknowledged on a best effort basis, no

@@ -26,6 +26,7 @@ Svelte 5.
   note text, and opens the data folder.
 - `Ctrl+Alt+Space` (changeable in the `…` menu) shows or hides the window from
   anywhere, even when minimized; closing the window keeps mynotes in the tray.
+  The window reopens at the size and place you left it.
 
 Notes are saved automatically in `%APPDATA%\ovh.iks-homelab.mynotes`
 (`mynotes.db` and an `images` folder).
