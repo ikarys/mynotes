@@ -53,6 +53,9 @@
         "installMode": "currentUser",
         "installerIcon": "icons/icon.ico",
         "uninstallerIcon": "icons/icon.ico",
+        "sidebarImage": "windows/sidebar.bmp",
+        "headerImage": "windows/header.bmp",
+        "uninstallerHeaderImage": "windows/header.bmp",
         "installerHooks": "windows/hooks.nsh"
       }
     }
