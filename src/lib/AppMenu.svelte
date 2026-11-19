@@ -18,6 +18,9 @@
 	import { theme, type ThemeMode } from './theme.svelte';
 	import { typography, FONTS, MIN_SIZE, MAX_SIZE } from './typography.svelte';
 	import { ontop } from './ontop.svelte';
+	import { updates } from './updates.svelte';
+	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
+	import Download from '@lucide/svelte/icons/download';
 	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir } from './api';
 	import TrashDialog from './TrashDialog.svelte';
 	import AboutDialog from './AboutDialog.svelte';
@@ -212,6 +215,16 @@
 		<Pin size={16} /> Always on top
 		{#if ontop.enabled}<Check size={16} class="item-check" />{/if}
 	</button>
+	<button class="item" role="menuitemcheckbox" aria-checked={updates.auto} onclick={() => updates.toggleAuto()}>
+		<RefreshCw size={16} /> Check for updates
+		{#if updates.auto}<Check size={16} class="item-check" />{/if}
+	</button>
+	{#if updates.available}
+		<button class="item" disabled={updates.installing} onclick={() => run(() => updates.install())}>
+			<Download size={16} />
+			{updates.installing ? 'Installing…' : `Update to v${updates.available.version}`}
+		</button>
+	{/if}
 	<button class="item" onclick={openAbout}>
 		<Info size={16} /> About mynotes
 	</button>

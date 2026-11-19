@@ -42,6 +42,9 @@ Both are unsigned, so Windows SmartScreen warns on first launch: click
 - `Ctrl+Alt+Space` (changeable in the `…` menu) shows or hides the window from
   anywhere, even when minimized; closing the window keeps mynotes in the tray.
   The window reopens at the size and place you left it.
+- When a new version is out, the `…` menu shows `Update to vX`: the installed
+  app updates and restarts itself, the portable exe opens the download page.
+  The check runs a few seconds after start; turn it off in the same menu.
 
 Notes are saved automatically in `%APPDATA%\ovh.iks-homelab.mynotes`
 (`mynotes.db` and an `images` folder).

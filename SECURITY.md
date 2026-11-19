@@ -1,7 +1,11 @@
 # Security
 
 mynotes is a single-user desktop app. Notes stay on the machine, in
-`%APPDATA%\ovh.iks-homelab.mynotes`, and nothing is sent over the network.
+`%APPDATA%\ovh.iks-homelab.mynotes`. The only network request is the update
+check: a few seconds after start, mynotes downloads
+`https://github.com/ikarys/mynotes/releases/latest/download/latest.json`
+(nothing about you or your notes is sent; GitHub sees your IP address). Turn
+it off with `Check for updates` in the `…` menu.
 
 ## Reporting
 
@@ -28,6 +32,8 @@ its data directory. Each guard below names the test that proves it.
 | Images no note references any more are removed (after a purge from the trash, and at startup) | Data remanence | `images.rs::prune_*` |
 | Links open only for `http`, `https` and `mailto` targets | Script or local file execution through links | `links.test.ts` (`blocks javascript urls`, `blocks file urls`) |
 | Stored mind map JSON is validated, and a corrupt file falls back to an empty map | Crash on hostile stored data | `mindmap.test.ts` (`parseMindmap`) |
+| An update is installed only if its signature matches the public key built into the app (`plugins.updater.pubkey` in `src-tauri/tauri.conf.json`), and is fetched over HTTPS | Malicious or tampered update | enforced by `tauri-plugin-updater`; no test of ours |
+| The portable exe never installs an update; it only opens the release page | Unexpected second install | `updater.rs::is_installed`; no automated test |
 | The webview may only load images from the app's own `images` folder (asset protocol scope), and the CSP forbids remote scripts and connections | Local file disclosure, remote code | configuration in `src-tauri/tauri.conf.json`; no automated test |
 
 ## What is not protected
@@ -42,3 +48,5 @@ its data directory. Each guard below names the test that proves it.
   it is erased from the trash (at most 30 days).
 - Files you save with `Save as…` are outside mynotes' control.
 - Clipboard content you copy out of mynotes is visible to other apps.
+- Updates trust the maintainer's signing key. Whoever holds that key can
+  ship an update that installs without a warning.

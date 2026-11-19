@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { appReady } from './lib/api';
+	import { updates } from './lib/updates.svelte';
 	import { workspace } from './lib/workspace.svelte';
 	import TabBar from './lib/TabBar.svelte';
 	import QuickSwitcher from './lib/QuickSwitcher.svelte';
@@ -60,6 +61,7 @@
 		requestAnimationFrame(() => {
 			appReady().catch((err) => console.error(err));
 		});
+		updates.start();
 	});
 
 	onDestroy(() => {

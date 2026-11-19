@@ -4,6 +4,7 @@ mod files;
 mod images;
 mod shell;
 mod storage;
+mod updater;
 
 use std::sync::Mutex;
 
@@ -18,6 +19,7 @@ pub fn run() {
             shell::show_main(app)
         }))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(shell::WINDOW_STATE)
@@ -110,6 +112,8 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            updater::check_update,
+            updater::install_update,
             commands::list_notes,
             commands::load_note,
             commands::create_note,
