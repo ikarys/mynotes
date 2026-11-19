@@ -13,6 +13,8 @@ Svelte 5.
 - `Ctrl+N` new note, `Ctrl+Shift+M` new mind map, `Ctrl+W` close tab,
   `Ctrl+Tab` next tab, `Ctrl+P` find a note (full-text search).
 - Select text to format it; paste images or Markdown directly.
+- A ```` ```markdown ```` code block has a Preview button to switch between
+  its source and the rendered result.
 - Mind map: `Tab` adds a child, `Enter` a sibling, `F2` renames,
   right-click for more.
 - The `…` menu copies or exports the note as Markdown and switches between

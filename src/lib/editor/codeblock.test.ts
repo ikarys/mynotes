@@ -1,0 +1,82 @@
+// @vitest-environment happy-dom
+import { describe, expect, it } from 'vitest';
+import { Editor } from '@tiptap/core';
+import { baseExtensions } from './extensions';
+
+describe('MarkdownCodeBlock', () => {
+	it('toggles markdown preview', () => {
+		const editor = new Editor({
+			extensions: baseExtensions(),
+			content: '```markdown\n**bold** text\n```',
+			contentType: 'markdown'
+		});
+
+		const toggle = editor.view.dom.querySelector('.code-toggle') as HTMLButtonElement;
+		expect(toggle.hidden).toBe(false);
+
+		toggle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+		const preview = editor.view.dom.querySelector('.md-preview') as HTMLElement;
+		const pre = editor.view.dom.querySelector('pre') as HTMLPreElement;
+		expect(preview.querySelector('strong')?.textContent).toBe('bold');
+		expect(pre.hidden).toBe(true);
+		expect(toggle.textContent).toBe('Source');
+
+		toggle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+		expect(pre.hidden).toBe(false);
+		expect(preview.hidden).toBe(true);
+
+		editor.destroy();
+	});
+
+	it('hides toggle for non-markdown code', () => {
+		const editor = new Editor({
+			extensions: baseExtensions(),
+			content: '```js\nconst a = 1\n```',
+			contentType: 'markdown'
+		});
+
+		const toggle = editor.view.dom.querySelector('.code-toggle') as HTMLButtonElement;
+		expect(toggle.hidden).toBe(true);
+
+		editor.destroy();
+	});
+
+	it('does not expose hostile attributes in preview', () => {
+		const editor = new Editor({
+			extensions: baseExtensions(),
+			content: '```markdown\n<img src=x onerror="alert(1)">\n\n[x](javascript:alert(1))\n```',
+			contentType: 'markdown'
+		});
+
+		const toggle = editor.view.dom.querySelector('.code-toggle') as HTMLButtonElement;
+		toggle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+		const preview = editor.view.dom.querySelector('.md-preview') as HTMLElement;
+		expect(preview.querySelector('[onerror]')).toBeNull();
+
+		preview.querySelectorAll('a').forEach((anchor) => {
+			const href = anchor.getAttribute('href') ?? '';
+			expect(href.toLowerCase().startsWith('javascript:')).toBe(false);
+		});
+
+		editor.destroy();
+	});
+
+	it('round trips markdown', () => {
+		const editor = new Editor({
+			extensions: baseExtensions(),
+			content: '```markdown\n**bold** text\n```',
+			contentType: 'markdown'
+		});
+
+		const toggle = editor.view.dom.querySelector('.code-toggle') as HTMLButtonElement;
+		toggle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+		toggle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+		expect(editor.getMarkdown()).toContain('```markdown');
+		expect(editor.getMarkdown()).toContain('**bold** text');
+
+		editor.destroy();
+	});
+});
