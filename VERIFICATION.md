@@ -26,4 +26,8 @@ one names a check you can run yourself.
 
 - There is no blind usability test yet. It will come with the first public
   release.
-- There is no CI. The checks above run locally before each merge.
+- No CI on merges: the checks above run locally before each merge. Only
+  releases run in CI: `.github/workflows/release.yml` runs the tests on a
+  GitHub Windows runner, builds the exe from the tagged commit and attaches it
+  with its SHA-256 to the GitHub release, so a published binary can be traced
+  to its source.
