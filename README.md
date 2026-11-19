@@ -22,7 +22,8 @@ Svelte 5.
 - Mind map: `Tab` adds a child, `Enter` a sibling, `F2` renames,
   right-click for more.
 - The `…` menu also copies the note as Markdown, exports a mind map as PNG,
-  switches between system, light and dark themes and opens the data folder.
+  switches between system, light and dark themes, sets the font and size of
+  note text, and opens the data folder.
 - `Ctrl+Alt+Space` (changeable in the `…` menu) shows or hides the window from
   anywhere, even when minimized; closing the window keeps mynotes in the tray.
 

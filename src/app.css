@@ -364,6 +364,48 @@ body,
 	color: var(--text);
 }
 
+.stepper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 4px 4px;
+}
+
+.stepper select {
+	flex: 1;
+	min-width: 0;
+	height: 28px;
+	padding: 0 6px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--text);
+	font: inherit;
+	font-size: 12px;
+}
+
+.stepper button {
+	width: 28px;
+	height: 28px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--text);
+	font: inherit;
+}
+
+.stepper button:disabled {
+	color: var(--muted);
+	opacity: 0.5;
+}
+
+.stepper output {
+	min-width: 36px;
+	text-align: center;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
 .segmented button[aria-checked='true'] {
 	background: var(--surface);
 	color: var(--text);
@@ -419,7 +461,8 @@ button {
 .tiptap {
 	flex: 1;
 	outline: none;
-	font-size: 15px;
+	font-family: var(--note-font, inherit);
+	font-size: var(--note-size, 15px);
 	line-height: 1.6;
 	user-select: text;
 	caret-color: var(--accent);
@@ -444,15 +487,15 @@ button {
 }
 
 .tiptap h1 {
-	font-size: 1.6rem;
+	font-size: 1.6em;
 }
 
 .tiptap h2 {
-	font-size: 1.3rem;
+	font-size: 1.3em;
 }
 
 .tiptap h3 {
-	font-size: 1.1rem;
+	font-size: 1.1em;
 }
 
 .tiptap ul,

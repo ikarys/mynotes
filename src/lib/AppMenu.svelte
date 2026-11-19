@@ -12,6 +12,7 @@
 	import Moon from '@lucide/svelte/icons/moon';
 	import { workspace } from './workspace.svelte';
 	import { theme, type ThemeMode } from './theme.svelte';
+	import { typography, FONTS, MIN_SIZE, MAX_SIZE } from './typography.svelte';
 	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir } from './api';
 
 	let menu: HTMLDivElement | undefined = $state();
@@ -141,6 +142,29 @@
 				{m.label}
 			</button>
 		{/each}
+	</div>
+	<div class="menu-label" id="text-label">Note text</div>
+	<div class="stepper" role="group" aria-labelledby="text-label">
+		<select
+			aria-label="Font"
+			value={typography.font}
+			onchange={(event) => typography.setFont(event.currentTarget.value)}
+		>
+			{#each FONTS as font (font.id)}
+				<option value={font.id}>{font.label}</option>
+			{/each}
+		</select>
+		<button
+			aria-label="Smaller text"
+			disabled={typography.size <= MIN_SIZE}
+			onclick={() => typography.setSize(typography.size - 1)}>−</button
+		>
+		<output aria-label="Text size">{typography.size}px</output>
+		<button
+			aria-label="Larger text"
+			disabled={typography.size >= MAX_SIZE}
+			onclick={() => typography.setSize(typography.size + 1)}>+</button
+		>
 	</div>
 	<div class="menu-sep"></div>
 	<div class="menu-label">Show/hide shortcut</div>
