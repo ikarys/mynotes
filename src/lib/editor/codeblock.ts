@@ -1,4 +1,7 @@
-import CodeBlock from '@tiptap/extension-code-block';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { createLowlight } from 'lowlight';
+import json from 'highlight.js/lib/languages/json';
+import yaml from 'highlight.js/lib/languages/yaml';
 import type { Editor } from '@tiptap/core';
 import { Node as PMNode, DOMSerializer } from '@tiptap/pm/model';
 import type { ViewMutationRecord } from '@tiptap/pm/view';
@@ -34,7 +37,19 @@ export function renderMarkdown(editor: Editor, markdown: string, target: HTMLEle
 	}
 }
 
-export const MarkdownCodeBlock = CodeBlock.extend({
+// Only JSON and YAML: every highlight.js grammar adds to the bundle, and the app must stay light.
+const lowlight = createLowlight({ json, yaml });
+lowlight.registerAlias({ yaml: ['yml'] });
+
+// Auto-detection would colour plain and Markdown fences as YAML; only a named language is highlighted.
+const namedOnly = {
+	highlight: (language: string, value: string) => lowlight.highlight(language, value),
+	listLanguages: () => lowlight.listLanguages(),
+	registered: (language: string) => lowlight.registered(language),
+	highlightAuto: () => ({ children: [] })
+};
+
+export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 	addNodeView() {
 		return ({ node, editor }: { node: PMNode; editor: Editor }) => {
 			const dom = document.createElement('div');
@@ -177,4 +192,4 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 			};
 		};
 	}
-});
+}).configure({ lowlight: namedOnly });

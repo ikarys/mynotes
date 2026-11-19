@@ -109,4 +109,17 @@ describe('MarkdownCodeBlock', () => {
 
 		editor.destroy();
 	});
+
+	it('highlights named JSON and YAML blocks, not bare fences', () => {
+		const render = (content: string) => {
+			const editor = new Editor({ extensions: baseExtensions(), content, contentType: 'markdown' });
+			const html = editor.view.dom.innerHTML;
+			editor.destroy();
+			return html;
+		};
+
+		expect(render('```json\n{"a": 1}\n```')).toContain('hljs-attr');
+		expect(render('```yml\nkey: value\n```')).toContain('hljs-attr');
+		expect(render('```\nkey: value\n# Title\n```')).not.toContain('hljs-');
+	});
 });
