@@ -425,6 +425,12 @@
 		outline-color: var(--text);
 	}
 
+	/* The editor copies the node's fill, accent on the root, where the accent-tinted text selection is invisible. */
+	.mindmap :global(#input-box::selection) {
+		background: var(--text);
+		color: var(--bg);
+	}
+
 	.mindmap :global(.me-children .me-tpc) {
 		border: 1px solid var(--line);
 		background: var(--surface);
