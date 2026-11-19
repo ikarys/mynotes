@@ -4,6 +4,23 @@ import { Editor } from '@tiptap/core';
 import { baseExtensions } from './extensions';
 
 describe('MarkdownCodeBlock', () => {
+	it('keeps the preview after ProseMirror processes DOM mutations', async () => {
+		const editor = new Editor({
+			extensions: baseExtensions(),
+			content: '```markdown\n# Title\n```',
+			contentType: 'markdown'
+		});
+		const block = editor.view.dom.querySelector('.code-block');
+		const toggle = editor.view.dom.querySelector('.code-toggle') as HTMLButtonElement;
+		toggle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(editor.view.dom.querySelector('.code-block')).toBe(block);
+		expect(editor.view.dom.querySelector('.md-preview h1')?.textContent).toBe('Title');
+		expect(editor.state.doc.textContent).toBe('# Title');
+		editor.destroy();
+	});
+
 	it('toggles markdown preview', () => {
 		const editor = new Editor({
 			extensions: baseExtensions(),

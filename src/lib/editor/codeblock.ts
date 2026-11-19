@@ -68,7 +68,8 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 			};
 
 			const sync = () => {
-				code.className = current.attrs.language ? `language-${current.attrs.language}` : '';
+				const className = current.attrs.language ? `language-${current.attrs.language}` : '';
+				if (code.className !== className) code.className = className;
 				const canPreview = isMarkdownLanguage(current.attrs.language);
 
 				button.hidden = !canPreview;
@@ -136,7 +137,10 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 
 					return true;
 				},
+				// Attribute writes come from sync() only; letting ProseMirror see them makes it
+				// re-read the block from the DOM and redraw it, losing the preview state.
 				ignoreMutation(mutation: ViewMutationRecord): boolean {
+					if (mutation.type === 'attributes') return true;
 					return !code.contains(mutation.target);
 				},
 				stopEvent(event: Event): boolean {
