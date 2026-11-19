@@ -8,7 +8,7 @@ use std::sync::Mutex;
 
 use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
-use tauri_plugin_global_shortcut::{Builder as ShortcutBuilder, ShortcutState};
+use tauri_plugin_global_shortcut::{Builder as ShortcutBuilder, GlobalShortcutExt, ShortcutState};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -25,6 +25,14 @@ pub fn run() {
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&data_dir)?;
             let store = storage::Store::open(&data_dir.join("mynotes.db"))?;
+            let hotkey = match store.get_setting(commands::HOTKEY_SETTING) {
+                Ok(Some(value)) => value,
+                Ok(None) => commands::DEFAULT_HOTKEY.to_string(),
+                Err(e) => {
+                    eprintln!("failed to read hotkey setting: {e}");
+                    commands::DEFAULT_HOTKEY.to_string()
+                }
+            };
             app.manage(commands::AppState {
                 store: Mutex::new(store),
                 images_dir: data_dir.join("images"),
@@ -45,20 +53,22 @@ pub fn run() {
                 }
             }
 
-            match ShortcutBuilder::new().with_shortcuts(["ctrl+alt+space"]) {
-                Ok(builder) => {
-                    let plugin = builder
-                        .with_handler(|app, _shortcut, event| {
-                            if event.state == ShortcutState::Pressed {
-                                shell::toggle_main(app);
-                            }
-                        })
-                        .build();
-                    if let Err(e) = app.handle().plugin(plugin) {
-                        eprintln!("failed to register global shortcut: {e}");
+            let plugin = ShortcutBuilder::new()
+                .with_handler(|app, _shortcut, event| {
+                    if event.state == ShortcutState::Pressed {
+                        shell::toggle_main(app);
+                    }
+                })
+                .build();
+            app.handle().plugin(plugin)?;
+
+            match commands::parse_hotkey(&hotkey) {
+                Ok(shortcut) => {
+                    if let Err(e) = app.global_shortcut().register(shortcut) {
+                        eprintln!("failed to register global shortcut {hotkey}: {e}");
                     }
                 }
-                Err(e) => eprintln!("failed to configure global shortcut: {e}"),
+                Err(e) => eprintln!("failed to register global shortcut {hotkey}: {e}"),
             }
 
             Ok(())
@@ -79,6 +89,8 @@ pub fn run() {
             commands::get_session,
             commands::set_session,
             commands::save_image,
+            commands::get_hotkey,
+            commands::set_hotkey,
             shell::app_ready,
             export::export_file,
         ])

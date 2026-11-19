@@ -202,6 +202,28 @@ impl Store {
         )?;
         Ok(())
     }
+
+    pub fn get_setting(&self, key: &str) -> Result<Option<String>> {
+        match self.conn.query_row(
+            "SELECT value FROM settings WHERE key = ?1",
+            params![key],
+            |row| row.get::<_, String>(0),
+        ) {
+            Ok(value) => Ok(Some(value)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(err) => Err(err),
+        }
+    }
+
+    pub fn set_setting(&self, key: &str, value: &str) -> Result<()> {
+        self.conn.execute(
+            "INSERT INTO settings (key, value)
+             VALUES (?1, ?2)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            params![key, value],
+        )?;
+        Ok(())
+    }
 }
 
 fn init(conn: &Connection) -> Result<()> {
@@ -220,6 +242,10 @@ fn init(conn: &Connection) -> Result<()> {
              id INTEGER PRIMARY KEY CHECK (id = 1),
              open_tabs TEXT NOT NULL,
              active_tab INTEGER
+         );
+         CREATE TABLE IF NOT EXISTS settings (
+             key TEXT PRIMARY KEY,
+             value TEXT NOT NULL
          );
          CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
              title,
@@ -360,6 +386,22 @@ mod tests {
         };
         store.set_session(&next).unwrap();
         assert_eq!(store.get_session().unwrap(), next);
+    }
+
+    #[test]
+    fn settings_missing_set_and_overwrite() {
+        let store = Store::open_in_memory().unwrap();
+        assert_eq!(store.get_setting("hotkey").unwrap(), None);
+        store.set_setting("hotkey", "Alt+Space").unwrap();
+        assert_eq!(
+            store.get_setting("hotkey").unwrap().as_deref(),
+            Some("Alt+Space")
+        );
+        store.set_setting("hotkey", "Ctrl+Space").unwrap();
+        assert_eq!(
+            store.get_setting("hotkey").unwrap().as_deref(),
+            Some("Ctrl+Space")
+        );
     }
 
     #[test]

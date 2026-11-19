@@ -53,3 +53,11 @@ export async function setSession(session: Session): Promise<void> {
 export async function appReady(): Promise<void> {
 	await invoke('app_ready');
 }
+
+export async function getHotkey(): Promise<string> {
+	return invoke<string>('get_hotkey');
+}
+
+export async function setHotkey(hotkey: string): Promise<string> {
+	return invoke<string>('set_hotkey', { hotkey });
+}
