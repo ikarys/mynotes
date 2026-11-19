@@ -119,6 +119,11 @@ body,
 		color 120ms ease-out;
 }
 
+.tab.dragging {
+	z-index: 1;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+}
+
 .tab .title {
 	flex: 1;
 	overflow: hidden;

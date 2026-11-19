@@ -91,6 +91,16 @@ class Workspace {
 		this.persist();
 	}
 
+	moveTab(id: number, toIndex: number): void {
+		const from = this.tabs.findIndex((tab) => tab.id === id);
+		if (from === -1 || from === toIndex || toIndex < 0 || toIndex >= this.tabs.length) return;
+		const tabs = [...this.tabs];
+		const [tab] = tabs.splice(from, 1);
+		tabs.splice(toIndex, 0, tab);
+		this.tabs = tabs;
+		this.persist();
+	}
+
 	cycle(step: 1 | -1): void {
 		const length = this.tabs.length;
 		if (length === 0) return;
