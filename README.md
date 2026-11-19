@@ -27,8 +27,9 @@ Both are unsigned, so Windows SmartScreen warns on first launch: click
   `Ctrl+Tab` next tab, `Ctrl+P` find a note (full-text search).
 - `Ctrl+O` opens a `.md` or `.txt` file as a new note; `Ctrl+Shift+S` saves
   the note as Markdown or plain text.
-- Closing a tab keeps the note (find it again with `Ctrl+P`); `Delete note…`
-  in the `…` menu removes it for good.
+- Closing a tab keeps the note (find it again with `Ctrl+P`); `Move to trash`
+  in the `…` menu hides it; the Trash (same menu) restores it or erases it
+  for good, and notes left there are erased after 30 days.
 - Select text to format it; paste images or Markdown directly.
 - A ```` ```markdown ```` code block has a Preview button to switch between
   its source and the rendered result.

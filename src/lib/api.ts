@@ -48,6 +48,18 @@ export async function purgeNote(id: number): Promise<void> {
 	await invoke('purge_note', { id });
 }
 
+export async function listTrash(): Promise<NoteMeta[]> {
+	return invoke<NoteMeta[]>('list_trash');
+}
+
+export async function restoreNote(id: number): Promise<void> {
+	await invoke('restore_note', { id });
+}
+
+export async function emptyTrash(): Promise<void> {
+	await invoke('empty_trash');
+}
+
 export async function search(query: string): Promise<NoteMeta[]> {
 	return invoke<NoteMeta[]>('search', { query });
 }

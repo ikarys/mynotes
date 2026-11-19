@@ -23,6 +23,9 @@
 	let autosave: Autosave | undefined;
 	let destroyed = false;
 	let actions: NoteActions | null = null;
+	let words: number = $state(0);
+	let chars: number = $state(0);
+	let countTimer: number | undefined;
 
 	function flush(): void {
 		void autosave?.flush();
@@ -41,6 +44,20 @@
 			}
 		});
 		primeImages(srcs);
+	}
+
+	function updateCount(e: Editor): void {
+		const text = e.state.doc.textBetween(0, e.state.doc.content.size, ' ', ' ');
+		words = text.match(/\S+/g)?.length ?? 0;
+		chars = text.replace(/\n/g, '').length;
+	}
+
+	function scheduleCount(e: Editor): void {
+		if (countTimer !== undefined) clearTimeout(countTimer);
+		countTimer = setTimeout(() => {
+			countTimer = undefined;
+			updateCount(e);
+		}, 300);
 	}
 
 	async function copyMarkdown(): Promise<void> {
@@ -146,9 +163,11 @@
 					empty: e.isEmpty
 				});
 				autosave?.schedule();
+				scheduleCount(e);
 				primeEditorImages(e);
 			});
 
+			scheduleCount(editor);
 			primeEditorImages(editor);
 
 			window.addEventListener('blur', flush);
@@ -163,6 +182,8 @@
 
 	onDestroy(() => {
 		destroyed = true;
+
+		if (countTimer !== undefined) clearTimeout(countTimer);
 
 		const last = editor;
 		void (autosave?.flush() ?? Promise.resolve()).finally(() => last?.destroy());
@@ -179,4 +200,7 @@
 <div class="doc-scroll">
 	<FormatBar bind:el={barEl} {editor} />
 	<div class="doc" bind:this={element}></div>
+	<div class="word-count">
+		{words} {words === 1 ? 'word' : 'words'} · {chars} {chars === 1 ? 'character' : 'characters'}
+	</div>
 </div>

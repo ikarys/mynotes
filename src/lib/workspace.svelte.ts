@@ -3,6 +3,7 @@ import {
 	createNote,
 	trashNote,
 	purgeNote,
+	restoreNote,
 	getSession,
 	listNotes,
 	openTextFile,
@@ -147,6 +148,16 @@ class Workspace {
 		} catch (err) {
 			console.error(err);
 			this.notify('Move to trash failed');
+		}
+	}
+
+	async restoreFromTrash(meta: NoteMeta): Promise<void> {
+		try {
+			await restoreNote(meta.id);
+			this.open(meta);
+		} catch (err) {
+			console.error(err);
+			this.notify('Restore failed');
 		}
 	}
 

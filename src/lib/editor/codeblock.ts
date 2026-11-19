@@ -40,6 +40,16 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 			const dom = document.createElement('div');
 			dom.className = 'code-block';
 
+			const actions = document.createElement('div');
+			actions.className = 'code-actions';
+			actions.setAttribute('contenteditable', 'false');
+
+			const copy = document.createElement('button');
+			copy.type = 'button';
+			copy.className = 'code-copy';
+			copy.setAttribute('contenteditable', 'false');
+			copy.textContent = 'Copy';
+
 			const button = document.createElement('button');
 			button.type = 'button';
 			button.className = 'code-toggle';
@@ -56,10 +66,12 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 			preview.setAttribute('contenteditable', 'false');
 			preview.hidden = true;
 
-			dom.append(button, pre, preview);
+			actions.append(copy, button);
+			dom.append(actions, pre, preview);
 
 			let current = node;
 			let isPreview = false;
+			let copyTimer: number | undefined;
 
 			const isMarkdownLanguage = (language: unknown) => {
 				const value = String(language ?? '').toLowerCase();
@@ -93,6 +105,21 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 				isPreview = !isPreview;
 				sync();
 			};
+
+			copy.addEventListener('mousedown', (event) => {
+				event.preventDefault();
+				navigator.clipboard
+					.writeText(current.textContent)
+					.then(() => {
+						copy.textContent = 'Copied';
+						if (copyTimer !== undefined) clearTimeout(copyTimer);
+						copyTimer = window.setTimeout(() => {
+							copy.textContent = 'Copy';
+							copyTimer = undefined;
+						}, 1200);
+					})
+					.catch((err) => console.error(err));
+			});
 
 			button.addEventListener('mousedown', (event) => {
 				event.preventDefault();
@@ -145,7 +172,7 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 					return !code.contains(mutation.target);
 				},
 				stopEvent(event: Event): boolean {
-					return event.target instanceof Node && (button.contains(event.target) || preview.contains(event.target));
+					return event.target instanceof Node && (actions.contains(event.target) || preview.contains(event.target));
 				}
 			};
 		};

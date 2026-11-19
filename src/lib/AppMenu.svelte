@@ -10,15 +10,24 @@
 	import Monitor from '@lucide/svelte/icons/monitor';
 	import Sun from '@lucide/svelte/icons/sun';
 	import Moon from '@lucide/svelte/icons/moon';
+	import ArchiveRestore from '@lucide/svelte/icons/archive-restore';
+	import Pin from '@lucide/svelte/icons/pin';
+	import Info from '@lucide/svelte/icons/info';
+	import Check from '@lucide/svelte/icons/check';
 	import { workspace } from './workspace.svelte';
 	import { theme, type ThemeMode } from './theme.svelte';
 	import { typography, FONTS, MIN_SIZE, MAX_SIZE } from './typography.svelte';
+	import { ontop } from './ontop.svelte';
 	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir } from './api';
+	import TrashDialog from './TrashDialog.svelte';
+	import AboutDialog from './AboutDialog.svelte';
 
 	let menu: HTMLDivElement | undefined = $state();
 	let shortcutButton: HTMLButtonElement | undefined = $state();
 	let hotkey: string = $state('');
 	let recording: boolean = $state(false);
+	let trashDialog: TrashDialog | undefined = $state();
+	let aboutDialog: AboutDialog | undefined = $state();
 
 	const modes: { mode: ThemeMode; label: string; icon: typeof Sun }[] = [
 		{ mode: 'system', label: 'System', icon: Monitor },
@@ -29,6 +38,16 @@
 	function run(action: (() => Promise<void>) | undefined): void {
 		menu?.hidePopover();
 		action?.().catch((err) => console.error(err));
+	}
+
+	function openTrash(): void {
+		menu?.hidePopover();
+		void trashDialog?.show().catch((err) => console.error(err));
+	}
+
+	function openAbout(): void {
+		menu?.hidePopover();
+		aboutDialog?.show();
 	}
 
 	function startRecording(): void {
@@ -186,4 +205,17 @@
 	<button class="item" onclick={() => run(openDataDir)}>
 		<HardDrive size={16} /> Open data folder
 	</button>
+	<button class="item" onclick={openTrash}>
+		<ArchiveRestore size={16} /> Trash
+	</button>
+	<button class="item" role="menuitemcheckbox" aria-checked={ontop.enabled} onclick={() => ontop.toggle()}>
+		<Pin size={16} /> Always on top
+		{#if ontop.enabled}<Check size={16} class="item-check" />{/if}
+	</button>
+	<button class="item" onclick={openAbout}>
+		<Info size={16} /> About mynotes
+	</button>
 </div>
+
+<TrashDialog bind:this={trashDialog} />
+<AboutDialog bind:this={aboutDialog} />
