@@ -17,7 +17,7 @@ fn lock<'a>(
     mutex.lock().map_err(|_| POISONED.to_string())
 }
 
-pub const DEFAULT_HOTKEY: &str = "Alt+Space";
+pub const DEFAULT_HOTKEY: &str = "Ctrl+Alt+Space";
 pub const HOTKEY_SETTING: &str = "hotkey";
 
 pub fn parse_hotkey(s: &str) -> Result<Shortcut, String> {

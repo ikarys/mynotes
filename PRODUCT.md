@@ -25,7 +25,7 @@ Notepad speed and tabs, with rich text and mind maps, local only, no account, no
 
 ## Operating Context
 
-Lives in the tray, starts with Windows, toggled by a global shortcut (Alt+Space by default, changeable in the menu). Notes are tabs like
+Lives in the tray, starts with Windows, toggled by a global shortcut (Ctrl+Alt+Space by default, changeable in the menu). Notes are tabs like
 Notepad (Ctrl+N document, Ctrl+Shift+M mind map, Ctrl+W close, Ctrl+Tab). Content leaves
 the app as Markdown (copy, export) or PNG (mind map).
 

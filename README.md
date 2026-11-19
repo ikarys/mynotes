@@ -17,7 +17,7 @@ Svelte 5.
   right-click for more.
 - The `…` menu copies or exports the note as Markdown and switches between
   system, light and dark themes.
-- `Alt+Space` (changeable in the `…` menu) shows or hides the window from
+- `Ctrl+Alt+Space` (changeable in the `…` menu) shows or hides the window from
   anywhere, even when minimized; closing the window keeps mynotes in the tray.
 
 Notes are saved automatically in `%APPDATA%\mynotes`.
