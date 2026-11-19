@@ -4,6 +4,8 @@
 	import { updates } from './lib/updates.svelte';
 	import { workspace } from './lib/workspace.svelte';
 	import TabBar from './lib/TabBar.svelte';
+	import Rail from './lib/Rail.svelte';
+	import NotesList from './lib/NotesList.svelte';
 	import QuickSwitcher from './lib/QuickSwitcher.svelte';
 	import DocEditor from './lib/DocEditor.svelte';
 	import MindMapEditor from './lib/MindMapEditor.svelte';
@@ -69,38 +71,42 @@
 	});
 </script>
 
-<TabBar onsearch={() => (switcherOpen = true)} />
+<TabBar />
 
-<main class="pane">
-	{#if active?.kind === 'doc'}
-		{#key active.id}
-			<DocEditor id={active.id} />
-		{/key}
-	{:else if active?.kind === 'mindmap'}
-		{#key active.id}
-			<MindMapEditor id={active.id} />
-		{/key}
-	{:else}
-		<div class="empty-state">
-			<div class="empty-title">No note open</div>
-			<div class="empty-actions">
-				<button class="empty-button" onclick={() => void workspace.newNote('doc')}>
-					<Plus size={16} />
-					New note
-				</button>
-				<button class="empty-button" onclick={() => void workspace.newNote('mindmap')}>
-					<Workflow size={16} />
-					New mind map
-				</button>
+<div class="body">
+	<Rail onsearch={() => (switcherOpen = true)} />
+	<NotesList />
+	<main class="pane">
+		{#if active?.kind === 'doc'}
+			{#key active.id}
+				<DocEditor id={active.id} />
+			{/key}
+		{:else if active?.kind === 'mindmap'}
+			{#key active.id}
+				<MindMapEditor id={active.id} />
+			{/key}
+		{:else}
+			<div class="empty-state">
+				<div class="empty-title">No note open</div>
+				<div class="empty-actions">
+					<button class="empty-button" onclick={() => void workspace.newNote('doc')}>
+						<Plus size={16} />
+						New note
+					</button>
+					<button class="empty-button" onclick={() => void workspace.newNote('mindmap')}>
+						<Workflow size={16} />
+						New mind map
+					</button>
+				</div>
+				<div class="shortcuts">
+					<kbd>Ctrl+N</kbd>
+					<kbd>Ctrl+Shift+M</kbd>
+					<kbd>Ctrl+P</kbd>
+				</div>
 			</div>
-			<div class="shortcuts">
-				<kbd>Ctrl+N</kbd>
-				<kbd>Ctrl+Shift+M</kbd>
-				<kbd>Ctrl+P</kbd>
-			</div>
-		</div>
-	{/if}
-</main>
+		{/if}
+	</main>
+</div>
 
 <QuickSwitcher bind:open={switcherOpen} />
 <Toast />

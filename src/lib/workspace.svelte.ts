@@ -30,6 +30,7 @@ export interface NoteActions {
 
 class Workspace {
 	tabs = $state<Tab[]>([]);
+	notes = $state<NoteMeta[]>([]);
 	activeId = $state<number | null>(null);
 	// Raw so editors can compare their own object by identity when unregistering.
 	actions = $state.raw<NoteActions | null>(null);
@@ -46,6 +47,7 @@ class Workspace {
 		try {
 			const session = await getSession();
 			const notes = await listNotes();
+			this.notes = notes;
 			const tabs: Tab[] = [];
 			for (const id of session.open_tabs) {
 				const note = notes.find((n) => n.id === id);
@@ -69,12 +71,14 @@ class Workspace {
 			this.tabs = [...this.tabs, { id: note.id, kind: note.kind, title: '', empty: true }];
 			this.activeId = note.id;
 			this.persist();
+			void this.refreshNotes();
 		} catch (err) {
 			console.error(err);
 		}
 	}
 
 	open(meta: NoteMeta): void {
+		if (this.activeId !== meta.id) void this.refreshNotes();
 		const existing = this.tabs.find((tab) => tab.id === meta.id);
 		if (existing) {
 			this.activeId = meta.id;
@@ -87,6 +91,7 @@ class Workspace {
 
 	activate(id: number): void {
 		if (!this.tabs.some((tab) => tab.id === id)) return;
+		if (this.activeId !== id) void this.refreshNotes();
 		this.activeId = id;
 		this.persist();
 	}
@@ -127,6 +132,7 @@ class Workspace {
 			} catch (err) {
 				console.error(err);
 			}
+			void this.refreshNotes();
 		}
 	}
 
@@ -141,6 +147,7 @@ class Workspace {
 			this.tabs = [...this.tabs, { id: note.id, kind: 'doc', title, empty: false }];
 			this.activeId = note.id;
 			this.persist();
+			void this.refreshNotes();
 		} catch (err) {
 			console.error(err);
 			this.notify(String(err));
@@ -155,6 +162,7 @@ class Workspace {
 		try {
 			await trashNote(tab.id);
 			this.notify('Moved to trash');
+			void this.refreshNotes();
 		} catch (err) {
 			console.error(err);
 			this.notify('Move to trash failed');
@@ -165,6 +173,7 @@ class Workspace {
 		try {
 			await restoreNote(meta.id);
 			this.open(meta);
+			void this.refreshNotes();
 		} catch (err) {
 			console.error(err);
 			this.notify('Restore failed');
@@ -175,6 +184,18 @@ class Workspace {
 	update(id: number, patch: { title?: string; empty?: boolean }): void {
 		const tab = this.tabs.find((t) => t.id === id);
 		if (tab) Object.assign(tab, patch);
+		const meta = patch.title === undefined ? undefined : this.notes.find((n) => n.id === id);
+		if (meta && patch.title !== undefined) meta.title = patch.title;
+	}
+
+	// Saves are not routed through here, so the list is re-read when the user switches
+	// notes or changes the set of notes; titles follow live through update().
+	async refreshNotes(): Promise<void> {
+		try {
+			this.notes = await listNotes();
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
 	setActions(a: NoteActions | null): void {

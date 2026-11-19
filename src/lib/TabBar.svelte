@@ -1,14 +1,9 @@
 <script lang="ts">
-	import Plus from '@lucide/svelte/icons/plus';
-	import Workflow from '@lucide/svelte/icons/workflow';
-	import Search from '@lucide/svelte/icons/search';
 	import X from '@lucide/svelte/icons/x';
 	import { workspace } from './workspace.svelte';
 	import KindIcon from './KindIcon.svelte';
 	import AppMenu from './AppMenu.svelte';
 	import WindowControls from './WindowControls.svelte';
-
-	let { onsearch }: { onsearch: () => void } = $props();
 
 	let tabRefs = new Map<number, HTMLDivElement>();
 
@@ -112,24 +107,8 @@
 				</button>
 			</div>
 		{/each}
-		<button class="tool" title="New note (Ctrl+N)" aria-label="New note" onclick={() => void workspace.newNote('doc')}>
-			<Plus size={16} />
-		</button>
-		<button
-			class="tool"
-			title="New mind map (Ctrl+Shift+M)"
-			aria-label="New mind map"
-			onclick={() => void workspace.newNote('mindmap')}
-		>
-			<Workflow size={16} />
-		</button>
 	</div>
 
-	<button class="search" onclick={onsearch} aria-label="Find a note" title="Find a note (Ctrl+P)">
-		<Search size={14} />
-		<span>Find a note</span>
-		<kbd>Ctrl+P</kbd>
-	</button>
 	<AppMenu />
 	<WindowControls />
 </nav>

@@ -7,6 +7,7 @@ export interface NoteMeta {
 	kind: Kind;
 	title: string;
 	updated_at: number;
+	excerpt: string;
 }
 
 export interface Note extends NoteMeta {

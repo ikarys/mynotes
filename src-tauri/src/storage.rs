@@ -28,6 +28,8 @@ pub struct NoteMeta {
     pub kind: Kind,
     pub title: String,
     pub updated_at: i64,
+    /// Start of the plain text, so a list can show a preview without loading notes.
+    pub excerpt: String,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -137,18 +139,11 @@ impl Store {
 
     pub fn list_trash(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, kind, title, updated_at FROM notes
+            "SELECT id, kind, title, updated_at, '' FROM notes
              WHERE deleted_at IS NOT NULL
              ORDER BY deleted_at DESC, id DESC",
         )?;
-        let rows = stmt.query_map([], |row| {
-            Ok(NoteMeta {
-                id: row.get(0)?,
-                kind: kind_from_row(row, 1)?,
-                title: row.get(2)?,
-                updated_at: row.get(3)?,
-            })
-        })?;
+        let rows = stmt.query_map([], meta_from_row)?;
         rows.collect()
     }
 
@@ -226,18 +221,13 @@ impl Store {
 
     pub fn list_notes(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, kind, title, updated_at FROM notes
-             WHERE deleted_at IS NULL
-             ORDER BY updated_at DESC, id DESC",
+            "SELECT n.id, n.kind, n.title, n.updated_at, coalesce(substr(f.body, 1, 300), '')
+             FROM notes AS n
+             LEFT JOIN notes_fts AS f ON f.rowid = n.id
+             WHERE n.deleted_at IS NULL
+             ORDER BY n.updated_at DESC, n.id DESC",
         )?;
-        let rows = stmt.query_map([], |row| {
-            Ok(NoteMeta {
-                id: row.get(0)?,
-                kind: kind_from_row(row, 1)?,
-                title: row.get(2)?,
-                updated_at: row.get(3)?,
-            })
-        })?;
+        let rows = stmt.query_map([], meta_from_row)?;
         rows.collect()
     }
 
@@ -248,21 +238,14 @@ impl Store {
             return Ok(recent);
         };
         let mut stmt = self.conn.prepare(
-            "SELECT n.id, n.kind, n.title, n.updated_at
+            "SELECT n.id, n.kind, n.title, n.updated_at, substr(notes_fts.body, 1, 300)
              FROM notes_fts
              JOIN notes AS n ON n.id = notes_fts.rowid
              WHERE notes_fts MATCH ?1 AND n.deleted_at IS NULL
              ORDER BY bm25(notes_fts)
              LIMIT 50",
         )?;
-        let rows = stmt.query_map(params![fts], |row| {
-            Ok(NoteMeta {
-                id: row.get(0)?,
-                kind: kind_from_row(row, 1)?,
-                title: row.get(2)?,
-                updated_at: row.get(3)?,
-            })
-        })?;
+        let rows = stmt.query_map(params![fts], meta_from_row)?;
         rows.collect()
     }
 
@@ -374,6 +357,16 @@ pub(crate) fn now_ms() -> i64 {
         .unwrap_or(0)
 }
 
+fn meta_from_row(row: &rusqlite::Row<'_>) -> Result<NoteMeta> {
+    Ok(NoteMeta {
+        id: row.get(0)?,
+        kind: kind_from_row(row, 1)?,
+        title: row.get(2)?,
+        updated_at: row.get(3)?,
+        excerpt: row.get(4)?,
+    })
+}
+
 fn kind_from_row(row: &rusqlite::Row, column: usize) -> Result<Kind> {
     match row.get::<_, String>(column)? {
         kind if kind == "doc" => Ok(Kind::Doc),
@@ -434,6 +427,27 @@ mod tests {
         assert_eq!(list.len(), 2);
         assert_eq!(list[0].id, second.id);
         assert_eq!(list[1].id, first.id);
+    }
+
+    #[test]
+    fn list_notes_carries_a_bounded_excerpt() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        let empty = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(
+                note.id,
+                "title",
+                "",
+                &format!("title\n{}", "x".repeat(1000)),
+            )
+            .unwrap();
+
+        let list = store.list_notes().unwrap();
+        let saved = list.iter().find(|m| m.id == note.id).unwrap();
+        assert!(saved.excerpt.starts_with("title\nxxx"));
+        assert_eq!(saved.excerpt.chars().count(), 300);
+        assert_eq!(list.iter().find(|m| m.id == empty.id).unwrap().excerpt, "");
     }
 
     #[test]

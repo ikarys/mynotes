@@ -1,3 +1,8 @@
+<script lang="ts" module>
+	// Entry points for the rail, which lives outside this component; the dialogs stay here.
+	export const appMenu: { trash?: () => void; settings?: () => void } = {};
+</script>
+
 <script lang="ts">
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import Copy from '@lucide/svelte/icons/copy';
@@ -37,6 +42,9 @@
 		menu?.hidePopover();
 		settingsDialog?.show();
 	}
+
+	appMenu.trash = openTrash;
+	appMenu.settings = openSettings;
 
 	function onWindowKeydown(event: KeyboardEvent): void {
 		if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === ',') {

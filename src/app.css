@@ -218,54 +218,11 @@ body,
 		color 120ms ease-out;
 }
 
-.tabs .tool {
-	align-self: center;
-	margin-top: 4px;
-}
-
-/* The new-note buttons sit at the end of the strip, as on the landing page. */
-.tabs > .tool:first-of-type {
-	margin-left: auto;
-}
-
 .tool:hover,
 .tool:popover-open,
 .tool[aria-expanded='true'] {
 	background: var(--hover);
 	color: var(--text);
-}
-
-.search {
-	align-self: center;
-	flex: none;
-	height: 28px;
-	margin: 0 6px;
-	padding: 0 6px 0 10px;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	border: 1px solid var(--line);
-	border-radius: 6px;
-	background: var(--bg);
-	color: var(--muted);
-	font: inherit;
-	transition: border-color 120ms ease-out;
-}
-
-.search:hover {
-	border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
-	color: var(--text);
-}
-
-.search kbd {
-	border-bottom-width: 1px;
-}
-
-@media (max-width: 640px) {
-	.search span,
-	.search kbd {
-		display: none;
-	}
 }
 
 .winctl {
@@ -459,9 +416,15 @@ button {
 	flex-direction: column;
 }
 
-.pane {
+.body {
 	flex: 1;
 	min-height: 0;
+	display: flex;
+}
+
+.pane {
+	flex: 1;
+	min-width: 0;
 }
 
 .doc-scroll {
