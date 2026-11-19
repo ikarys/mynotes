@@ -59,6 +59,19 @@ describe('MarkdownCodeBlock', () => {
 		editor.destroy();
 	});
 
+	it('offers the toggle on a bare fence', () => {
+		const editor = new Editor({
+			extensions: baseExtensions(),
+			content: '```\n# Title\n```',
+			contentType: 'markdown'
+		});
+
+		const toggle = editor.view.dom.querySelector('.code-toggle') as HTMLButtonElement;
+		expect(toggle.hidden).toBe(false);
+
+		editor.destroy();
+	});
+
 	it('does not expose hostile attributes in preview', () => {
 		const editor = new Editor({
 			extensions: baseExtensions(),

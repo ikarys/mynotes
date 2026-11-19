@@ -64,7 +64,8 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 			const isMarkdownLanguage = (language: unknown) => {
 				const value = String(language ?? '').toLowerCase();
 
-				return value === 'markdown' || value === 'md';
+				// A bare ``` fence is treated as markdown: it is how notes are usually typed.
+				return value === '' || value === 'markdown' || value === 'md';
 			};
 
 			const sync = () => {
