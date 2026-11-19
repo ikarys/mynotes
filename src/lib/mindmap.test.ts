@@ -7,7 +7,8 @@ import {
 	mindmapText,
 	mindmapTitle,
 	newMindmap,
-	parseMindmap
+	parseMindmap,
+	wordAt
 } from './mindmap';
 
 describe('parseMindmap', () => {
@@ -120,5 +121,21 @@ describe('mindmapMarkdown', () => {
 
 		expect(() => mindmapText(data)).not.toThrow();
 		expect(() => mindmapMarkdown(data)).not.toThrow();
+	});
+});
+
+describe('wordAt', () => {
+	it('finds the word under the caret, including at its edges', () => {
+		expect(wordAt('Mind map', 0)).toEqual([0, 4]);
+		expect(wordAt('Mind map', 6)).toEqual([5, 8]);
+		expect(wordAt('Mind map', 5)).toEqual([5, 8]);
+		expect(wordAt('Mind map', 8)).toEqual([5, 8]);
+		expect(wordAt('café crème', 3)).toEqual([0, 4]);
+	});
+
+	it('returns null on spaces, punctuation or empty text', () => {
+		expect(wordAt('Mind map', 4)).toBeNull();
+		expect(wordAt('a, b', 1)).toBeNull();
+		expect(wordAt('', 0)).toBeNull();
 	});
 });

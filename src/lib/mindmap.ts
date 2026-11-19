@@ -103,3 +103,13 @@ export function mindmapMarkdown(data: MindElixirData): string {
 
 	return `${lines.join('\n')}\n`;
 }
+
+/** Bounds of the word at `offset`, or null when it falls on spaces or punctuation. */
+export function wordAt(text: string, offset: number): [number, number] | null {
+	for (const part of new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text)) {
+		const end = part.index + part.segment.length;
+		// A caret just past the last letter still points at that word.
+		if (offset < end || end === text.length) return part.isWordLike ? [part.index, end] : null;
+	}
+	return null;
+}

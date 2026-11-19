@@ -11,7 +11,8 @@
 		mindmapMarkdown,
 		mindmapText,
 		mindmapTitle,
-		parseMindmap
+		parseMindmap,
+		wordAt
 	} from './mindmap';
 
 	let { id }: { id: number } = $props();
@@ -102,6 +103,20 @@
 		const b = box.getBoundingClientRect();
 		box.style.left = `${box.offsetLeft + (n.left - b.left) / current.scaleVal}px`;
 		box.style.top = `${box.offsetTop + (n.top - b.top) / current.scaleVal}px`;
+	};
+
+	// The library opens the editor with the whole topic selected; a double-click should select the word under it.
+	// Runs after the library's own dblclick handler, once the editor is open and fitted over the node.
+	const onDblclick = (event: MouseEvent) => {
+		const box = element?.querySelector<HTMLElement>('#input-box');
+		if (!box || event.target === box) return;
+
+		const caret = document.caretRangeFromPoint(event.clientX, event.clientY);
+		const text = caret?.startContainer;
+		if (!caret || !text || text.nodeType !== Node.TEXT_NODE || !box.contains(text)) return;
+
+		const word = wordAt(text.textContent ?? '', caret.startOffset);
+		if (word) getSelection()?.setBaseAndExtent(text, word[0], text, word[1]);
 	};
 
 	// A press inside the editor would otherwise start a map pan that captures the pointer and blocks text selection.
@@ -290,6 +305,7 @@
 			instance.bus.addListener('scale', onPlace);
 			element.addEventListener('keydown', onKeydown);
 			element.addEventListener('pointerdown', onPointerdown, true);
+			element.addEventListener('dblclick', onDblclick);
 			element.addEventListener('focusout', onPlace);
 			element.addEventListener('focusin', onPlace);
 			instance.selectNode(instance.findEle(instance.nodeData.id));
@@ -315,6 +331,7 @@
 		window.removeEventListener('resize', onPlace);
 		element?.removeEventListener('keydown', onKeydown);
 		element?.removeEventListener('pointerdown', onPointerdown, true);
+		element?.removeEventListener('dblclick', onDblclick);
 		element?.removeEventListener('focusout', onPlace);
 		element?.removeEventListener('focusin', onPlace);
 
