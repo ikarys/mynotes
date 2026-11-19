@@ -7,10 +7,6 @@
 	import type MindElixir from 'mind-elixir';
 	import type { Theme } from 'mind-elixir';
 	import Plus from '@lucide/svelte/icons/plus';
-	import ListPlus from '@lucide/svelte/icons/list-plus';
-	import Trash from '@lucide/svelte/icons/trash';
-	import Undo from '@lucide/svelte/icons/undo-2';
-	import Scan from '@lucide/svelte/icons/scan';
 	import {
 		isEmptyMindmap,
 		mindmapMarkdown,
@@ -22,6 +18,8 @@
 	let { id }: { id: number } = $props();
 
 	let element: HTMLDivElement | undefined = $state();
+	let wrap: HTMLDivElement | undefined = $state();
+	let plus: { x: number; y: number } | null = $state(null);
 
 	let mind: MindElixir | undefined;
 	let ready = $state(false);
@@ -39,8 +37,38 @@
 		requestAnimationFrame(() => {
 			const node = mind?.currentNode;
 			if (node) mind?.scrollIntoView(node);
+			place();
 		});
 	};
+
+	const place = () => {
+		const current = mind;
+		if (!current || current.currentNodes.length !== 1) {
+			plus = null;
+			return;
+		}
+
+		if (element?.querySelector('#input-box')) {
+			plus = null;
+			return;
+		}
+
+		const node = current.currentNode;
+		if (!node || !wrap) {
+			plus = null;
+			return;
+		}
+
+		const r = node.getBoundingClientRect();
+		const w = wrap.getBoundingClientRect();
+		const left = node.closest('.lhs') !== null;
+		const size = 24;
+		const y = r.top - w.top + r.height / 2 - size / 2;
+		const x = left ? r.left - w.left - 8 - size : r.right - w.left + 8;
+		plus = { x, y };
+	};
+
+	const onPlace = () => requestAnimationFrame(place);
 
 	// Mind Elixir only edits on F2 or double-click; typing on a selected node renames it, like a spreadsheet cell.
 	const onKeydown = (event: KeyboardEvent) => {
@@ -58,25 +86,10 @@
 		});
 	};
 
-	// Toolbar actions act on the selection; with nothing selected the root is the natural target.
-	const selected = (current: MindElixir) => {
-		if (!current.currentNode) current.selectNode(current.findEle(current.nodeData.id));
-		return current.currentNode;
-	};
-
-	const tools = [
-		{ label: 'Add child (Tab)', icon: Plus, run: (m: MindElixir) => m.addChild(selected(m) ?? undefined) },
-		{ label: 'Add sibling (Enter)', icon: ListPlus, run: (m: MindElixir) => m.insertSibling('after', selected(m) ?? undefined) },
-		{ label: 'Delete (Del)', icon: Trash, run: (m: MindElixir) => m.removeNodes(m.currentNodes) },
-		{ label: 'Undo (Ctrl+Z)', icon: Undo, run: (m: MindElixir) => m.undo() },
-		{ label: 'Fit to window', icon: Scan, run: (m: MindElixir) => m.scaleFit() }
-	];
-
-	const runTool = (run: (m: MindElixir) => unknown) => {
-		const current = mind;
-		if (!current) return;
-		void run(current);
-		current.container.focus({ preventScroll: true });
+	// The library opens the editor on the new node itself; refocusing the map would close it.
+	const addChild = () => {
+		const node = mind?.currentNode;
+		if (node) void mind?.addChild(node);
 	};
 
 	const flushAutosave = () => {
@@ -149,9 +162,24 @@
 
 			if (!element) return;
 
+			// Default sub-branches underline deep topics; boxed topics need the line to meet their side at mid-height.
+			const generateSubBranch: Theme['generateSubBranch'] = function ({ pT, pL, pW, pH, cT, cL, cW, cH, direction }) {
+				const gap = parseInt(this.container.style.getPropertyValue('--node-gap-x'));
+				const y1 = pT + pH / 2;
+				const y2 = cT + cH / 2;
+				const bend = Math.min((Math.abs(y1 - y2) / 300) * gap, gap);
+				if (direction === 'lhs') {
+					const x = pL;
+					return `M ${x + gap} ${y1} C ${x - bend} ${y1} ${x + bend} ${y2} ${x - gap} ${y2} H ${cL + cW - gap}`;
+				}
+				const x = pL + pW;
+				return `M ${x - gap} ${y1} C ${x + bend} ${y1} ${x - bend} ${y2} ${x + gap} ${y2} H ${cL + gap}`;
+			};
+
 			const theme: Theme = {
 				name: 'mynotes',
 				type: 'light',
+				generateSubBranch,
 				palette: ['#f7941d', '#5b8def', '#3fb68b', '#c86bd9', '#e5534b', '#d4a72c'],
 				cssVar: {
 					'--bgcolor': 'var(--bg)',
@@ -205,12 +233,20 @@
 			});
 
 			instance.bus.addListener('operation', onOperation);
+			instance.bus.addListener('selectNodes', onPlace);
+			instance.bus.addListener('unselectNodes', onPlace);
+			instance.bus.addListener('move', onPlace);
+			instance.bus.addListener('scale', onPlace);
 			element.addEventListener('keydown', onKeydown);
+			element.addEventListener('focusout', onPlace);
+			element.addEventListener('focusin', onPlace);
 			instance.selectNode(instance.findEle(instance.nodeData.id));
 			instance.container.focus({ preventScroll: true });
 			ready = true;
+			requestAnimationFrame(place);
 			window.addEventListener('blur', flushAutosave);
 			document.addEventListener('visibilitychange', onVisibilityChange);
+			window.addEventListener('resize', onPlace);
 			workspace.setActions(actions);
 		} catch (error) {
 			console.error(error);
@@ -224,10 +260,19 @@
 
 		window.removeEventListener('blur', flushAutosave);
 		document.removeEventListener('visibilitychange', onVisibilityChange);
+		window.removeEventListener('resize', onPlace);
 		element?.removeEventListener('keydown', onKeydown);
+		element?.removeEventListener('focusout', onPlace);
+		element?.removeEventListener('focusin', onPlace);
 
 		const last = mind;
-		if (last) last.bus.removeListener('operation', onOperation);
+		if (last) {
+			last.bus.removeListener('operation', onOperation);
+			last.bus.removeListener('selectNodes', onPlace);
+			last.bus.removeListener('unselectNodes', onPlace);
+			last.bus.removeListener('move', onPlace);
+			last.bus.removeListener('scale', onPlace);
+		}
 
 		void (autosave?.flush() ?? Promise.resolve()).finally(() => last?.destroy());
 
@@ -235,25 +280,24 @@
 	});
 </script>
 
-<div class="wrap">
+<div class="wrap" bind:this={wrap}>
 	<div class="mindmap" bind:this={element}></div>
+	{#if plus}
+		<button
+			class="plus"
+			type="button"
+			title="Add child (Tab)"
+			aria-label="Add child"
+			style:left="{plus.x}px"
+			style:top="{plus.y}px"
+			onmousedown={(e) => e.preventDefault()}
+			onclick={addChild}
+		>
+			<Plus size={14} />
+		</button>
+	{/if}
 	{#if ready}
-		<div class="toolbar" role="toolbar" aria-label="Mind map">
-			{#each tools as tool, index (tool.label)}
-				{#if index === 3}<span class="sep"></span>{/if}
-				<!-- mousedown is cancelled so the map keeps focus and selection. -->
-				<button
-					type="button"
-					title={tool.label}
-					aria-label={tool.label}
-					onmousedown={(event) => event.preventDefault()}
-					onclick={() => runTool(tool.run)}
-				>
-					<tool.icon size={16} />
-				</button>
-			{/each}
-		</div>
-		<p class="hint">Drag to pan · Double-click or type to edit · Drag a node onto another to move it · Right-click for more</p>
+		<p class="hint">Drag to pan · Type or double-click to edit · + or Tab adds a child · Right-click for more</p>
 	{/if}
 </div>
 
@@ -269,42 +313,26 @@
 		height: 100%;
 	}
 
-	.toolbar {
+	.plus {
 		position: absolute;
-		left: 50%;
-		bottom: 16px;
-		transform: translateX(-50%);
-		display: flex;
-		align-items: center;
-		gap: 2px;
-		padding: 4px;
-		background: var(--surface);
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
 		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow);
-	}
-
-	.toolbar button {
-		width: 30px;
-		height: 30px;
-		border: none;
-		border-radius: 6px;
-		background: transparent;
+		background: var(--surface);
 		color: var(--muted);
 		display: grid;
 		place-items: center;
+		padding: 0;
+		box-shadow: var(--shadow);
+		cursor: pointer;
+		z-index: 5;
 	}
 
-	.toolbar button:hover {
-		background: var(--hover);
-		color: var(--text);
-	}
-
-	.sep {
-		width: 1px;
-		height: 18px;
-		background: var(--line);
-		margin: 0 3px;
+	.plus:hover {
+		background: var(--accent);
+		color: #1d1c26;
+		border-color: transparent;
 	}
 
 	.hint {
@@ -319,5 +347,12 @@
 
 	.mindmap :global(.map-container) {
 		background: var(--bg);
+	}
+
+	.mindmap :global(.me-children .me-tpc) {
+		border: 1px solid var(--line);
+		background: var(--surface);
+		border-radius: 6px;
+		padding: 4px 10px;
 	}
 </style>
