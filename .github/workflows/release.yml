@@ -1,10 +1,12 @@
-# Builds the Windows exe from the tagged source and attaches it to a GitHub
-# release, so anyone can trace a published binary back to its commit.
+# Builds the Windows installer and portable exe from the tagged source and
+# attaches them to a GitHub release, so anyone can trace a published binary back to its commit.
 name: release
 
 on:
   push:
     tags: ["v*"]
+  # Manual run: builds the files as an artifact to test before tagging, publishes nothing.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,13 +24,26 @@ jobs:
       - run: npx vitest run
       - run: cargo test --manifest-path src-tauri/Cargo.toml
       - run: npx tauri build
-      - name: Publish
+      - name: Collect files
         shell: bash
+        env:
+          NAME: ${{ github.ref_name }}
+        run: |
+          # Branch names may contain '/', which is not valid in a file name.
+          v="${NAME//\//-}"
+          mkdir out
+          cp src-tauri/target/release/bundle/nsis/*-setup.exe "out/mynotes-$v-windows-x64-setup.exe"
+          cp src-tauri/target/release/mynotes.exe "out/mynotes-$v-windows-x64-portable.exe"
+          (cd out && sha256sum *.exe > SHA256SUMS)
+      - if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mynotes-windows
+          path: out/
+      - if: startsWith(github.ref, 'refs/tags/')
+        name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
-        run: |
-          exe="mynotes-$TAG-windows-x64.exe"
-          cp src-tauri/target/release/mynotes.exe "$exe"
-          sha256sum "$exe" > "$exe.sha256"
-          gh release create "$TAG" "$exe" "$exe.sha256" --notes-from-tag --verify-tag
+        shell: bash
+        run: gh release create "$TAG" out/* --notes-from-tag --verify-tag

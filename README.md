@@ -8,6 +8,19 @@ A Windows notepad that starts instantly and remembers your notes without
 files, with rich text, pasted images and mind maps. Built with Tauri 2 and
 Svelte 5.
 
+## Install (Windows 10/11, x64)
+
+Download from [Releases](https://github.com/ikarys/mynotes/releases):
+
+- `…-setup.exe` installs for the current user (no admin rights), adds a
+  Start menu entry and an uninstaller. Uninstalling removes the app, its
+  shortcuts and its autostart entry. Your notes are kept unless you tick
+  "Delete the application data".
+- `…-portable.exe` runs from anywhere, nothing installed.
+
+Both are unsigned, so Windows SmartScreen warns on first launch: click
+"More info", then "Run anyway". `SHA256SUMS` lets you check the download.
+
 ## Use
 
 - `Ctrl+N` new note, `Ctrl+Shift+M` new mind map, `Ctrl+W` close tab,

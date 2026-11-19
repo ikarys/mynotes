@@ -9,9 +9,10 @@ dev:
     (cd src-tauri && cargo xwin build --target {{target}})
     {{exe}}
 
-# Release Windows exe.
+# Release Windows exe. The installer is built by CI on Windows: the Tauri CLI
+# cannot bundle NSIS from Linux for an app with a tray icon.
 build:
-    cargo tauri build --runner cargo-xwin --target {{target}}
+    cargo tauri build --runner cargo-xwin --target {{target}} --no-bundle
 
 test:
     cd src-tauri && cargo test

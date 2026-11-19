@@ -57,8 +57,16 @@ pub fn run() {
 
             if !cfg!(debug_assertions) {
                 let marker = data_dir.join("autostart-initialized");
-                if !marker.exists() {
-                    let autolaunch = app.autolaunch();
+                let autolaunch = app.autolaunch();
+                if marker.exists() {
+                    // Re-registering points autostart at this exe: it may have moved,
+                    // e.g. from the portable exe to the installed one.
+                    if autolaunch.is_enabled().unwrap_or(false)
+                        && let Err(e) = autolaunch.enable()
+                    {
+                        eprintln!("failed to refresh autostart path: {e}");
+                    }
+                } else {
                     if let Err(e) = autolaunch.enable() {
                         eprintln!("failed to enable autostart on first run: {e}");
                     }

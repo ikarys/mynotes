@@ -21,6 +21,7 @@ one names a check you can run yourself.
 | Date | Commit | Exe size | Cold start | RAM |
 |---|---|---|---|---|
 | 2026-11-18 | see git log | 4.9 MB | not measured yet (needs Windows) | not measured yet |
+| 2026-11-19 | `opt-level = "z"` | 4.4 MB | not measured yet (needs Windows) | not measured yet |
 
 ## Not checked
 
@@ -28,6 +29,7 @@ one names a check you can run yourself.
   release.
 - No CI on merges: the checks above run locally before each merge. Only
   releases run in CI: `.github/workflows/release.yml` runs the tests on a
-  GitHub Windows runner, builds the exe from the tagged commit and attaches it
-  with its SHA-256 to the GitHub release, so a published binary can be traced
-  to its source.
+  GitHub Windows runner, builds the installer and the portable exe from the
+  tagged commit and attaches them with `SHA256SUMS` to the GitHub release, so
+  a published binary can be traced to its source. A manual run of the same
+  workflow builds them as an artifact for testing, without publishing.
