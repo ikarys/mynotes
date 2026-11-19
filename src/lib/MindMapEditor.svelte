@@ -420,6 +420,11 @@
 		background: var(--bg);
 	}
 
+	/* The root is filled with the accent, so the accent selection outline would vanish into it. */
+	.mindmap :global(.me-root .me-tpc.selected) {
+		outline-color: var(--text);
+	}
+
 	.mindmap :global(.me-children .me-tpc) {
 		border: 1px solid var(--line);
 		background: var(--surface);
