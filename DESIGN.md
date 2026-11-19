@@ -23,6 +23,8 @@ active tab, list bullets, links, caret, selection and focus only.
 | `--muted`    | `#67647a` | `#9a98ae` |
 | `--accent`   | `#f7941d` | `#f7941d` |
 | `--accent-text` (links, AA on bg) | `#a85a00` | `#ffad4d` |
+| `--code-string` (JSON/YAML strings) | `#2f7d4f` | `#8fd4a4` |
+| `--code-number` (JSON/YAML numbers) | `#6a4fc4` | `#b8a6ff` |
 
 ## Components
 

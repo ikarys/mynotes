@@ -17,6 +17,26 @@ fn lock<'a>(
     mutex.lock().map_err(|_| POISONED.to_string())
 }
 
+fn prune_purged_contents(state: &AppState, contents: &[String]) {
+    if contents.is_empty() {
+        return;
+    }
+    let store = match lock(&state.store) {
+        Ok(store) => store,
+        Err(e) => {
+            eprintln!("failed to prune images after purge: {e}");
+            return;
+        }
+    };
+    for content in contents {
+        if let Err(e) = crate::images::prune(&state.images_dir, Some(content), |name| {
+            store.is_referenced(name).unwrap_or(true)
+        }) {
+            eprintln!("failed to prune images after purge: {e}");
+        }
+    }
+}
+
 pub const DEFAULT_HOTKEY: &str = "Ctrl+Alt+Space";
 pub const HOTKEY_SETTING: &str = "hotkey";
 
@@ -116,22 +136,46 @@ pub fn save_note(
 }
 
 #[tauri::command]
-pub fn delete_note(id: i64, state: State<'_, AppState>) -> Result<(), String> {
+pub fn trash_note(id: i64, state: State<'_, AppState>) -> Result<(), String> {
+    let store = lock(&state.store)?;
+    store.trash_note(id).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub fn list_trash(state: State<'_, AppState>) -> Result<Vec<NoteMeta>, String> {
+    let store = lock(&state.store)?;
+    store.list_trash().map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub fn restore_note(id: i64, state: State<'_, AppState>) -> Result<(), String> {
+    let store = lock(&state.store)?;
+    store.restore_note(id).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub fn purge_note(id: i64, state: State<'_, AppState>) -> Result<(), String> {
     let store = lock(&state.store)?;
     let content = store
         .load_note(id)
         .map_err(|err| err.to_string())?
         .map(|n| n.content);
-    store.delete_note(id).map_err(|err| err.to_string())?;
+    store.purge_note(id).map_err(|err| err.to_string())?;
+    drop(store);
 
-    if let Some(content) = content
-        && let Err(e) = crate::images::prune(&state.images_dir, Some(&content), |name| {
-            store.is_referenced(name).unwrap_or(true)
-        })
-    {
-        eprintln!("failed to prune images after deleting note {id}: {e}");
+    if let Some(content) = content {
+        prune_purged_contents(&state, &[content]);
     }
 
+    Ok(())
+}
+
+#[tauri::command]
+pub fn empty_trash(state: State<'_, AppState>) -> Result<(), String> {
+    let store = lock(&state.store)?;
+    let contents = store.purge_trash(None).map_err(|err| err.to_string())?;
+    drop(store);
+    prune_purged_contents(&state, &contents);
     Ok(())
 }
 

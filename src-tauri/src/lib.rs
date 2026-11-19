@@ -4,6 +4,7 @@ mod files;
 mod images;
 mod shell;
 mod storage;
+mod updater;
 
 use std::sync::Mutex;
 
@@ -18,6 +19,7 @@ pub fn run() {
             shell::show_main(app)
         }))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(shell::WINDOW_STATE)
@@ -31,6 +33,13 @@ pub fn run() {
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&data_dir)?;
             let store = storage::Store::open(&data_dir.join("mynotes.db"))?;
+
+            // Old trash is purged before the startup image prune so it sees final references.
+            let cutoff =
+                storage::now_ms().saturating_sub(storage::TRASH_DAYS * 24 * 60 * 60 * 1000);
+            if let Err(e) = store.purge_trash(Some(cutoff)) {
+                eprintln!("failed to purge old trash at startup: {e}");
+            }
 
             // Images dropped from notes in earlier sessions; pruned at startup
             // because undo history, which could restore them, is gone by then.
@@ -103,11 +112,17 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            updater::check_update,
+            updater::install_update,
             commands::list_notes,
             commands::load_note,
             commands::create_note,
             commands::save_note,
-            commands::delete_note,
+            commands::trash_note,
+            commands::list_trash,
+            commands::restore_note,
+            commands::purge_note,
+            commands::empty_trash,
             commands::search,
             commands::get_session,
             commands::set_session,

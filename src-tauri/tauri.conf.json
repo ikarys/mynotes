@@ -59,5 +59,16 @@
         "installerHooks": "windows/hooks.nsh"
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM0MDYzRUExOTFFQjRENDcKUldSSFRldVJvVDRHTk5HQkdVZmxFcEQ2NTJENUp2ZVdkdEczS2VkSVhtZVY5SGhRanFkamM4RzAK",
+      "endpoints": [
+        "https://github.com/ikarys/mynotes/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

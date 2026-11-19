@@ -4,6 +4,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 pub type Result<T> = rusqlite::Result<T>;
 
+pub const TRASH_DAYS: i64 = 30;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Kind {
@@ -121,10 +123,100 @@ impl Store {
         Ok(())
     }
 
-    pub fn delete_note(&self, id: i64) -> Result<()> {
+    pub fn trash_note(&self, id: i64) -> Result<()> {
+        let now = now_ms();
+        let updated = self.conn.execute(
+            "UPDATE notes SET deleted_at = ?1 WHERE id = ?2 AND deleted_at IS NULL",
+            params![now, id],
+        )?;
+        if updated == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        Ok(())
+    }
+
+    pub fn list_trash(&self) -> Result<Vec<NoteMeta>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, kind, title, updated_at FROM notes
+             WHERE deleted_at IS NOT NULL
+             ORDER BY deleted_at DESC, id DESC",
+        )?;
+        let rows = stmt.query_map([], |row| {
+            Ok(NoteMeta {
+                id: row.get(0)?,
+                kind: kind_from_row(row, 1)?,
+                title: row.get(2)?,
+                updated_at: row.get(3)?,
+            })
+        })?;
+        rows.collect()
+    }
+
+    pub fn restore_note(&self, id: i64) -> Result<()> {
+        let restored = self.conn.execute(
+            "UPDATE notes SET deleted_at = NULL WHERE id = ?1 AND deleted_at IS NOT NULL",
+            params![id],
+        )?;
+        if restored == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        Ok(())
+    }
+
+    pub fn purge_note(&self, id: i64) -> Result<()> {
+        self.conn.query_row(
+            "SELECT 1 FROM notes WHERE id = ?1 AND deleted_at IS NOT NULL",
+            params![id],
+            |_| Ok(()),
+        )?;
+        self.erase_notes(&[id])
+    }
+
+    pub fn purge_trash(&self, older_than_ms: Option<i64>) -> Result<Vec<String>> {
+        let mut ids = Vec::new();
+        let mut contents = Vec::new();
+        match older_than_ms {
+            None => {
+                let mut stmt = self
+                    .conn
+                    .prepare("SELECT id, content FROM notes WHERE deleted_at IS NOT NULL")?;
+                let rows = stmt.query_map([], |row| {
+                    Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?))
+                })?;
+                for row in rows {
+                    let (id, content) = row?;
+                    ids.push(id);
+                    contents.push(content);
+                }
+            }
+            Some(cutoff) => {
+                let mut stmt = self.conn.prepare(
+                    "SELECT id, content FROM notes
+                     WHERE deleted_at IS NOT NULL AND deleted_at < ?1",
+                )?;
+                let rows = stmt.query_map(params![cutoff], |row| {
+                    Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?))
+                })?;
+                for row in rows {
+                    let (id, content) = row?;
+                    ids.push(id);
+                    contents.push(content);
+                }
+            }
+        }
+        self.erase_notes(&ids)?;
+        Ok(contents)
+    }
+
+    fn erase_notes(&self, ids: &[i64]) -> Result<()> {
+        if ids.is_empty() {
+            return Ok(());
+        }
         let tx = self.conn.unchecked_transaction()?;
-        tx.execute("DELETE FROM notes WHERE id = ?", params![id])?;
-        tx.execute("DELETE FROM notes_fts WHERE rowid = ?", params![id])?;
+        for id in ids {
+            tx.execute("DELETE FROM notes WHERE id = ?", params![id])?;
+            tx.execute("DELETE FROM notes_fts WHERE rowid = ?", params![id])?;
+        }
         tx.commit()?;
         // The WAL keeps old page copies until checkpointed.
         self.conn
@@ -134,7 +226,9 @@ impl Store {
 
     pub fn list_notes(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, kind, title, updated_at FROM notes ORDER BY updated_at DESC, id DESC",
+            "SELECT id, kind, title, updated_at FROM notes
+             WHERE deleted_at IS NULL
+             ORDER BY updated_at DESC, id DESC",
         )?;
         let rows = stmt.query_map([], |row| {
             Ok(NoteMeta {
@@ -157,7 +251,7 @@ impl Store {
             "SELECT n.id, n.kind, n.title, n.updated_at
              FROM notes_fts
              JOIN notes AS n ON n.id = notes_fts.rowid
-             WHERE notes_fts MATCH ?1
+             WHERE notes_fts MATCH ?1 AND n.deleted_at IS NULL
              ORDER BY bm25(notes_fts)
              LIMIT 50",
         )?;
@@ -241,7 +335,6 @@ fn init(conn: &Connection) -> Result<()> {
     conn.execute_batch(
         "PRAGMA secure_delete = ON;
          PRAGMA foreign_keys = ON;
-         PRAGMA user_version = 1;
          CREATE TABLE IF NOT EXISTS notes (
              id INTEGER PRIMARY KEY,
              kind TEXT NOT NULL CHECK (kind IN ('doc', 'mindmap')),
@@ -265,10 +358,16 @@ fn init(conn: &Connection) -> Result<()> {
              tokenize = 'unicode61 remove_diacritics 2'
          );
          INSERT INTO notes_fts(notes_fts, rank) VALUES('secure-delete', 1);",
-    )
+    )?;
+    let user_version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
+    if user_version < 2 {
+        conn.execute("ALTER TABLE notes ADD COLUMN deleted_at INTEGER", [])?;
+        conn.pragma_update(None, "user_version", 2)?;
+    }
+    Ok(())
 }
 
-fn now_ms() -> i64 {
+pub(crate) fn now_ms() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis() as i64)
@@ -367,7 +466,108 @@ mod tests {
     }
 
     #[test]
-    fn delete_note_removes_from_list_and_search() {
+    fn trash_hides_from_list_and_search_and_restore_brings_it_back() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(note.id, "trash", "body", "trash me")
+            .unwrap();
+
+        assert_eq!(store.list_notes().unwrap().len(), 1);
+        assert_eq!(store.search("trash").unwrap().len(), 1);
+
+        store.trash_note(note.id).unwrap();
+        assert!(store.list_notes().unwrap().is_empty());
+        assert!(store.search("trash").unwrap().is_empty());
+        assert!(matches!(
+            store.trash_note(note.id).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+
+        let trash = store.list_trash().unwrap();
+        assert_eq!(trash.len(), 1);
+        assert_eq!(trash[0].id, note.id);
+        assert_eq!(trash[0].title, "trash");
+
+        store.restore_note(note.id).unwrap();
+        assert!(matches!(
+            store.restore_note(note.id).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+
+        let list = store.list_notes().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].id, note.id);
+        assert!(store.list_trash().unwrap().is_empty());
+        assert_eq!(store.search("trash").unwrap().len(), 1);
+    }
+
+    #[test]
+    fn trash_note_missing_id_is_error() {
+        let store = Store::open_in_memory().unwrap();
+        assert!(matches!(
+            store.trash_note(999).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+    }
+
+    #[test]
+    fn purge_note_on_live_note_is_error_and_leaves_it() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(note.id, "live", "body", "live text")
+            .unwrap();
+
+        assert!(matches!(
+            store.purge_note(note.id).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+        assert_eq!(store.list_notes().unwrap().len(), 1);
+        assert!(store.load_note(note.id).unwrap().is_some());
+    }
+
+    #[test]
+    fn purge_trash_cutoff_only_erases_old_notes() {
+        let store = Store::open_in_memory().unwrap();
+        let old = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(old.id, "old", "old content", "old text")
+            .unwrap();
+        store.trash_note(old.id).unwrap();
+        store
+            .conn
+            .execute(
+                "UPDATE notes SET deleted_at = 1000 WHERE id = ?",
+                params![old.id],
+            )
+            .unwrap();
+
+        let fresh = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(fresh.id, "fresh", "fresh content", "fresh text")
+            .unwrap();
+        store.trash_note(fresh.id).unwrap();
+        store
+            .conn
+            .execute(
+                "UPDATE notes SET deleted_at = 2000 WHERE id = ?",
+                params![fresh.id],
+            )
+            .unwrap();
+
+        let contents = store.purge_trash(Some(1500)).unwrap();
+        assert_eq!(contents, vec!["old content".to_string()]);
+        assert!(store.load_note(old.id).unwrap().is_none());
+        assert!(store.load_note(fresh.id).unwrap().is_some());
+
+        let trash = store.list_trash().unwrap();
+        assert_eq!(trash.len(), 1);
+        assert_eq!(trash[0].id, fresh.id);
+    }
+
+    #[test]
+    fn trash_then_purge_removes_from_list_and_search() {
         let store = Store::open_in_memory().unwrap();
         let note = store.create_note(Kind::Doc).unwrap();
         store
@@ -375,10 +575,15 @@ mod tests {
             .unwrap();
 
         assert_eq!(store.search("delete").unwrap().len(), 1);
-        store.delete_note(note.id).unwrap();
+        store.trash_note(note.id).unwrap();
 
         assert!(store.list_notes().unwrap().is_empty());
         assert!(store.search("delete").unwrap().is_empty());
+        assert_eq!(store.list_trash().unwrap().len(), 1);
+
+        store.purge_note(note.id).unwrap();
+        assert!(store.list_trash().unwrap().is_empty());
+        assert!(store.load_note(note.id).unwrap().is_none());
     }
 
     #[test]
@@ -470,7 +675,8 @@ mod tests {
             let store = Store::open(&path).unwrap();
             let note = store.create_note(Kind::Doc).unwrap();
             store.save_note(note.id, marker, marker, marker).unwrap();
-            store.delete_note(note.id).unwrap();
+            store.trash_note(note.id).unwrap();
+            store.purge_note(note.id).unwrap();
         }
 
         let db_bytes = std::fs::read(&path).unwrap();
@@ -504,5 +710,43 @@ mod tests {
         assert!(store.is_referenced("needle").unwrap());
         assert!(store.is_referenced("abc needle").unwrap());
         assert!(!store.is_referenced("missing").unwrap());
+    }
+
+    #[test]
+    fn old_schema_is_migrated_and_trash_works() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("old.db");
+
+        {
+            let conn = Connection::open(&path).unwrap();
+            conn.execute_batch(
+                "PRAGMA user_version = 1;
+                 CREATE TABLE notes (
+                     id INTEGER PRIMARY KEY,
+                     kind TEXT NOT NULL CHECK (kind IN ('doc', 'mindmap')),
+                     title TEXT NOT NULL DEFAULT '',
+                     content TEXT NOT NULL DEFAULT '',
+                     created_at INTEGER NOT NULL,
+                     updated_at INTEGER NOT NULL
+                 );
+                 INSERT INTO notes (kind, title, content, created_at, updated_at)
+                 VALUES ('doc', 'legacy', 'legacy content', 1, 2);",
+            )
+            .unwrap();
+        }
+
+        let store = Store::open(&path).unwrap();
+        let list = store.list_notes().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].title, "legacy");
+
+        store.trash_note(list[0].id).unwrap();
+        assert!(store.list_notes().unwrap().is_empty());
+        assert_eq!(store.list_trash().unwrap().len(), 1);
+
+        // Reopen to prove the migration is idempotent.
+        drop(store);
+        let store = Store::open(&path).unwrap();
+        assert_eq!(store.list_trash().unwrap().len(), 1);
     }
 }

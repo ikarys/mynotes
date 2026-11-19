@@ -27,19 +27,26 @@ Both are unsigned, so Windows SmartScreen warns on first launch: click
   `Ctrl+Tab` next tab, `Ctrl+P` find a note (full-text search).
 - `Ctrl+O` opens a `.md` or `.txt` file as a new note; `Ctrl+Shift+S` saves
   the note as Markdown or plain text.
-- Closing a tab keeps the note (find it again with `Ctrl+P`); `Delete note…`
-  in the `…` menu removes it for good.
+- Closing a tab keeps the note (find it again with `Ctrl+P`); `Move to trash`
+  in the `…` menu hides it; the Trash (same menu) restores it or erases it
+  for good, and notes left there are erased after 30 days.
+- `Ctrl+F` finds text in the note, `Ctrl+H` finds and replaces.
 - Select text to format it; paste images or Markdown directly.
 - A ```` ```markdown ```` code block has a Preview button to switch between
   its source and the rendered result.
+- A code block's language (Markdown, JSON, YAML) can be changed from the
+  selector at its top right; JSON and YAML are coloured.
 - Mind map: `Tab` adds a child, `Enter` a sibling, `F2` renames,
   right-click for more.
-- The `…` menu also copies the note as Markdown, exports a mind map as PNG,
-  switches between system, light and dark themes, sets the font and size of
-  note text, and opens the data folder.
-- `Ctrl+Alt+Space` (changeable in the `…` menu) shows or hides the window from
+- The `…` menu also copies the note as Markdown and exports a mind map as
+  PNG. Settings (`Ctrl+,`) holds the theme, the font and size of note text,
+  the show/hide shortcut, the update check and the data folder.
+- `Ctrl+Alt+Space` (changeable in Settings) shows or hides the window from
   anywhere, even when minimized; closing the window keeps mynotes in the tray.
   The window reopens at the size and place you left it.
+- When a new version is out, the `…` menu shows `Update to vX`: the installed
+  app updates and restarts itself, the portable exe opens the download page.
+  The check runs a few seconds after start; turn it off in Settings.
 
 Notes are saved automatically in `%APPDATA%\ovh.iks-homelab.mynotes`
 (`mynotes.db` and an `images` folder).

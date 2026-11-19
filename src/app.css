@@ -10,6 +10,8 @@
 	--muted: #67647a;
 	--accent: #f7941d;
 	--accent-text: #a85a00;
+	--code-string: #2f7d4f;
+	--code-number: #6a4fc4;
 	--hover: rgba(29, 28, 38, 0.06);
 	--press: rgba(29, 28, 38, 0.1);
 	--mark: rgba(247, 148, 29, 0.28);
@@ -27,6 +29,8 @@
 	--muted: #9a98ae;
 	--accent: #f7941d;
 	--accent-text: #ffad4d;
+	--code-string: #8fd4a4;
+	--code-number: #b8a6ff;
 	--hover: rgba(232, 230, 240, 0.07);
 	--press: rgba(232, 230, 240, 0.11);
 	--mark: rgba(247, 148, 29, 0.32);
@@ -44,6 +48,8 @@
 		--muted: #9a98ae;
 		--accent: #f7941d;
 		--accent-text: #ffad4d;
+		--code-string: #8fd4a4;
+		--code-number: #b8a6ff;
 		--hover: rgba(232, 230, 240, 0.07);
 		--press: rgba(232, 230, 240, 0.11);
 		--mark: rgba(247, 148, 29, 0.32);
@@ -117,6 +123,11 @@ body,
 	transition:
 		background-color 120ms ease-out,
 		color 120ms ease-out;
+}
+
+.tab.dragging {
+	z-index: 1;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
 }
 
 .tab .title {
@@ -295,6 +306,8 @@ body,
 	background: var(--surface);
 	color: var(--text);
 	box-shadow: var(--shadow);
+	max-height: calc(100vh - 48px);
+	overflow-y: auto;
 }
 
 .menu:popover-open {
@@ -544,6 +557,26 @@ button {
 	padding: 0;
 }
 
+.tiptap pre .hljs-attr,
+.tiptap pre .hljs-literal {
+	color: var(--accent-text);
+}
+
+.tiptap pre .hljs-string {
+	color: var(--code-string);
+}
+
+.tiptap pre .hljs-number {
+	color: var(--code-number);
+}
+
+.tiptap pre .hljs-comment,
+.tiptap pre .hljs-punctuation,
+.tiptap pre .hljs-bullet,
+.tiptap pre .hljs-meta {
+	color: var(--muted);
+}
+
 .tiptap blockquote {
 	margin: 0 0 0.6em;
 	padding-left: 1em;
@@ -727,10 +760,9 @@ kbd {
 	position: relative;
 }
 
-.code-toggle {
-	position: absolute;
-	top: 6px;
-	right: 6px;
+.code-lang,
+.code-toggle,
+.code-copy {
 	height: 22px;
 	padding: 0 8px;
 	font-size: 12px;
@@ -741,7 +773,9 @@ kbd {
 	cursor: pointer;
 }
 
-.code-toggle:hover {
+.code-lang:hover,
+.code-toggle:hover,
+.code-copy:hover {
 	color: var(--text);
 }
 
@@ -770,3 +804,299 @@ kbd {
 }
 
 .menu .item.danger { color: var(--danger, #c4314b); }
+
+dialog.sheet {
+	margin: auto;
+	width: min(420px, 90vw);
+	padding: 20px;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: var(--surface);
+	color: var(--text);
+}
+
+dialog.sheet::backdrop {
+	background: rgba(0, 0, 0, 0.35);
+}
+
+dialog.sheet[open] {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.sheet-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.sheet-note {
+	margin: 0;
+	font-size: 12px;
+	color: var(--muted);
+}
+
+.trash-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	max-height: min(40vh, 320px);
+	overflow-y: auto;
+}
+
+.trash-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--chrome);
+}
+
+.trash-icon {
+	display: flex;
+	color: var(--muted);
+}
+
+.trash-title {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.row-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.sheet-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.sheet-btn {
+	height: 22px;
+	padding: 0 8px;
+	font-size: 12px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--chrome);
+	color: var(--muted);
+	cursor: pointer;
+}
+
+.sheet-btn:hover {
+	color: var(--text);
+}
+
+.sheet-btn.danger {
+	color: var(--danger, #c4314b);
+}
+
+.sheet-btn.danger:hover {
+	color: var(--text);
+}
+
+.sheet-btn:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.empty {
+	margin: 8px 0;
+	font-size: 12px;
+	color: var(--muted);
+	text-align: center;
+}
+
+.settings {
+	max-height: calc(100vh - 32px);
+	overflow-y: auto;
+}
+
+.settings section {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.settings h3.menu-label {
+	margin: 0;
+	padding: 0;
+	font-weight: inherit;
+}
+
+.settings .segmented,
+.settings .stepper {
+	align-self: stretch;
+	margin: 0;
+}
+
+.setting-control {
+	height: 28px;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.setting-check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+}
+
+.setting-check input {
+	accent-color: var(--accent);
+}
+
+.about {
+	align-items: center;
+	text-align: center;
+}
+
+.about img {
+	width: 64px;
+	height: 64px;
+}
+
+.about h2 {
+	margin: 0;
+	font-size: 16px;
+}
+
+.about .version,
+.about p,
+.about .license {
+	margin: 0;
+	font-size: 12px;
+	color: var(--muted);
+}
+
+.about .links {
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+}
+
+.about a {
+	font-size: 12px;
+	color: var(--accent-text);
+	text-decoration: none;
+}
+
+.about a:hover {
+	text-decoration: underline;
+}
+
+.word-count {
+	position: sticky;
+	bottom: 0;
+	margin-left: auto;
+	max-width: fit-content;
+	padding: 4px 12px;
+	font-size: 12px;
+	color: var(--muted);
+	background: var(--bg);
+	text-align: right;
+	pointer-events: none;
+}
+
+.code-lang {
+	padding: 0 4px;
+	font-family: inherit;
+}
+
+.code-actions {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	display: flex;
+	gap: 6px;
+}
+
+.menu .item .item-check {
+	margin-left: auto;
+	color: var(--accent-text);
+}
+/* Pinned over the pane rather than in the flow, so opening it never shifts the text. */
+.find-bar {
+	position: fixed;
+	top: 48px;
+	right: 16px;
+	z-index: 5;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 6px;
+	box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+}
+
+.find-bar .find-row {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.find-bar input {
+	height: 24px;
+	font-size: 13px;
+	padding: 0 6px;
+	color: var(--text);
+	background: var(--chrome);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	outline: none;
+}
+
+.find-bar input:focus {
+	border-color: var(--accent);
+}
+
+.find-bar button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 24px;
+	min-width: 24px;
+	padding: 0 4px;
+	font-size: 12px;
+	color: var(--text);
+	background: var(--chrome);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.find-bar button:hover {
+	background: var(--hover);
+}
+
+.find-bar .toggle.active {
+	color: var(--accent-text);
+	border-color: var(--accent);
+}
+
+.find-bar .find-count {
+	color: var(--muted);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.find-match {
+	background: color-mix(in srgb, var(--accent) 25%, transparent);
+	border-radius: 2px;
+}
+
+.find-current {
+	background: color-mix(in srgb, var(--accent) 55%, transparent);
+}

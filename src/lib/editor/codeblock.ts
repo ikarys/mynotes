@@ -1,4 +1,7 @@
-import CodeBlock from '@tiptap/extension-code-block';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { createLowlight } from 'lowlight';
+import json from 'highlight.js/lib/languages/json';
+import yaml from 'highlight.js/lib/languages/yaml';
 import type { Editor } from '@tiptap/core';
 import { Node as PMNode, DOMSerializer } from '@tiptap/pm/model';
 import type { ViewMutationRecord } from '@tiptap/pm/view';
@@ -34,11 +37,51 @@ export function renderMarkdown(editor: Editor, markdown: string, target: HTMLEle
 	}
 }
 
-export const MarkdownCodeBlock = CodeBlock.extend({
+// Only JSON and YAML: every highlight.js grammar adds to the bundle, and the app must stay light.
+const lowlight = createLowlight({ json, yaml });
+lowlight.registerAlias({ yaml: ['yml'] });
+
+// Auto-detection would colour plain and Markdown fences as YAML; only a named language is highlighted.
+const namedOnly = {
+	highlight: (language: string, value: string) => lowlight.highlight(language, value),
+	listLanguages: () => lowlight.listLanguages(),
+	registered: (language: string) => lowlight.registered(language),
+	highlightAuto: () => ({ children: [] })
+};
+
+const LANGUAGES: [string, string][] = [
+	['', 'Markdown'],
+	['json', 'JSON'],
+	['yaml', 'YAML']
+];
+
+function addOption(select: HTMLSelectElement, value: string, label: string): void {
+	const option = document.createElement('option');
+	option.value = value;
+	option.textContent = label;
+	select.append(option);
+}
+
+export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 	addNodeView() {
-		return ({ node, editor }: { node: PMNode; editor: Editor }) => {
+		return ({ node, editor, getPos }: { node: PMNode; editor: Editor; getPos: () => number | undefined }) => {
 			const dom = document.createElement('div');
 			dom.className = 'code-block';
+
+			const actions = document.createElement('div');
+			actions.className = 'code-actions';
+			actions.setAttribute('contenteditable', 'false');
+
+			const copy = document.createElement('button');
+			copy.type = 'button';
+			copy.className = 'code-copy';
+			copy.setAttribute('contenteditable', 'false');
+			copy.textContent = 'Copy';
+
+			const language = document.createElement('select');
+			language.className = 'code-lang';
+			language.setAttribute('aria-label', 'Code language');
+			for (const [value, label] of LANGUAGES) addOption(language, value, label);
 
 			const button = document.createElement('button');
 			button.type = 'button';
@@ -56,10 +99,12 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 			preview.setAttribute('contenteditable', 'false');
 			preview.hidden = true;
 
-			dom.append(button, pre, preview);
+			actions.append(language, copy, button);
+			dom.append(actions, pre, preview);
 
 			let current = node;
 			let isPreview = false;
+			let copyTimer: number | undefined;
 
 			const isMarkdownLanguage = (language: unknown) => {
 				const value = String(language ?? '').toLowerCase();
@@ -72,6 +117,10 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 				const className = current.attrs.language ? `language-${current.attrs.language}` : '';
 				if (code.className !== className) code.className = className;
 				const canPreview = isMarkdownLanguage(current.attrs.language);
+				const value = String(current.attrs.language ?? '');
+				// A fence typed with another language keeps it, listed as is.
+				if (![...language.options].some((option) => option.value === value)) addOption(language, value, value);
+				language.value = value;
 
 				button.hidden = !canPreview;
 
@@ -93,6 +142,28 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 				isPreview = !isPreview;
 				sync();
 			};
+
+			copy.addEventListener('mousedown', (event) => {
+				event.preventDefault();
+				navigator.clipboard
+					.writeText(current.textContent)
+					.then(() => {
+						copy.textContent = 'Copied';
+						if (copyTimer !== undefined) clearTimeout(copyTimer);
+						copyTimer = window.setTimeout(() => {
+							copy.textContent = 'Copy';
+							copyTimer = undefined;
+						}, 1200);
+					})
+					.catch((err) => console.error(err));
+			});
+
+			language.addEventListener('change', () => {
+				const pos = getPos();
+				if (pos === undefined) return;
+				const attrs = { ...current.attrs, language: language.value || null };
+				editor.view.dispatch(editor.view.state.tr.setNodeMarkup(pos, undefined, attrs));
+			});
 
 			button.addEventListener('mousedown', (event) => {
 				event.preventDefault();
@@ -145,9 +216,9 @@ export const MarkdownCodeBlock = CodeBlock.extend({
 					return !code.contains(mutation.target);
 				},
 				stopEvent(event: Event): boolean {
-					return event.target instanceof Node && (button.contains(event.target) || preview.contains(event.target));
+					return event.target instanceof Node && (actions.contains(event.target) || preview.contains(event.target));
 				}
 			};
 		};
 	}
-});
+}).configure({ lowlight: namedOnly });

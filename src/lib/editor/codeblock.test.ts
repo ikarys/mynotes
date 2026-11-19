@@ -109,4 +109,37 @@ describe('MarkdownCodeBlock', () => {
 
 		editor.destroy();
 	});
+
+	it('highlights named JSON and YAML blocks, not bare fences', () => {
+		const render = (content: string) => {
+			const editor = new Editor({ extensions: baseExtensions(), content, contentType: 'markdown' });
+			const html = editor.view.dom.innerHTML;
+			editor.destroy();
+			return html;
+		};
+
+		expect(render('```json\n{"a": 1}\n```')).toContain('hljs-attr');
+		expect(render('```yml\nkey: value\n```')).toContain('hljs-attr');
+		expect(render('```\nkey: value\n# Title\n```')).not.toContain('hljs-');
+	});
+
+	it('sets the language of an existing block from its selector', () => {
+		const editor = new Editor({ extensions: baseExtensions(), content: '```\n{"a": 1}\n```', contentType: 'markdown' });
+		const select = editor.view.dom.querySelector('.code-lang') as HTMLSelectElement;
+		expect(select.value).toBe('');
+
+		select.value = 'json';
+		select.dispatchEvent(new Event('change'));
+
+		expect(editor.getMarkdown()).toContain('```json');
+		expect(editor.view.dom.innerHTML).toContain('hljs-attr');
+		expect((editor.view.dom.querySelector('.code-lang') as HTMLSelectElement).value).toBe('json');
+		editor.destroy();
+	});
+
+	it('keeps a language the selector does not list', () => {
+		const editor = new Editor({ extensions: baseExtensions(), content: '```rust\nfn main() {}\n```', contentType: 'markdown' });
+		expect((editor.view.dom.querySelector('.code-lang') as HTMLSelectElement).value).toBe('rust');
+		editor.destroy();
+	});
 });
