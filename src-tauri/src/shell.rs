@@ -4,6 +4,10 @@ use tauri::Manager;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri_plugin_autostart::ManagerExt;
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
+// VISIBLE is left out: restoring it would show the window on a `--hidden` autostart.
+pub const WINDOW_STATE: StateFlags = StateFlags::all().difference(StateFlags::VISIBLE);
 
 static FIRST_READY: AtomicBool = AtomicBool::new(true);
 
@@ -24,12 +28,23 @@ pub fn show_main(app: &tauri::AppHandle) {
     }
 }
 
+// Saved on hide, not only on exit: a tray app is usually ended by a Windows
+// shutdown, which never runs the plugin's exit hook.
+pub fn hide_main(app: &tauri::AppHandle) {
+    if let Err(e) = app.save_window_state(WINDOW_STATE) {
+        eprintln!("failed to save window state: {e}");
+    }
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.hide();
+    }
+}
+
 pub fn toggle_main(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let visible = window.is_visible().unwrap_or(false);
         let focused = window.is_focused().unwrap_or(false);
         if visible && focused {
-            let _ = window.hide();
+            hide_main(app);
         } else {
             show_main(app);
         }

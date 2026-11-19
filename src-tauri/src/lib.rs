@@ -18,6 +18,11 @@ pub fn run() {
             shell::show_main(app)
         }))
         .plugin(tauri_plugin_opener::init())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(shell::WINDOW_STATE)
+                .build(),
+        )
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
             Some(vec!["--hidden"]),
@@ -86,7 +91,7 @@ pub fn run() {
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
-                let _ = window.hide();
+                shell::hide_main(window.app_handle());
             }
         })
         .invoke_handler(tauri::generate_handler![

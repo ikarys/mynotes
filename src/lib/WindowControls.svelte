@@ -16,7 +16,7 @@
 		<Square size={12} strokeWidth={1.25} />
 	</button>
 	<!-- Close keeps the app in the tray, like the native close button does. -->
-	<button class="close" aria-label="Close" title="Close" onclick={() => win.hide().catch(fail)}>
+	<button class="close" aria-label="Close" title="Close" onclick={() => win.close().catch(fail)}>
 		<X size={16} strokeWidth={1.25} />
 	</button>
 </div>
