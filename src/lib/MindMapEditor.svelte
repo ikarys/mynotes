@@ -60,7 +60,10 @@
 
 		const r = node.getBoundingClientRect();
 		const w = wrap.getBoundingClientRect();
-		const left = node.closest('.lhs') !== null;
+		// In SIDE mode the library puts a new root child on the emptier side, left on a tie, whatever we ask.
+		const root = node.nodeObj.parent === undefined;
+		const count = (side: string) => element?.querySelector(`.${side}`)?.childElementCount ?? 0;
+		const left = root ? count('lhs') <= count('rhs') : node.closest('.lhs') !== null;
 		const size = 24;
 		const y = r.top - w.top + r.height / 2 - size / 2;
 		const x = left ? r.left - w.left - 8 - size : r.right - w.left + 8;
