@@ -78,6 +78,37 @@
 
 	const onPlace = () => requestAnimationFrame(place);
 
+	// The library sizes the editor to the text, so on a padded, centred node like the root it sits off to one side.
+	const onBeginEdit = (operation: { name: string }) => {
+		// The editor only gets its id after this event; a microtask still runs before the first paint.
+		if (operation.name === 'beginEdit') queueMicrotask(fitEditor);
+	};
+
+	const fitEditor = () => {
+		const current = mind;
+		const node = current?.currentNode;
+		const box = element?.querySelector<HTMLElement>('#input-box');
+		if (!current || !node || !box) return;
+
+		Object.assign(box.style, {
+			margin: '0',
+			boxSizing: 'border-box',
+			minWidth: `${node.offsetWidth}px`,
+			minHeight: `${node.offsetHeight}px`,
+			textAlign: 'center'
+		});
+		// Screen rects are zoomed; the editor's left/top are in unzoomed map units.
+		const n = node.getBoundingClientRect();
+		const b = box.getBoundingClientRect();
+		box.style.left = `${box.offsetLeft + (n.left - b.left) / current.scaleVal}px`;
+		box.style.top = `${box.offsetTop + (n.top - b.top) / current.scaleVal}px`;
+	};
+
+	// A press inside the editor would otherwise start a map pan that captures the pointer and blocks text selection.
+	const onPointerdown = (event: PointerEvent) => {
+		if ((event.target as HTMLElement).id === 'input-box') event.stopPropagation();
+	};
+
 	// Mind Elixir only edits on F2 or double-click; typing on a selected node renames it, like a spreadsheet cell.
 	const onKeydown = (event: KeyboardEvent) => {
 		const current = mind;
@@ -252,11 +283,13 @@
 			});
 
 			instance.bus.addListener('operation', onOperation);
+			instance.bus.addListener('operation', onBeginEdit);
 			instance.bus.addListener('selectNodes', onPlace);
 			instance.bus.addListener('unselectNodes', onPlace);
 			instance.bus.addListener('move', onPlace);
 			instance.bus.addListener('scale', onPlace);
 			element.addEventListener('keydown', onKeydown);
+			element.addEventListener('pointerdown', onPointerdown, true);
 			element.addEventListener('focusout', onPlace);
 			element.addEventListener('focusin', onPlace);
 			instance.selectNode(instance.findEle(instance.nodeData.id));
@@ -281,12 +314,14 @@
 		document.removeEventListener('visibilitychange', onVisibilityChange);
 		window.removeEventListener('resize', onPlace);
 		element?.removeEventListener('keydown', onKeydown);
+		element?.removeEventListener('pointerdown', onPointerdown, true);
 		element?.removeEventListener('focusout', onPlace);
 		element?.removeEventListener('focusin', onPlace);
 
 		const last = mind;
 		if (last) {
 			last.bus.removeListener('operation', onOperation);
+			last.bus.removeListener('operation', onBeginEdit);
 			last.bus.removeListener('selectNodes', onPlace);
 			last.bus.removeListener('unselectNodes', onPlace);
 			last.bus.removeListener('move', onPlace);
