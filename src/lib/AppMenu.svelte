@@ -12,7 +12,7 @@
 	import Moon from '@lucide/svelte/icons/moon';
 	import { workspace } from './workspace.svelte';
 	import { theme, type ThemeMode } from './theme.svelte';
-	import { getHotkey, setHotkey, openDataDir } from './api';
+	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir } from './api';
 
 	let menu: HTMLDivElement | undefined = $state();
 	let shortcutButton: HTMLButtonElement | undefined = $state();
@@ -31,12 +31,28 @@
 	}
 
 	function startRecording(): void {
+		if (recording) return;
 		recording = true;
 		shortcutButton?.focus();
+		suspendHotkey().catch((err) => console.error(err));
 	}
 
 	function stopRecording(): void {
+		if (!recording) return;
 		recording = false;
+		resumeHotkey().catch((err) => workspace.notify(String(err)));
+	}
+
+	function loadHotkey(event: ToggleEvent): void {
+		if (event.newState !== 'open') return;
+		getHotkey()
+			.then((value) => {
+				hotkey = value;
+			})
+			.catch((err) => {
+				console.error(err);
+				workspace.notify('Could not read the shortcut');
+			});
 	}
 
 	function handleShortcutKey(event: KeyboardEvent): void {
@@ -82,21 +98,13 @@
 				stopRecording();
 			});
 	}
-
-	$effect(() => {
-		getHotkey()
-			.then((value) => {
-				hotkey = value;
-			})
-			.catch((err) => console.error(err));
-	});
 </script>
 
 <button class="tool" popovertarget="app-menu" aria-label="More" title="More">
 	<Ellipsis size={16} />
 </button>
 
-<div id="app-menu" class="menu" popover bind:this={menu}>
+<div id="app-menu" class="menu" popover bind:this={menu} ontoggle={loadHotkey}>
 	<button class="item" onclick={() => run(() => workspace.openFile())}>
 		<FolderOpen size={16} /> Open file… <kbd>Ctrl+O</kbd>
 	</button>

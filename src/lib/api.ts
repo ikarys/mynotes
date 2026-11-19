@@ -68,6 +68,14 @@ export async function setHotkey(hotkey: string): Promise<string> {
 	return invoke<string>('set_hotkey', { hotkey });
 }
 
+export async function suspendHotkey(): Promise<void> {
+	return invoke<void>('suspend_hotkey');
+}
+
+export async function resumeHotkey(): Promise<void> {
+	return invoke<void>('resume_hotkey');
+}
+
 export async function saveText(name: string, markdown: string, plain: string): Promise<boolean> {
 	return invoke<boolean>('save_text', { name, markdown, plain });
 }

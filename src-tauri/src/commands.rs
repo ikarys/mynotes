@@ -29,13 +29,33 @@ pub fn parse_hotkey(s: &str) -> Result<Shortcut, String> {
     Ok(shortcut)
 }
 
-#[tauri::command]
-pub fn get_hotkey(state: State<'_, AppState>) -> Result<String, String> {
+fn stored_hotkey(state: &AppState) -> Result<String, String> {
     let store = lock(&state.store)?;
     let value = store
         .get_setting(HOTKEY_SETTING)
         .map_err(|err| err.to_string())?;
     Ok(value.unwrap_or_else(|| DEFAULT_HOTKEY.to_string()))
+}
+
+#[tauri::command]
+pub fn get_hotkey(state: State<'_, AppState>) -> Result<String, String> {
+    stored_hotkey(&state)
+}
+
+// While the user records a new shortcut, the live one would fire and hide the window.
+#[tauri::command]
+pub fn suspend_hotkey(app: tauri::AppHandle) -> Result<(), String> {
+    app.global_shortcut()
+        .unregister_all()
+        .map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub fn resume_hotkey(app: tauri::AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    let shortcut = parse_hotkey(&stored_hotkey(&state)?)?;
+    let shortcuts = app.global_shortcut();
+    let _ = shortcuts.unregister_all();
+    shortcuts.register(shortcut).map_err(|err| err.to_string())
 }
 
 #[tauri::command]
@@ -45,22 +65,13 @@ pub fn set_hotkey(
     state: State<'_, AppState>,
 ) -> Result<String, String> {
     let new_shortcut = parse_hotkey(&hotkey)?;
-    let old_hotkey = {
-        let store = lock(&state.store)?;
-        store
-            .get_setting(HOTKEY_SETTING)
-            .map_err(|err| err.to_string())?
-            .unwrap_or_else(|| DEFAULT_HOTKEY.to_string())
-    };
-    let old_shortcut = parse_hotkey(&old_hotkey).ok();
+    let old_shortcut = parse_hotkey(&stored_hotkey(&state)?).ok();
+    let shortcuts = app.global_shortcut();
+    let _ = shortcuts.unregister_all();
 
-    if let Some(old) = old_shortcut {
-        let _ = app.global_shortcut().unregister(old);
-    }
-
-    if app.global_shortcut().register(new_shortcut).is_err() {
+    if shortcuts.register(new_shortcut).is_err() {
         if let Some(old) = old_shortcut {
-            let _ = app.global_shortcut().register(old);
+            let _ = shortcuts.register(old);
         }
         return Err(format!("{hotkey} is not available, another app may use it"));
     }

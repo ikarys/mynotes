@@ -101,6 +101,8 @@ pub fn run() {
             commands::save_image,
             commands::get_hotkey,
             commands::set_hotkey,
+            commands::suspend_hotkey,
+            commands::resume_hotkey,
             shell::app_ready,
             export::export_file,
             files::save_text,
