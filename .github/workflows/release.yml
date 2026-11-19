@@ -27,10 +27,9 @@ jobs:
       - name: Collect files
         shell: bash
         env:
-          NAME: ${{ github.ref_name }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
         run: |
-          # Branch names may contain '/', which is not valid in a file name.
-          v="${NAME//\//-}"
+          v="${TAG:-dev-${GITHUB_SHA::7}}"
           mkdir out
           cp src-tauri/target/release/bundle/nsis/*-setup.exe "out/mynotes-$v-windows-x64-setup.exe"
           cp src-tauri/target/release/mynotes.exe "out/mynotes-$v-windows-x64-portable.exe"
