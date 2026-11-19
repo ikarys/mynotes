@@ -11,15 +11,16 @@ Segoe UI Variable (the Windows system face), one family. UI 13px; editor body 15
 ## Colour
 
 Follows `prefers-color-scheme`. Restrained: neutrals carry everything, orange marks the
-active tab, links, caret, selection and focus only.
+active tab, list bullets, links, caret, selection and focus only.
 
 | token        | light     | dark      |
 |--------------|-----------|-----------|
-| `--bg`       | `#fbfaf7` | `#14152a` |
-| `--chrome`   | `#f0eee8` | `#0f1020` |
-| `--line`     | `#e2dfd6` | `#262842` |
+| `--bg`       | `#fdfcfa` | `#14152a` |
+| `--chrome`   | `#efede7` | `#0e0f1a` |
+| `--surface` (menus, mind map nodes) | `#ffffff` | `#1d1f33` |
+| `--line`     | `#e3e0d8` | `#2a2c44` |
 | `--text`     | `#1d1c26` | `#e9e7f2` |
-| `--muted`    | `#6b6878` | `#9a98ae` |
+| `--muted`    | `#67647a` | `#9a98ae` |
 | `--accent`   | `#f7941d` | `#f7941d` |
 | `--accent-text` (links, AA on bg) | `#a85a00` | `#ffad4d` |
 
