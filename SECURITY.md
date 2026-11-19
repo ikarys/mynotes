@@ -5,7 +5,7 @@ mynotes is a single-user desktop app. Notes stay on the machine, in
 check: a few seconds after start, mynotes downloads
 `https://github.com/ikarys/mynotes/releases/latest/download/latest.json`
 (nothing about you or your notes is sent; GitHub sees your IP address). Turn
-it off with `Check for updates` in the `…` menu.
+it off in Settings (`Ctrl+,`).
 
 ## Reporting
 
