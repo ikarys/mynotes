@@ -29,6 +29,27 @@
 		const data = current.getData();
 		workspace.update(id, { title: mindmapTitle(data), empty: isEmptyMindmap(data) });
 		autosave?.schedule();
+		// Edits can push the selected node off-screen; the map pans with transforms, not scroll.
+		requestAnimationFrame(() => {
+			const node = mind?.currentNode;
+			if (node) mind?.scrollIntoView(node);
+		});
+	};
+
+	// Mind Elixir only edits on F2 or double-click; typing on a selected node renames it, like a spreadsheet cell.
+	const onKeydown = (event: KeyboardEvent) => {
+		const current = mind;
+		if (!current || event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
+		if ((event.target as HTMLElement).id === 'input-box' || current.currentNodes.length !== 1) return;
+
+		void current.beginEdit().then(() => {
+			const box = element?.querySelector<HTMLElement>('#input-box');
+			if (!box) return;
+			box.textContent = event.key;
+			const selection = getSelection();
+			selection?.selectAllChildren(box);
+			selection?.collapseToEnd();
+		});
 	};
 
 	const flushAutosave = () => {
@@ -149,10 +170,15 @@
 				if (!current) return;
 
 				const currentData = current.getData();
-				await saveNote(id, mindmapTitle(currentData), JSON.stringify(currentData), mindmapText(currentData));
+				// The theme is the app's, not the note's: a stored copy would override it on reload.
+				const content = JSON.stringify({ ...currentData, theme: undefined });
+				await saveNote(id, mindmapTitle(currentData), content, mindmapText(currentData));
 			});
 
 			instance.bus.addListener('operation', onOperation);
+			element.addEventListener('keydown', onKeydown);
+			instance.selectNode(instance.findEle(instance.nodeData.id));
+			instance.container.focus({ preventScroll: true });
 			window.addEventListener('blur', flushAutosave);
 			document.addEventListener('visibilitychange', onVisibilityChange);
 			workspace.setActions(actions);
@@ -168,6 +194,7 @@
 
 		window.removeEventListener('blur', flushAutosave);
 		document.removeEventListener('visibilitychange', onVisibilityChange);
+		element?.removeEventListener('keydown', onKeydown);
 
 		const last = mind;
 		if (last) last.bus.removeListener('operation', onOperation);
