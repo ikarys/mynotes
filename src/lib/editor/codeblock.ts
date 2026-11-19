@@ -49,9 +49,22 @@ const namedOnly = {
 	highlightAuto: () => ({ children: [] })
 };
 
+const LANGUAGES: [string, string][] = [
+	['', 'Markdown'],
+	['json', 'JSON'],
+	['yaml', 'YAML']
+];
+
+function addOption(select: HTMLSelectElement, value: string, label: string): void {
+	const option = document.createElement('option');
+	option.value = value;
+	option.textContent = label;
+	select.append(option);
+}
+
 export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 	addNodeView() {
-		return ({ node, editor }: { node: PMNode; editor: Editor }) => {
+		return ({ node, editor, getPos }: { node: PMNode; editor: Editor; getPos: () => number | undefined }) => {
 			const dom = document.createElement('div');
 			dom.className = 'code-block';
 
@@ -64,6 +77,11 @@ export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 			copy.className = 'code-copy';
 			copy.setAttribute('contenteditable', 'false');
 			copy.textContent = 'Copy';
+
+			const language = document.createElement('select');
+			language.className = 'code-lang';
+			language.setAttribute('aria-label', 'Code language');
+			for (const [value, label] of LANGUAGES) addOption(language, value, label);
 
 			const button = document.createElement('button');
 			button.type = 'button';
@@ -81,7 +99,7 @@ export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 			preview.setAttribute('contenteditable', 'false');
 			preview.hidden = true;
 
-			actions.append(copy, button);
+			actions.append(language, copy, button);
 			dom.append(actions, pre, preview);
 
 			let current = node;
@@ -99,6 +117,10 @@ export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 				const className = current.attrs.language ? `language-${current.attrs.language}` : '';
 				if (code.className !== className) code.className = className;
 				const canPreview = isMarkdownLanguage(current.attrs.language);
+				const value = String(current.attrs.language ?? '');
+				// A fence typed with another language keeps it, listed as is.
+				if (![...language.options].some((option) => option.value === value)) addOption(language, value, value);
+				language.value = value;
 
 				button.hidden = !canPreview;
 
@@ -134,6 +156,13 @@ export const MarkdownCodeBlock = CodeBlockLowlight.extend({
 						}, 1200);
 					})
 					.catch((err) => console.error(err));
+			});
+
+			language.addEventListener('change', () => {
+				const pos = getPos();
+				if (pos === undefined) return;
+				const attrs = { ...current.attrs, language: language.value || null };
+				editor.view.dispatch(editor.view.state.tr.setNodeMarkup(pos, undefined, attrs));
 			});
 
 			button.addEventListener('mousedown', (event) => {

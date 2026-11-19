@@ -34,6 +34,8 @@ Both are unsigned, so Windows SmartScreen warns on first launch: click
 - Select text to format it; paste images or Markdown directly.
 - A ```` ```markdown ```` code block has a Preview button to switch between
   its source and the rendered result.
+- A code block's language (Markdown, JSON, YAML) can be changed from the
+  selector at its top right; JSON and YAML are coloured.
 - Mind map: `Tab` adds a child, `Enter` a sibling, `F2` renames,
   right-click for more.
 - The `…` menu also copies the note as Markdown, exports a mind map as PNG,

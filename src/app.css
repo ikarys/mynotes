@@ -758,6 +758,7 @@ kbd {
 	position: relative;
 }
 
+.code-lang,
 .code-toggle,
 .code-copy {
 	height: 22px;
@@ -770,6 +771,7 @@ kbd {
 	cursor: pointer;
 }
 
+.code-lang:hover,
 .code-toggle:hover,
 .code-copy:hover {
 	color: var(--text);
@@ -960,6 +962,11 @@ dialog.sheet[open] {
 	background: var(--bg);
 	text-align: right;
 	pointer-events: none;
+}
+
+.code-lang {
+	padding: 0 4px;
+	font-family: inherit;
 }
 
 .code-actions {
