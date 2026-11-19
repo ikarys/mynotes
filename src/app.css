@@ -212,6 +212,11 @@ body,
 	margin-top: 4px;
 }
 
+/* The new-note buttons sit at the end of the strip, as on the landing page. */
+.tabs > .tool:first-of-type {
+	margin-left: auto;
+}
+
 .tool:hover,
 .tool:popover-open,
 .tool[aria-expanded='true'] {
