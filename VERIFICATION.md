@@ -43,5 +43,8 @@ How the v0.2.0 row was measured, on Windows 11, Ryzen 9 9950X3D:
   releases run in CI: `.github/workflows/release.yml` runs the tests on a
   GitHub Windows runner, builds the installer and the portable exe from the
   tagged commit and attaches them with `SHA256SUMS` to the GitHub release, so
-  a published binary can be traced to its source. A manual run of the same
+  a published binary can be traced to its source. The installer is signed
+  with the update key (a GitHub secret) and a `latest.json` is published
+  with it; installed apps refuse an update whose signature does not match
+  the public key in `src-tauri/tauri.conf.json`. A manual run of the same
   workflow builds them as an artifact for testing, without publishing.

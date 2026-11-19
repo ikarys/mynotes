@@ -23,7 +23,13 @@ jobs:
       - run: npm ci
       - run: npx vitest run
       - run: cargo test --manifest-path src-tauri/Cargo.toml
-      - run: npx tauri build
+      # Signs the installer for the in-app updater. The public half of the key is
+      # in tauri.conf.json, so an update signed by any other key is refused.
+      - run: npx tauri build --config '{"bundle":{"createUpdaterArtifacts":true}}'
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
       - name: Collect files
         shell: bash
         env:
@@ -34,6 +40,12 @@ jobs:
           cp src-tauri/target/release/bundle/nsis/*-setup.exe "out/mynotes-$v-windows-x64-setup.exe"
           cp src-tauri/target/release/mynotes.exe "out/mynotes-$v-windows-x64-portable.exe"
           (cd out && sha256sum *.exe > SHA256SUMS)
+          # latest.json is what installed apps read to find and verify the update.
+          setup="mynotes-$v-windows-x64-setup.exe"
+          SIG="$(cat src-tauri/target/release/bundle/nsis/*-setup.exe.sig)" \
+          URL="https://github.com/ikarys/mynotes/releases/download/$v/$setup" VERSION="${v#v}" \
+          node -e 'const e = process.env; console.log(JSON.stringify({ version: e.VERSION, pub_date: new Date().toISOString(),
+            platforms: { "windows-x86_64": { signature: e.SIG, url: e.URL } } }))' > out/latest.json
       - if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
