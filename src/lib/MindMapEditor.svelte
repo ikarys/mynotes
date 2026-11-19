@@ -6,6 +6,11 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import type MindElixir from 'mind-elixir';
 	import type { Theme } from 'mind-elixir';
+	import Plus from '@lucide/svelte/icons/plus';
+	import ListPlus from '@lucide/svelte/icons/list-plus';
+	import Trash from '@lucide/svelte/icons/trash';
+	import Undo from '@lucide/svelte/icons/undo-2';
+	import Scan from '@lucide/svelte/icons/scan';
 	import {
 		isEmptyMindmap,
 		mindmapMarkdown,
@@ -19,6 +24,7 @@
 	let element: HTMLDivElement | undefined = $state();
 
 	let mind: MindElixir | undefined;
+	let ready = $state(false);
 	let autosave: Autosave | undefined;
 	let destroyed = false;
 
@@ -50,6 +56,27 @@
 			selection?.selectAllChildren(box);
 			selection?.collapseToEnd();
 		});
+	};
+
+	// Toolbar actions act on the selection; with nothing selected the root is the natural target.
+	const selected = (current: MindElixir) => {
+		if (!current.currentNode) current.selectNode(current.findEle(current.nodeData.id));
+		return current.currentNode;
+	};
+
+	const tools = [
+		{ label: 'Add child (Tab)', icon: Plus, run: (m: MindElixir) => m.addChild(selected(m) ?? undefined) },
+		{ label: 'Add sibling (Enter)', icon: ListPlus, run: (m: MindElixir) => m.insertSibling('after', selected(m) ?? undefined) },
+		{ label: 'Delete (Del)', icon: Trash, run: (m: MindElixir) => m.removeNodes(m.currentNodes) },
+		{ label: 'Undo (Ctrl+Z)', icon: Undo, run: (m: MindElixir) => m.undo() },
+		{ label: 'Fit to window', icon: Scan, run: (m: MindElixir) => m.scaleFit() }
+	];
+
+	const runTool = (run: (m: MindElixir) => unknown) => {
+		const current = mind;
+		if (!current) return;
+		void run(current);
+		current.container.focus({ preventScroll: true });
 	};
 
 	const flushAutosave = () => {
@@ -151,6 +178,8 @@
 				toolBar: false,
 				contextMenu: true,
 				keypress: true,
+				// Left-drag pans like any canvas app; box selection moves to the right button.
+				mouseSelectionButton: 2,
 				allowUndo: true,
 				newTopicName: 'Topic',
 				theme
@@ -179,6 +208,7 @@
 			element.addEventListener('keydown', onKeydown);
 			instance.selectNode(instance.findEle(instance.nodeData.id));
 			instance.container.focus({ preventScroll: true });
+			ready = true;
 			window.addEventListener('blur', flushAutosave);
 			document.addEventListener('visibilitychange', onVisibilityChange);
 			workspace.setActions(actions);
@@ -205,12 +235,86 @@
 	});
 </script>
 
-<div class="mindmap" bind:this={element}></div>
+<div class="wrap">
+	<div class="mindmap" bind:this={element}></div>
+	{#if ready}
+		<div class="toolbar" role="toolbar" aria-label="Mind map">
+			{#each tools as tool, index (tool.label)}
+				{#if index === 3}<span class="sep"></span>{/if}
+				<!-- mousedown is cancelled so the map keeps focus and selection. -->
+				<button
+					type="button"
+					title={tool.label}
+					aria-label={tool.label}
+					onmousedown={(event) => event.preventDefault()}
+					onclick={() => runTool(tool.run)}
+				>
+					<tool.icon size={16} />
+				</button>
+			{/each}
+		</div>
+		<p class="hint">Drag to pan · Double-click or type to edit · Drag a node onto another to move it · Right-click for more</p>
+	{/if}
+</div>
 
 <style>
+	.wrap {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+
 	.mindmap {
 		width: 100%;
 		height: 100%;
+	}
+
+	.toolbar {
+		position: absolute;
+		left: 50%;
+		bottom: 16px;
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		padding: 4px;
+		background: var(--surface);
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		box-shadow: var(--shadow);
+	}
+
+	.toolbar button {
+		width: 30px;
+		height: 30px;
+		border: none;
+		border-radius: 6px;
+		background: transparent;
+		color: var(--muted);
+		display: grid;
+		place-items: center;
+	}
+
+	.toolbar button:hover {
+		background: var(--hover);
+		color: var(--text);
+	}
+
+	.sep {
+		width: 1px;
+		height: 18px;
+		background: var(--line);
+		margin: 0 3px;
+	}
+
+	.hint {
+		position: absolute;
+		left: 16px;
+		top: 10px;
+		margin: 0;
+		font-size: 12px;
+		color: var(--muted);
+		pointer-events: none;
 	}
 
 	.mindmap :global(.map-container) {
