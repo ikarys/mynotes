@@ -18,7 +18,9 @@
 
 	let element: HTMLDivElement | undefined = $state();
 	let wrap: HTMLDivElement | undefined = $state();
-	let plus: { x: number; y: number } | null = $state(null);
+	// side is set on the root's two buttons only: 0 adds on the left, 1 on the right.
+	type PlusButton = { x: number; y: number; label: string; side?: 0 | 1 };
+	let plus: PlusButton[] = $state([]);
 
 	let mind: MindElixir | undefined;
 	let ready = $state(false);
@@ -43,31 +45,35 @@
 	const place = () => {
 		const current = mind;
 		if (!current || current.currentNodes.length !== 1) {
-			plus = null;
+			plus = [];
 			return;
 		}
 
 		if (element?.querySelector('#input-box')) {
-			plus = null;
+			plus = [];
 			return;
 		}
 
 		const node = current.currentNode;
 		if (!node || !wrap) {
-			plus = null;
+			plus = [];
 			return;
 		}
 
 		const r = node.getBoundingClientRect();
 		const w = wrap.getBoundingClientRect();
-		// In SIDE mode the library puts a new root child on the emptier side, left on a tie, whatever we ask.
-		const root = node.nodeObj.parent === undefined;
-		const count = (side: string) => element?.querySelector(`.${side}`)?.childElementCount ?? 0;
-		const left = root ? count('lhs') <= count('rhs') : node.closest('.lhs') !== null;
 		const size = 24;
 		const y = r.top - w.top + r.height / 2 - size / 2;
-		const x = left ? r.left - w.left - 8 - size : r.right - w.left + 8;
-		plus = { x, y };
+		const leftX = r.left - w.left - 8 - size;
+		const rightX = r.right - w.left + 8;
+		if (node.nodeObj.parent === undefined) {
+			plus = [
+				{ x: leftX, y, label: 'Add child on the left', side: 0 },
+				{ x: rightX, y, label: 'Add child on the right', side: 1 }
+			];
+			return;
+		}
+		plus = [{ x: node.closest('.lhs') !== null ? leftX : rightX, y, label: 'Add child (Tab)' }];
 	};
 
 	const onPlace = () => requestAnimationFrame(place);
@@ -89,9 +95,29 @@
 	};
 
 	// The library opens the editor on the new node itself; refocusing the map would close it.
-	const addChild = () => {
-		const node = mind?.currentNode;
-		if (node) void mind?.addChild(node);
+	const addChild = async (side?: 0 | 1) => {
+		const current = mind;
+		const node = current?.currentNode;
+		if (!current || !node) return;
+		if (side === undefined) {
+			void current.addChild(node);
+			return;
+		}
+
+		// SIDE mode always puts a new root child on the emptier side and ignores the node's direction, so the map
+		// is pinned to that side for this one insertion. Undo snapshots and refresh ignore the map direction.
+		const child = current.generateNewObj();
+		child.direction = side;
+		const direction = current.direction;
+		current.direction = side;
+		try {
+			await current.addChild(node, child);
+		} finally {
+			current.direction = direction;
+		}
+		current.linkDiv();
+		// A provided node skips the library's own editor, so it is opened once the layout is back to SIDE.
+		void current.beginEdit();
 	};
 
 	const flushAutosave = () => {
@@ -275,20 +301,20 @@
 
 <div class="wrap" bind:this={wrap}>
 	<div class="mindmap" bind:this={element}></div>
-	{#if plus}
+	{#each plus as button (button.x)}
 		<button
 			class="plus"
 			type="button"
-			title="Add child (Tab)"
-			aria-label="Add child"
-			style:left="{plus.x}px"
-			style:top="{plus.y}px"
+			title={button.label}
+			aria-label={button.label}
+			style:left="{button.x}px"
+			style:top="{button.y}px"
 			onmousedown={(e) => e.preventDefault()}
-			onclick={addChild}
+			onclick={() => addChild(button.side)}
 		>
 			<Plus size={14} />
 		</button>
-	{/if}
+	{/each}
 	{#if ready}
 		<p class="hint">Drag to pan · Type or double-click to edit · + or Tab adds a child · Right-click for more</p>
 	{/if}
