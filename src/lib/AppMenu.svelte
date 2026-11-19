@@ -123,8 +123,8 @@
 			</button>
 		{/if}
 		{#if workspace.active}
-			<button class="item danger" onclick={() => run(() => workspace.deleteActive())}>
-				<Trash2 size={16} /> Delete note…
+			<button class="item danger" onclick={() => run(() => workspace.trashActive())}>
+				<Trash2 size={16} /> Move to trash
 			</button>
 		{/if}
 		<div class="menu-sep"></div>

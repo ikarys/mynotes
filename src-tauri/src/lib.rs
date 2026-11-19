@@ -32,6 +32,13 @@ pub fn run() {
             std::fs::create_dir_all(&data_dir)?;
             let store = storage::Store::open(&data_dir.join("mynotes.db"))?;
 
+            // Old trash is purged before the startup image prune so it sees final references.
+            let cutoff =
+                storage::now_ms().saturating_sub(storage::TRASH_DAYS * 24 * 60 * 60 * 1000);
+            if let Err(e) = store.purge_trash(Some(cutoff)) {
+                eprintln!("failed to purge old trash at startup: {e}");
+            }
+
             // Images dropped from notes in earlier sessions; pruned at startup
             // because undo history, which could restore them, is gone by then.
             if let Err(e) = images::prune(&data_dir.join("images"), None, |name| {
@@ -107,7 +114,11 @@ pub fn run() {
             commands::load_note,
             commands::create_note,
             commands::save_note,
-            commands::delete_note,
+            commands::trash_note,
+            commands::list_trash,
+            commands::restore_note,
+            commands::purge_note,
+            commands::empty_trash,
             commands::search,
             commands::get_session,
             commands::set_session,

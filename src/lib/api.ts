@@ -40,8 +40,12 @@ export async function saveNote(id: number, title: string, content: string, text:
 	await invoke('save_note', { id, title, content, text });
 }
 
-export async function deleteNote(id: number): Promise<void> {
-	await invoke('delete_note', { id });
+export async function trashNote(id: number): Promise<void> {
+	await invoke('trash_note', { id });
+}
+
+export async function purgeNote(id: number): Promise<void> {
+	await invoke('purge_note', { id });
 }
 
 export async function search(query: string): Promise<NoteMeta[]> {

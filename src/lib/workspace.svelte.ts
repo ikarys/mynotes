@@ -1,7 +1,8 @@
 import { tick } from 'svelte';
 import {
 	createNote,
-	deleteNote,
+	trashNote,
+	purgeNote,
 	getSession,
 	listNotes,
 	openTextFile,
@@ -109,7 +110,9 @@ class Workspace {
 		await tick();
 		if (wasEmpty) {
 			try {
-				await deleteNote(id);
+				// An untouched note is erased outright; only notes with content go to the trash.
+				await trashNote(id);
+				await purgeNote(id);
 			} catch (err) {
 				console.error(err);
 			}
@@ -133,18 +136,17 @@ class Workspace {
 		}
 	}
 
-	async deleteActive(): Promise<void> {
+	async trashActive(): Promise<void> {
 		const tab = this.active;
 		if (!tab) return;
-		if (!confirm(`Delete "${tab.title || 'Untitled'}"? This cannot be undone.`)) return;
 		this.removeTab(tab.id);
 		await tick();
 		try {
-			await deleteNote(tab.id);
-			this.notify('Note deleted');
+			await trashNote(tab.id);
+			this.notify('Moved to trash');
 		} catch (err) {
 			console.error(err);
-			this.notify('Delete failed');
+			this.notify('Move to trash failed');
 		}
 	}
 
