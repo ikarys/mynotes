@@ -30,6 +30,7 @@ Both are unsigned, so Windows SmartScreen warns on first launch: click
 - Closing a tab keeps the note (find it again with `Ctrl+P`); `Move to trash`
   in the `…` menu hides it; the Trash (same menu) restores it or erases it
   for good, and notes left there are erased after 30 days.
+- `Ctrl+F` finds text in the note, `Ctrl+H` finds and replaces.
 - Select text to format it; paste images or Markdown directly.
 - A ```` ```markdown ```` code block has a Preview button to switch between
   its source and the rendered result.

@@ -12,7 +12,9 @@
 	import { PasteHandling } from './editor/paste';
 	import { LinkClick } from './editor/links';
 	import { selectionMarkdown } from './editor/markdown';
+	import { FindReplace } from './editor/find';
 	import FormatBar from './editor/FormatBar.svelte';
+	import FindBar from './editor/FindBar.svelte';
 	import './editor/editor.css';
 
 	let { id }: { id: number } = $props();
@@ -26,6 +28,9 @@
 	let words: number = $state(0);
 	let chars: number = $state(0);
 	let countTimer: number | undefined;
+	let findOpen = $state(false);
+	let findReplace = $state(false);
+	let findKey = $state(0);
 
 	function flush(): void {
 		void autosave?.flush();
@@ -119,9 +124,18 @@
 				PasteHandling,
 				LinkClick,
 				CopyMarkdownKey,
+				FindReplace.configure({
+					onOpen: (replace) => {
+						findOpen = true;
+						findReplace = replace;
+						findKey++;
+					}
+				}),
 				BubbleMenu.configure({
 					element: barEl,
+					// Find selects each match; the format bar would cover the text being searched.
 					shouldShow: ({ editor, state }) =>
+						!findOpen &&
 						!state.selection.empty &&
 						editor.isEditable &&
 						!editor.isActive('image') &&
@@ -198,6 +212,11 @@
 </script>
 
 <div class="doc-scroll">
+	{#if findOpen}
+		{#key findKey}
+			<FindBar {editor} replace={findReplace} onclose={() => (findOpen = false)} />
+		{/key}
+	{/if}
 	<FormatBar bind:el={barEl} {editor} />
 	<div class="doc" bind:this={element}></div>
 	<div class="word-count">
