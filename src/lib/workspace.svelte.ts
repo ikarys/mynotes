@@ -1,5 +1,17 @@
 import { tick } from 'svelte';
-import { createNote, deleteNote, getSession, listNotes, setSession, type Kind, type NoteMeta } from './api';
+import {
+	createNote,
+	deleteNote,
+	getSession,
+	listNotes,
+	openTextFile,
+	saveNote,
+	setSession,
+	type Kind,
+	type NoteMeta
+} from './api';
+import { importedDoc } from './files';
+import { titleFrom } from './text';
 
 export interface Tab {
 	id: number;
@@ -10,7 +22,7 @@ export interface Tab {
 
 export interface NoteActions {
 	copyMarkdown(): Promise<void>;
-	exportMarkdown?(): Promise<void>;
+	saveAs(): Promise<void>;
 	exportPng?(): Promise<void>;
 }
 
@@ -90,14 +102,10 @@ class Workspace {
 	}
 
 	async close(id: number): Promise<void> {
-		const index = this.tabs.findIndex((tab) => tab.id === id);
-		if (index === -1) return;
-		const wasEmpty = this.tabs[index]?.empty ?? false;
-		const remaining = this.tabs.filter((tab) => tab.id !== id);
-		this.tabs = remaining;
-		const neighbour = remaining[index] ?? remaining[index - 1] ?? null;
-		this.activeId = neighbour?.id ?? null;
-		this.persist();
+		const tab = this.tabs.find((t) => t.id === id);
+		if (!tab) return;
+		const wasEmpty = tab.empty;
+		this.removeTab(id);
 		await tick();
 		if (wasEmpty) {
 			try {
@@ -105,6 +113,38 @@ class Workspace {
 			} catch (err) {
 				console.error(err);
 			}
+		}
+	}
+
+	async openFile(): Promise<void> {
+		try {
+			const file = await openTextFile();
+			if (!file) return;
+			const { json, text } = importedDoc(file);
+			const note = await createNote('doc');
+			const title = titleFrom(text) || file.name;
+			await saveNote(note.id, title, JSON.stringify(json), text);
+			this.tabs = [...this.tabs, { id: note.id, kind: 'doc', title, empty: false }];
+			this.activeId = note.id;
+			this.persist();
+		} catch (err) {
+			console.error(err);
+			this.notify(String(err));
+		}
+	}
+
+	async deleteActive(): Promise<void> {
+		const tab = this.active;
+		if (!tab) return;
+		if (!confirm(`Delete "${tab.title || 'Untitled'}"? This cannot be undone.`)) return;
+		this.removeTab(tab.id);
+		await tick();
+		try {
+			await deleteNote(tab.id);
+			this.notify('Note deleted');
+		} catch (err) {
+			console.error(err);
+			this.notify('Delete failed');
 		}
 	}
 
@@ -125,6 +165,16 @@ class Workspace {
 			this.toast = null;
 			this.toastTimer = undefined;
 		}, 1600);
+	}
+
+	private removeTab(id: number): void {
+		const index = this.tabs.findIndex((tab) => tab.id === id);
+		if (index === -1) return;
+		const remaining = this.tabs.filter((tab) => tab.id !== id);
+		this.tabs = remaining;
+		const neighbour = remaining[index] ?? remaining[index - 1] ?? null;
+		this.activeId = neighbour?.id ?? null;
+		this.persist();
 	}
 
 	private persist(): void {

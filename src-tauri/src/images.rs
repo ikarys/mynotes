@@ -74,6 +74,64 @@ pub fn save_image(dir: &std::path::Path, bytes: &[u8]) -> Result<std::path::Path
     Ok(path)
 }
 
+pub fn prune(
+    dir: &std::path::Path,
+    only_in: Option<&str>,
+    is_referenced: impl Fn(&str) -> bool,
+) -> std::io::Result<usize> {
+    if !dir.exists() {
+        return Ok(0);
+    }
+
+    let mut removed = 0;
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+
+        let file_name = entry.file_name();
+        let Some(name) = file_name.to_str() else {
+            continue;
+        };
+        if !is_stored_image_name(name) {
+            continue;
+        }
+
+        if let Some(content) = only_in
+            && !content.contains(name)
+        {
+            continue;
+        }
+
+        if !is_referenced(name) {
+            std::fs::remove_file(&path)?;
+            removed += 1;
+        }
+    }
+
+    Ok(removed)
+}
+
+fn is_stored_image_name(name: &str) -> bool {
+    let Some((hash, ext)) = name.split_once('.') else {
+        return false;
+    };
+
+    if hash.len() != 64 {
+        return false;
+    }
+    if !hash
+        .chars()
+        .all(|c| c.is_ascii_hexdigit() && c.is_ascii_lowercase())
+    {
+        return false;
+    }
+
+    matches!(ext, "png" | "jpg" | "gif" | "webp")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -125,5 +183,38 @@ mod tests {
             save_image(dir.path(), &big),
             Err(ImageError::TooLarge)
         ));
+    }
+
+    #[test]
+    fn prune_removes_unreferenced_stored_images_and_keeps_referenced() {
+        let dir = tempfile::tempdir().unwrap();
+        let unreferenced = "a".repeat(64) + ".png";
+        let referenced = "b".repeat(64) + ".png";
+        let foreign = "notes.txt";
+
+        std::fs::write(dir.path().join(&unreferenced), b"png").unwrap();
+        std::fs::write(dir.path().join(&referenced), b"png").unwrap();
+        std::fs::write(dir.path().join(foreign), b"text").unwrap();
+
+        let removed = prune(dir.path(), None, |name| name == referenced).unwrap();
+        assert_eq!(removed, 1);
+        assert!(!dir.path().join(&unreferenced).exists());
+        assert!(dir.path().join(&referenced).exists());
+        assert!(dir.path().join(foreign).exists());
+    }
+
+    #[test]
+    fn prune_respects_only_in_filter() {
+        let dir = tempfile::tempdir().unwrap();
+        let included = "c".repeat(64) + ".png";
+        let excluded = "d".repeat(64) + ".png";
+
+        std::fs::write(dir.path().join(&included), b"png").unwrap();
+        std::fs::write(dir.path().join(&excluded), b"png").unwrap();
+
+        let removed = prune(dir.path(), Some(&included), |_| false).unwrap();
+        assert_eq!(removed, 1);
+        assert!(!dir.path().join(&included).exists());
+        assert!(dir.path().join(&excluded).exists());
     }
 }

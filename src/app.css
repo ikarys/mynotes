@@ -722,3 +722,5 @@ kbd {
 .code-block pre[hidden] {
 	display: none;
 }
+
+.menu .item.danger { color: var(--danger, #c4314b); }

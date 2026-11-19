@@ -1,15 +1,18 @@
 <script lang="ts">
 	import Ellipsis from '@lucide/svelte/icons/ellipsis';
 	import Copy from '@lucide/svelte/icons/copy';
-	import FileDown from '@lucide/svelte/icons/file-down';
+	import FolderOpen from '@lucide/svelte/icons/folder-open';
+	import Save from '@lucide/svelte/icons/save';
 	import ImageDown from '@lucide/svelte/icons/image-down';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import HardDrive from '@lucide/svelte/icons/hard-drive';
 	import Keyboard from '@lucide/svelte/icons/keyboard';
 	import Monitor from '@lucide/svelte/icons/monitor';
 	import Sun from '@lucide/svelte/icons/sun';
 	import Moon from '@lucide/svelte/icons/moon';
 	import { workspace } from './workspace.svelte';
 	import { theme, type ThemeMode } from './theme.svelte';
-	import { getHotkey, setHotkey } from './api';
+	import { getHotkey, setHotkey, openDataDir } from './api';
 
 	let menu: HTMLDivElement | undefined = $state();
 	let shortcutButton: HTMLButtonElement | undefined = $state();
@@ -94,19 +97,25 @@
 </button>
 
 <div id="app-menu" class="menu" popover bind:this={menu}>
+	<button class="item" onclick={() => run(() => workspace.openFile())}>
+		<FolderOpen size={16} /> Open file… <kbd>Ctrl+O</kbd>
+	</button>
 	{#if workspace.actions}
 		{@const actions = workspace.actions}
 		<button class="item" onclick={() => run(actions.copyMarkdown)}>
 			<Copy size={16} /> Copy as Markdown <kbd>Ctrl+Shift+C</kbd>
 		</button>
-		{#if actions.exportMarkdown}
-			<button class="item" onclick={() => run(actions.exportMarkdown)}>
-				<FileDown size={16} /> Export as Markdown…
-			</button>
-		{/if}
+		<button class="item" onclick={() => run(actions.saveAs)}>
+			<Save size={16} /> Save as… <kbd>Ctrl+Shift+S</kbd>
+		</button>
 		{#if actions.exportPng}
 			<button class="item" onclick={() => run(actions.exportPng)}>
 				<ImageDown size={16} /> Export as PNG…
+			</button>
+		{/if}
+		{#if workspace.active}
+			<button class="item danger" onclick={() => run(() => workspace.deleteActive())}>
+				<Trash2 size={16} /> Delete note…
 			</button>
 		{/if}
 		<div class="menu-sep"></div>
@@ -140,5 +149,9 @@
 		{:else}
 			<kbd>{hotkey}</kbd>
 		{/if}
+	</button>
+	<div class="menu-sep"></div>
+	<button class="item" onclick={() => run(openDataDir)}>
+		<HardDrive size={16} /> Open data folder
 	</button>
 </div>

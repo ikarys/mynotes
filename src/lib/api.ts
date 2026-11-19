@@ -18,6 +18,12 @@ export interface Session {
 	active_tab: number | null;
 }
 
+export interface OpenedFile {
+	name: string;
+	markdown: boolean;
+	text: string;
+}
+
 export async function listNotes(): Promise<NoteMeta[]> {
 	return invoke<NoteMeta[]>('list_notes');
 }
@@ -60,4 +66,16 @@ export async function getHotkey(): Promise<string> {
 
 export async function setHotkey(hotkey: string): Promise<string> {
 	return invoke<string>('set_hotkey', { hotkey });
+}
+
+export async function saveText(name: string, markdown: string, plain: string): Promise<boolean> {
+	return invoke<boolean>('save_text', { name, markdown, plain });
+}
+
+export async function openTextFile(): Promise<OpenedFile | null> {
+	return invoke<OpenedFile | null>('open_text_file');
+}
+
+export async function openDataDir(): Promise<void> {
+	await invoke('open_data_dir');
 }

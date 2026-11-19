@@ -10,12 +10,12 @@ pub async fn export_file(request: Request<'_>) -> Result<bool, String> {
     let file_name = header_to_str(request.headers(), "x-file-name")?;
     let ext = header_to_str(request.headers(), "x-file-ext")?;
 
-    if ext != "md" && ext != "png" {
+    if ext != "png" {
         return Err("unsupported export type".to_string());
     }
 
     let name = sanitize_file_name(&percent_decode(&file_name));
-    let label = if ext == "md" { "Markdown" } else { "PNG image" };
+    let label = "PNG image";
 
     let Some(path) = rfd::FileDialog::new()
         .set_file_name(format!("{name}.{ext}"))

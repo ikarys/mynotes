@@ -12,17 +12,22 @@ Svelte 5.
 
 - `Ctrl+N` new note, `Ctrl+Shift+M` new mind map, `Ctrl+W` close tab,
   `Ctrl+Tab` next tab, `Ctrl+P` find a note (full-text search).
+- `Ctrl+O` opens a `.md` or `.txt` file as a new note; `Ctrl+Shift+S` saves
+  the note as Markdown or plain text.
+- Closing a tab keeps the note (find it again with `Ctrl+P`); `Delete note…`
+  in the `…` menu removes it for good.
 - Select text to format it; paste images or Markdown directly.
 - A ```` ```markdown ```` code block has a Preview button to switch between
   its source and the rendered result.
 - Mind map: `Tab` adds a child, `Enter` a sibling, `F2` renames,
   right-click for more.
-- The `…` menu copies or exports the note as Markdown and switches between
-  system, light and dark themes.
+- The `…` menu also copies the note as Markdown, exports a mind map as PNG,
+  switches between system, light and dark themes and opens the data folder.
 - `Ctrl+Alt+Space` (changeable in the `…` menu) shows or hides the window from
   anywhere, even when minimized; closing the window keeps mynotes in the tray.
 
-Notes are saved automatically in `%APPDATA%\mynotes`.
+Notes are saved automatically in `%APPDATA%\ovh.iks-homelab.mynotes`
+(`mynotes.db` and an `images` folder).
 
 AI assistance: this project is written with AI help, see [VIBECODING.md](VIBECODING.md).
 

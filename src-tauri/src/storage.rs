@@ -126,6 +126,9 @@ impl Store {
         tx.execute("DELETE FROM notes WHERE id = ?", params![id])?;
         tx.execute("DELETE FROM notes_fts WHERE rowid = ?", params![id])?;
         tx.commit()?;
+        // The WAL keeps old page copies until checkpointed.
+        self.conn
+            .query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(()))?;
         Ok(())
     }
 
@@ -224,11 +227,20 @@ impl Store {
         )?;
         Ok(())
     }
+
+    pub fn is_referenced(&self, needle: &str) -> Result<bool> {
+        self.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM notes WHERE instr(content, ?1) > 0)",
+            params![needle],
+            |row| row.get::<_, bool>(0),
+        )
+    }
 }
 
 fn init(conn: &Connection) -> Result<()> {
     conn.execute_batch(
-        "PRAGMA foreign_keys = ON;
+        "PRAGMA secure_delete = ON;
+         PRAGMA foreign_keys = ON;
          PRAGMA user_version = 1;
          CREATE TABLE IF NOT EXISTS notes (
              id INTEGER PRIMARY KEY,
@@ -251,7 +263,8 @@ fn init(conn: &Connection) -> Result<()> {
              title,
              body,
              tokenize = 'unicode61 remove_diacritics 2'
-         );",
+         );
+         INSERT INTO notes_fts(notes_fts, rank) VALUES('secure-delete', 1);",
     )
 }
 
@@ -444,5 +457,52 @@ mod tests {
                 active_tab: Some(list[0].id),
             }
         );
+    }
+
+    #[test]
+    fn deleted_note_leaves_no_text_in_db_files() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("notes.db");
+        let marker = "zq-secret-marker-41";
+        let marker_bytes = marker.as_bytes();
+
+        {
+            let store = Store::open(&path).unwrap();
+            let note = store.create_note(Kind::Doc).unwrap();
+            store.save_note(note.id, marker, marker, marker).unwrap();
+            store.delete_note(note.id).unwrap();
+        }
+
+        let db_bytes = std::fs::read(&path).unwrap();
+        assert!(
+            !db_bytes
+                .windows(marker_bytes.len())
+                .any(|window| window == marker_bytes)
+        );
+
+        let wal_path = path.with_file_name(format!(
+            "{}-wal",
+            path.file_name().unwrap().to_string_lossy()
+        ));
+        if let Ok(wal_bytes) = std::fs::read(&wal_path) {
+            assert!(
+                !wal_bytes
+                    .windows(marker_bytes.len())
+                    .any(|window| window == marker_bytes)
+            );
+        }
+    }
+
+    #[test]
+    fn is_referenced_finds_substring_in_content() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(note.id, "title", "abc needle def", "text")
+            .unwrap();
+
+        assert!(store.is_referenced("needle").unwrap());
+        assert!(store.is_referenced("abc needle").unwrap());
+        assert!(!store.is_referenced("missing").unwrap());
     }
 }

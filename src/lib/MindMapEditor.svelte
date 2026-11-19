@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { loadNote, saveNote } from './api';
+	import { loadNote, saveNote, saveText } from './api';
 	import { createAutosave, type Autosave } from './autosave';
 	import { workspace, type NoteActions } from './workspace.svelte';
-	import { invoke } from '@tauri-apps/api/core';
 	import type MindElixir from 'mind-elixir';
 	import type { Theme } from 'mind-elixir';
 	import Plus from '@lucide/svelte/icons/plus';
@@ -112,7 +111,7 @@
 				console.error(error);
 			}
 		},
-		async exportMarkdown() {
+		async saveAs() {
 			try {
 				const current = mind;
 				if (!current) return;
@@ -121,21 +120,12 @@
 
 				const data = current.getData();
 				const markdown = mindmapMarkdown(data);
-				const ok = await invoke<boolean>(
-					'export_file',
-					new TextEncoder().encode(markdown),
-					{
-						headers: {
-							'x-file-name': encodeURIComponent(mindmapTitle(data) || 'mind map'),
-							'x-file-ext': 'md'
-						}
-					}
-				);
-
-				if (ok) workspace.notify('Exported');
+				const plain = mindmapText(data);
+				const title = mindmapTitle(data) || 'mind map';
+				if (await saveText(title, markdown, plain)) workspace.notify('Saved');
 			} catch (error) {
 				console.error(error);
-				workspace.notify('Export failed');
+				workspace.notify('Save failed');
 			}
 		}
 	};

@@ -107,7 +107,21 @@ pub fn save_note(
 #[tauri::command]
 pub fn delete_note(id: i64, state: State<'_, AppState>) -> Result<(), String> {
     let store = lock(&state.store)?;
-    store.delete_note(id).map_err(|err| err.to_string())
+    let content = store
+        .load_note(id)
+        .map_err(|err| err.to_string())?
+        .map(|n| n.content);
+    store.delete_note(id).map_err(|err| err.to_string())?;
+
+    if let Some(content) = content
+        && let Err(e) = crate::images::prune(&state.images_dir, Some(&content), |name| {
+            store.is_referenced(name).unwrap_or(true)
+        })
+    {
+        eprintln!("failed to prune images after deleting note {id}: {e}");
+    }
+
+    Ok(())
 }
 
 #[tauri::command]

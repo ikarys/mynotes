@@ -27,6 +27,14 @@
 			if (e.repeat) return;
 			e.preventDefault();
 			void workspace.newNote('mindmap');
+		} else if (key === 'o' && !e.shiftKey && !e.altKey) {
+			if (e.repeat) return;
+			e.preventDefault();
+			void workspace.openFile();
+		} else if (e.code === 'KeyS' && e.shiftKey && !e.altKey) {
+			if (e.repeat) return;
+			e.preventDefault();
+			void workspace.actions?.saveAs();
 		} else if (key === 'w' && !e.shiftKey && !e.altKey) {
 			if (e.repeat) return;
 			e.preventDefault();

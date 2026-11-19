@@ -3,8 +3,7 @@
 	import { Editor, Extension, type JSONContent } from '@tiptap/core';
 	import { Placeholder } from '@tiptap/extensions';
 	import BubbleMenu from '@tiptap/extension-bubble-menu';
-	import { invoke } from '@tauri-apps/api/core';
-	import { loadNote, saveNote } from './api';
+	import { loadNote, saveNote, saveText } from './api';
 	import { titleFrom } from './text';
 	import { createAutosave, type Autosave } from './autosave';
 	import { workspace, type NoteActions } from './workspace.svelte';
@@ -54,30 +53,17 @@
 		}
 	}
 
-	async function exportMarkdown(): Promise<void> {
+	async function saveAs(): Promise<void> {
 		if (!editor) return;
 		try {
 			await autosave?.flush();
 			const md = rewriteMarkdownImages(editor.getMarkdown());
-			const text = editor.getText({ blockSeparator: '\n' });
-			const title = titleFrom(text) || 'note';
-			const bytes = new TextEncoder().encode(md);
-
-			const ok = await invoke<boolean>(
-				'export_file',
-				bytes,
-				{
-					headers: {
-						'x-file-name': encodeURIComponent(title),
-						'x-file-ext': 'md'
-					}
-				}
-			);
-
-			if (ok) workspace.notify('Exported');
+			const plain = editor.getText({ blockSeparator: '\n' });
+			const title = titleFrom(plain) || 'note';
+			if (await saveText(title, md, plain)) workspace.notify('Saved');
 		} catch (err) {
 			console.error(err);
-			workspace.notify('Export failed');
+			workspace.notify('Save failed');
 		}
 	}
 
@@ -168,7 +154,7 @@
 			window.addEventListener('blur', flush);
 			document.addEventListener('visibilitychange', onVisibilityChange);
 
-			actions = { copyMarkdown, exportMarkdown };
+			actions = { copyMarkdown, saveAs };
 			workspace.setActions(actions);
 		} catch (err) {
 			console.error(err);

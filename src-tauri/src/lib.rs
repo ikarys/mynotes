@@ -1,5 +1,6 @@
 mod commands;
 mod export;
+mod files;
 mod images;
 mod shell;
 mod storage;
@@ -25,6 +26,15 @@ pub fn run() {
             let data_dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&data_dir)?;
             let store = storage::Store::open(&data_dir.join("mynotes.db"))?;
+
+            // Images dropped from notes in earlier sessions; pruned at startup
+            // because undo history, which could restore them, is gone by then.
+            if let Err(e) = images::prune(&data_dir.join("images"), None, |name| {
+                store.is_referenced(name).unwrap_or(true)
+            }) {
+                eprintln!("failed to prune images at startup: {e}");
+            }
+
             let hotkey = match store.get_setting(commands::HOTKEY_SETTING) {
                 Ok(Some(value)) => value,
                 Ok(None) => commands::DEFAULT_HOTKEY.to_string(),
@@ -93,6 +103,9 @@ pub fn run() {
             commands::set_hotkey,
             shell::app_ready,
             export::export_file,
+            files::save_text,
+            files::open_text_file,
+            files::open_data_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
