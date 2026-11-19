@@ -107,7 +107,7 @@ h1 em { font-style: normal; color: var(--accent-text); }
 .method { margin: 40px 0 0; font-size: .9rem; color: var(--muted); max-width: 80ch; }
 
 /* Mind map: same palette, radii and curved links as the app's theme. */
-.mindmap { padding-block: 80px; display: grid; grid-template-columns: .8fr 1.2fr; gap: 56px; align-items: center; }
+.mindmap { padding-block: 80px; display: grid; grid-template-columns: .7fr 1.3fr; gap: 56px; align-items: center; }
 .mindmap ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
 .mindmap li { color: var(--muted); }
 .mindmap li kbd { margin-right: 4px; }
@@ -117,7 +117,6 @@ h1 em { font-style: normal; color: var(--accent-text); }
 .map .root text { font-weight: 600; font-size: 18px; fill: #1d1c26; }
 .map .main rect { fill: var(--surface); stroke-width: 2; }
 .map .leaf rect { fill: var(--surface); stroke: var(--line); }
-.map .leaf text { font-size: 14px; }
 .map path { fill: none; stroke-width: 1.5; stroke-linecap: round; }
 .map.draw path { stroke-dasharray: 400; animation: draw .9s cubic-bezier(.16, 1, .3, 1) both; }
 .map.draw .b2 path { animation-delay: .08s; } .map.draw .b3 path { animation-delay: .16s; } .map.draw .b4 path { animation-delay: .24s; }
@@ -146,7 +145,7 @@ footer p { margin: 0 0 6px; max-width: 70ch; }
 	.clock-head { flex-wrap: wrap; }
 	/* Scaled to fit, the labels would drop below 8 px; scrolling keeps them readable. */
 	.map { overflow-x: auto; }
-	.map svg { min-width: 600px; }
+	.map svg { min-width: 640px; }
 }
 @media (prefers-reduced-motion: reduce) {
 	*, *::before, *::after { animation: none !important; transition: none !important; }
@@ -230,20 +229,20 @@ footer p { margin: 0 0 6px; max-width: 70ch; }
 			</ul>
 		</div>
 		<div class="map" id="map" role="img" aria-label="A mind map titled Lisbon trip, with branches Getting there, Stay, Eat and See, each with two ideas">
-			<svg viewBox="0 0 720 380" aria-hidden="true">
-				<g class="b1" stroke="#f7941d"><path d="M302 180 C 280 180 290 92 270 92"/><path d="M150 92 C 135 92 135 54 120 54"/><path d="M150 92 C 135 92 135 130 120 130"/></g>
-				<g class="b2" stroke="#5b8def"><path d="M302 200 C 280 200 290 288 270 288"/><path d="M206 288 H 150 C 135 288 135 250 120 250"/><path d="M206 288 H 150 C 135 288 135 326 120 326"/></g>
-				<g class="b3" stroke="#3fb68b"><path d="M418 180 C 440 180 430 92 450 92"/><path d="M506 92 C 521 92 521 54 536 54"/><path d="M506 92 C 521 92 521 130 536 130"/></g>
-				<g class="b4" stroke="#c86bd9"><path d="M418 200 C 440 200 430 288 450 288"/><path d="M506 288 C 521 288 521 250 536 250"/><path d="M506 288 C 521 288 521 326 536 326"/></g>
-				<g class="root"><rect x="302" y="166" width="116" height="48" rx="10" fill="#f7941d"/><text x="360" y="196" text-anchor="middle">Lisbon trip</text></g>
-				<g class="main"><rect x="150" y="74" width="120" height="36" rx="8" stroke="#f7941d"/><text x="210" y="97" text-anchor="middle">Getting there</text></g>
+			<svg viewBox="-20 0 760 380" aria-hidden="true">
+				<g class="b1" stroke="#f7941d"><path d="M293 180 C 280 180 290 92 270 92"/><path d="M146 92 C 133 92 135 54 120 54"/><path d="M146 92 C 133 92 135 130 120 130"/></g>
+				<g class="b2" stroke="#5b8def"><path d="M293 200 C 280 200 290 288 270 288"/><path d="M206 288 H 150 C 135 288 135 250 120 250"/><path d="M206 288 H 150 C 135 288 135 326 120 326"/></g>
+				<g class="b3" stroke="#3fb68b"><path d="M427 180 C 440 180 430 92 450 92"/><path d="M506 92 C 521 92 521 54 536 54"/><path d="M506 92 C 521 92 521 130 536 130"/></g>
+				<g class="b4" stroke="#c86bd9"><path d="M427 200 C 440 200 430 288 450 288"/><path d="M506 288 C 521 288 521 250 536 250"/><path d="M506 288 C 521 288 521 326 536 326"/></g>
+				<g class="root"><rect x="293" y="166" width="134" height="48" rx="10" fill="#f7941d"/><text x="360" y="196" text-anchor="middle">Lisbon trip</text></g>
+				<g class="main"><rect x="146" y="74" width="124" height="36" rx="8" stroke="#f7941d"/><text x="208" y="97" text-anchor="middle">Getting there</text></g>
 				<g class="main"><rect x="206" y="270" width="64" height="36" rx="8" stroke="#5b8def"/><text x="238" y="293" text-anchor="middle">Stay</text></g>
 				<g class="main"><rect x="450" y="74" width="56" height="36" rx="8" stroke="#3fb68b"/><text x="478" y="97" text-anchor="middle">Eat</text></g>
 				<g class="main"><rect x="450" y="270" width="56" height="36" rx="8" stroke="#c86bd9"/><text x="478" y="293" text-anchor="middle">See</text></g>
-				<g class="leaf"><rect x="16" y="39" width="104" height="30" rx="6"/><text x="68" y="59" text-anchor="middle">Night train</text></g><g class="leaf"><rect x="24" y="115" width="96" height="30" rx="6"/><text x="72" y="135" text-anchor="middle">Book seats</text></g>
-				<g class="leaf"><rect x="20" y="235" width="100" height="30" rx="6"/><text x="70" y="255" text-anchor="middle">Alfama flat</text></g><g class="leaf"><rect x="8" y="311" width="112" height="30" rx="6"/><text x="64" y="331" text-anchor="middle">Check-in 3 pm</text></g>
+				<g class="leaf"><rect x="16" y="39" width="104" height="30" rx="6"/><text x="68" y="59" text-anchor="middle">Night train</text></g><g class="leaf"><rect x="14" y="115" width="106" height="30" rx="6"/><text x="67" y="135" text-anchor="middle">Book seats</text></g>
+				<g class="leaf"><rect x="14" y="235" width="106" height="30" rx="6"/><text x="67" y="255" text-anchor="middle">Alfama flat</text></g><g class="leaf"><rect x="-12" y="311" width="132" height="30" rx="6"/><text x="54" y="331" text-anchor="middle">Check-in 3 pm</text></g>
 				<g class="leaf"><rect x="536" y="39" width="76" height="30" rx="6"/><text x="574" y="59" text-anchor="middle">Pastéis</text></g><g class="leaf"><rect x="536" y="115" width="150" height="30" rx="6"/><text x="611" y="135" text-anchor="middle">Time Out market</text></g>
-				<g class="leaf"><rect x="536" y="235" width="80" height="30" rx="6"/><text x="576" y="255" text-anchor="middle">Tram 28</text></g><g class="leaf"><rect x="536" y="311" width="114" height="30" rx="6"/><text x="593" y="331" text-anchor="middle">Belém tower</text></g>
+				<g class="leaf"><rect x="536" y="235" width="88" height="30" rx="6"/><text x="580" y="255" text-anchor="middle">Tram 28</text></g><g class="leaf"><rect x="536" y="311" width="120" height="30" rx="6"/><text x="596" y="331" text-anchor="middle">Belém tower</text></g>
 			</svg>
 		</div>
 	</section>
