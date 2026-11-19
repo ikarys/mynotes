@@ -1,11 +1,11 @@
 {
-  "color": "yellow",
+  "color": "blue",
   "label": "vibecoding",
-  "message": "level 1 · checked 2026-11-19 · 51ce6f6",
+  "message": "level 1 · checked 2026-11-19 · 7584149",
   "schemaVersion": 1,
   "vibecoding": {
     "checked_by": "vibecheck 0.4.0",
-    "commit": "51ce6f6",
+    "commit": "7584149",
     "date": "2026-11-19",
     "evidence": {},
     "level": 1,
@@ -18,6 +18,6 @@
     },
     "read_by": null,
     "report": null,
-    "verdict": "pass with findings"
+    "verdict": "pass"
   }
 }
