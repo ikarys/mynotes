@@ -1,5 +1,4 @@
 use serde::Serialize;
-use std::path::PathBuf;
 use tauri_plugin_updater::UpdaterExt;
 
 #[derive(Serialize)]
@@ -8,13 +7,20 @@ pub struct UpdateInfo {
     pub installed: bool,
 }
 
+#[cfg(target_os = "linux")]
+fn is_installed() -> bool {
+    // The updater can only replace an AppImage (it sets APPIMAGE); a .deb belongs
+    // to the package manager, so its users get the download page instead.
+    std::env::var_os("APPIMAGE").is_some()
+}
+
+#[cfg(not(target_os = "linux"))]
 fn is_installed() -> bool {
     // The NSIS installer puts it there; the portable exe has none, and installing
     // an update over it would create a second copy.
     std::env::current_exe()
         .ok()
-        .and_then(|exe| exe.parent().map(PathBuf::from))
-        .map(|dir| dir.join("uninstall.exe").exists())
+        .and_then(|exe| exe.parent().map(|dir| dir.join("uninstall.exe").exists()))
         .unwrap_or(false)
 }
 

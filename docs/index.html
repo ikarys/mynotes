@@ -18,7 +18,7 @@ layout: default
         Download for Windows
         <small>2.9 MB</small>
       </a>
-      <span class="actions-note">Windows 10/11 x64 · free, MIT</span>
+      <span class="actions-note">Windows 10/11 x64 · also for <a href="#install">Linux</a> · free, MIT</span>
     </div>
 
     <figure class="compare" style="--pos:50%">
@@ -33,7 +33,7 @@ layout: default
           </svg>
         </div>
       </div>
-      <figcaption>Light or dark: mynotes follows the Windows theme, or the one you pick, with your font and size. Drag to compare.</figcaption>
+      <figcaption>Light or dark: mynotes follows the system theme, or the one you pick, with your font and size. Drag to compare.</figcaption>
     </figure>
   </div>
 </section>
@@ -177,7 +177,7 @@ layout: default
   </div>
 </section>
 
-<section class="install">
+<section class="install" id="install">
   <div class="wrap">
     <div class="install-copy">
       <h2>Install in a few seconds.</h2>
@@ -187,18 +187,24 @@ layout: default
           <path d="M7 10l5 5 5-5"></path>
           <path d="M5 21h14"></path>
         </svg>
-        Download for Windows
-        <small>2.9 MB</small>
+        Download
+        <small>Windows · Linux</small>
       </a>
     </div>
 
     <div class="install-details">
-      <p>Grab a file from the <a href="https://github.com/ikarys/mynotes/releases/latest">latest release</a>:</p>
+      <p>Grab a file from the <a href="https://github.com/ikarys/mynotes/releases/latest">latest release</a>. On Windows 10/11:</p>
       <ul class="install-list">
         <li><strong>setup.exe</strong> installs for your user only, no admin rights, with a Start menu entry and an uninstaller.</li>
         <li><strong>portable.exe</strong> runs from anywhere, nothing installed.</li>
       </ul>
-      <p>Both are unsigned, so Windows SmartScreen warns on first launch: click <em>More info</em>, then <em>Run anyway</em>. <code>SHA256SUMS</code> in the release lets you check the download. Uninstalling keeps your notes unless you tick <em>Delete the application data</em>.</p>
+      <p>Both are unsigned, so Windows SmartScreen warns on first launch: click <em>More info</em>, then <em>Run anyway</em>. Uninstalling keeps your notes unless you tick <em>Delete the application data</em>.</p>
+      <p>On Linux (Ubuntu 22.04 or newer, x86_64):</p>
+      <ul class="install-list">
+        <li><strong>AppImage</strong> runs from anywhere once made executable, and updates itself. It needs FUSE&nbsp;2 (<code>libfuse2</code>).</li>
+        <li><strong>.deb</strong> installs with <code>sudo apt install ./mynotes-…-linux-amd64.deb</code>; the app points you to each new version.</li>
+      </ul>
+      <p>On Wayland the <kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> shortcut does not work, and GNOME needs the AppIndicator extension for the tray icon. <code>SHA256SUMS</code> in the release lets you check any download.</p>
     </div>
   </div>
 </section>

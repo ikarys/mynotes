@@ -41,6 +41,8 @@ How the v0.2.0 and `af44dda` rows were measured, on Windows 11, Ryzen 9 9950X3D:
 
 ## Not checked
 
+- The Linux AppImage and .deb are built by the release workflow but not
+  measured, and no Linux desktop runs them in CI.
 - There is no blind usability test yet. It will come with the first public
   release.
 - No CI on merges: the checks above run locally before each merge. Only
