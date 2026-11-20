@@ -141,6 +141,69 @@
 	font-style: italic;
 }
 
+.notes-items > li {
+	position: relative;
+}
+
+.note-flag {
+	display: grid;
+	flex: none;
+	color: var(--muted);
+}
+
+.note-actions {
+	position: absolute;
+	top: 50%;
+	right: 6px;
+	display: flex;
+	gap: 2px;
+	transform: translateY(-50%);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 120ms ease-out;
+}
+
+.notes-items > li:hover .note-actions,
+.notes-items > li:focus-within .note-actions {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* The actions take the place of the time, which would otherwise show through. */
+.notes-items > li:hover .note-time,
+.notes-items > li:focus-within .note-time {
+	min-width: 70px;
+	visibility: hidden;
+}
+
+.note-action {
+	width: 22px;
+	height: 22px;
+	display: grid;
+	place-items: center;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--muted);
+	transition:
+		background-color 120ms ease-out,
+		color 120ms ease-out;
+}
+
+.note-action:hover:not(:disabled) {
+	background: var(--hover);
+	color: var(--text);
+}
+
+.note-action:disabled {
+	opacity: 0.35;
+}
+
+.note-action:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+
 .note-time {
 	font-size: 11px;
 	color: var(--muted);

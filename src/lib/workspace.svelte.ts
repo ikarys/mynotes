@@ -3,6 +3,8 @@ import {
 	createNote,
 	trashNote,
 	renameNote,
+	setPinned,
+	setLocked,
 	purgeNote,
 	restoreNote,
 	getSession,
@@ -127,19 +129,47 @@ class Workspace {
 	}
 
 	async trashActive(): Promise<void> {
-		const tab = this.current;
-		if (!tab) return;
-		this.current = null;
-		this.persist();
-		await tick();
+		if (this.current) await this.trash(this.current.id);
+	}
+
+	async trash(id: number): Promise<void> {
+		if (this.notes.find((n) => n.id === id)?.locked) {
+			this.notify('Unlock the note to move it to the trash');
+			return;
+		}
+		if (this.current?.id === id) {
+			this.current = null;
+			this.persist();
+			await tick();
+		}
 		try {
-			await trashNote(tab.id);
+			await trashNote(id);
 			this.notify('Moved to trash');
-			void this.refreshNotes();
 		} catch (err) {
 			console.error(err);
 			this.notify('Move to trash failed');
 		}
+		void this.refreshNotes();
+	}
+
+	async pin(id: number, pinned: boolean): Promise<void> {
+		try {
+			await setPinned(id, pinned);
+		} catch (err) {
+			console.error(err);
+			this.notify(pinned ? 'Pin failed' : 'Unpin failed');
+		}
+		void this.refreshNotes();
+	}
+
+	async lock(id: number, locked: boolean): Promise<void> {
+		try {
+			await setLocked(id, locked);
+		} catch (err) {
+			console.error(err);
+			this.notify(locked ? 'Lock failed' : 'Unlock failed');
+		}
+		void this.refreshNotes();
 	}
 
 	async restoreFromTrash(meta: NoteMeta): Promise<void> {

@@ -32,8 +32,9 @@ active note, list bullets, links, caret, selection and focus only.
   `…` menu and the window buttons; bare space drags the window.
 - Left rail 44px on `--chrome`: new note, new mind map, find; then notes list toggle
   (2px accent bar when open), trash, settings.
-- Notes list 248px on `--bg`, grouped Today / Yesterday / Earlier by local calendar day;
-  row = kind icon, title, relative time; the open note takes
+- Notes list 248px on `--bg`: a Pinned group first, then Today / Yesterday / Earlier by local calendar day;
+  row = kind icon, title, lock mark if locked, relative time; on hover or focus, pin / lock /
+  trash buttons (22px, muted) replace the time; the open note takes
   `--surface` and a 2px accent left bar. Renders at most 200 rows. Hidden state is kept;
   starts hidden under 1100px.
 - Dark is warm graphite, not blue, so the orange accent reads as the only colour.

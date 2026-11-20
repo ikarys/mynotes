@@ -6,11 +6,16 @@
 	import { relativeTime, dayGroup } from './text';
 	import KindIcon from './KindIcon.svelte';
 	import ChevronsLeft from '@lucide/svelte/icons/chevrons-left';
+	import Pin from '@lucide/svelte/icons/pin';
+	import PinOff from '@lucide/svelte/icons/pin-off';
+	import Lock from '@lucide/svelte/icons/lock';
+	import LockOpen from '@lucide/svelte/icons/lock-open';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	const LIMIT = 200;
 
 	type Group = {
-		label: 'Today' | 'Yesterday' | 'Earlier';
+		label: 'Pinned' | 'Today' | 'Yesterday' | 'Earlier';
 		items: NoteMeta[];
 	};
 
@@ -20,7 +25,7 @@
 		const result: Group[] = [];
 
 		for (const meta of shown) {
-			const label = dayGroup(meta.updated_at);
+			const label = meta.pinned ? 'Pinned' : dayGroup(meta.updated_at);
 			const last = result[result.length - 1];
 
 			if (last && last.label === label) {
@@ -111,9 +116,41 @@
 											<span class="note-title" class:untitled={!meta.title}>
 												{meta.title ? meta.title : 'Untitled'}
 											</span>
+											{#if meta.locked}
+												<span class="note-flag" role="img" aria-label="Locked" title="Locked">
+													<Lock size={12} />
+												</span>
+											{/if}
 											<span class="note-time">{relativeTime(meta.updated_at)}</span>
 										</span>
 									</button>
+									<span class="note-actions">
+										<button
+											class="note-action"
+											aria-label={meta.pinned ? 'Unpin' : 'Pin to top'}
+											title={meta.pinned ? 'Unpin' : 'Pin to top'}
+											onclick={() => workspace.pin(meta.id, !meta.pinned)}
+										>
+											{#if meta.pinned}<PinOff size={14} />{:else}<Pin size={14} />{/if}
+										</button>
+										<button
+											class="note-action"
+											aria-label={meta.locked ? 'Unlock' : 'Lock against deletion'}
+											title={meta.locked ? 'Unlock' : 'Lock against deletion'}
+											onclick={() => workspace.lock(meta.id, !meta.locked)}
+										>
+											{#if meta.locked}<LockOpen size={14} />{:else}<Lock size={14} />{/if}
+										</button>
+										<button
+											class="note-action"
+											aria-label="Move to trash"
+											title={meta.locked ? 'Unlock to move to trash' : 'Move to trash'}
+											disabled={meta.locked}
+											onclick={() => workspace.trash(meta.id)}
+										>
+											<Trash2 size={14} />
+										</button>
+									</span>
 								{/if}
 							</li>
 						{/each}

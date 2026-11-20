@@ -8,6 +8,8 @@ export interface NoteMeta {
 	title: string;
 	updated_at: number;
 	renamed: boolean;
+	pinned: boolean;
+	locked: boolean;
 }
 
 export interface Note extends NoteMeta {
@@ -43,6 +45,14 @@ export async function saveNote(id: number, title: string, content: string, text:
 
 export async function renameNote(id: number, title: string): Promise<string> {
 	return invoke<string>('rename_note', { id, title });
+}
+
+export async function setPinned(id: number, pinned: boolean): Promise<void> {
+	await invoke('set_pinned', { id, pinned });
+}
+
+export async function setLocked(id: number, locked: boolean): Promise<void> {
+	await invoke('set_locked', { id, locked });
 }
 
 export async function trashNote(id: number): Promise<void> {

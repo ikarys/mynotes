@@ -31,6 +31,8 @@ pub struct NoteMeta {
     pub updated_at: i64,
     /// True when a custom title is set, so the editor must not overwrite the shown title.
     pub renamed: bool,
+    pub pinned: bool,
+    pub locked: bool,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -167,6 +169,28 @@ impl Store {
         Ok(effective_title)
     }
 
+    pub fn set_pinned(&self, id: i64, pinned: bool) -> Result<()> {
+        let updated = self.conn.execute(
+            "UPDATE notes SET pinned = ?1 WHERE id = ?2 AND deleted_at IS NULL",
+            params![pinned, id],
+        )?;
+        if updated == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        Ok(())
+    }
+
+    pub fn set_locked(&self, id: i64, locked: bool) -> Result<()> {
+        let updated = self.conn.execute(
+            "UPDATE notes SET locked = ?1 WHERE id = ?2 AND deleted_at IS NULL",
+            params![locked, id],
+        )?;
+        if updated == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        Ok(())
+    }
+
     pub fn trash_note(&self, id: i64) -> Result<()> {
         let now = now_ms();
         let updated = self.conn.execute(
@@ -182,7 +206,7 @@ impl Store {
     pub fn list_trash(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, kind, coalesce(custom_title, title), updated_at,
-                    custom_title IS NOT NULL
+                    custom_title IS NOT NULL, pinned, locked
              FROM notes
              WHERE deleted_at IS NOT NULL
              ORDER BY deleted_at DESC, id DESC",
@@ -266,10 +290,10 @@ impl Store {
     pub fn list_notes(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
             "SELECT n.id, n.kind, coalesce(n.custom_title, n.title), n.updated_at,
-                    n.custom_title IS NOT NULL
+                    n.custom_title IS NOT NULL, n.pinned, n.locked
              FROM notes AS n
              WHERE n.deleted_at IS NULL
-             ORDER BY n.updated_at DESC, n.id DESC",
+             ORDER BY n.pinned DESC, n.updated_at DESC, n.id DESC",
         )?;
         let rows = stmt.query_map([], meta_from_row)?;
         rows.collect()
@@ -283,7 +307,7 @@ impl Store {
         };
         let mut stmt = self.conn.prepare(
             "SELECT n.id, n.kind, coalesce(n.custom_title, n.title), n.updated_at,
-                    n.custom_title IS NOT NULL
+                    n.custom_title IS NOT NULL, n.pinned, n.locked
              FROM notes_fts
              JOIN notes AS n ON n.id = notes_fts.rowid
              WHERE notes_fts MATCH ?1 AND n.deleted_at IS NULL
@@ -396,6 +420,26 @@ fn init(conn: &Connection) -> Result<()> {
         conn.execute("ALTER TABLE notes ADD COLUMN custom_title TEXT", [])?;
         conn.pragma_update(None, "user_version", 3)?;
     }
+    if user_version < 4 {
+        conn.execute_batch(
+            "ALTER TABLE notes ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0;
+             ALTER TABLE notes ADD COLUMN locked INTEGER NOT NULL DEFAULT 0;
+             -- The lock is enforced by the database so no code path (trash, purge, empty trash) can bypass it.
+             CREATE TRIGGER notes_locked_no_trash
+             BEFORE UPDATE OF deleted_at ON notes
+             WHEN OLD.locked AND NEW.deleted_at IS NOT NULL
+             BEGIN
+               SELECT RAISE(ABORT, 'note is locked');
+             END;
+             CREATE TRIGGER notes_locked_no_delete
+             BEFORE DELETE ON notes
+             WHEN OLD.locked
+             BEGIN
+               SELECT RAISE(ABORT, 'note is locked');
+             END;",
+        )?;
+        conn.pragma_update(None, "user_version", 4)?;
+    }
     Ok(())
 }
 
@@ -413,6 +457,8 @@ fn meta_from_row(row: &rusqlite::Row<'_>) -> Result<NoteMeta> {
         title: row.get(2)?,
         updated_at: row.get(3)?,
         renamed: row.get(4)?,
+        pinned: row.get(5)?,
+        locked: row.get(6)?,
     })
 }
 
@@ -864,5 +910,85 @@ mod tests {
         drop(store);
         let store = Store::open(&path).unwrap();
         assert_eq!(store.list_trash().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn pinned_notes_list_first_without_touching_updated_at() {
+        let store = Store::open_in_memory().unwrap();
+        let a = store.create_note(Kind::Doc).unwrap();
+        let b = store.create_note(Kind::Doc).unwrap();
+        store.save_note(a.id, "a", "a", "a").unwrap();
+        store.save_note(b.id, "b", "b", "b").unwrap();
+
+        let a_updated = store.load_note(a.id).unwrap().unwrap().updated_at;
+        store.set_pinned(a.id, true).unwrap();
+
+        let list = store.list_notes().unwrap();
+        assert_eq!(list.len(), 2);
+        assert_eq!(list[0].id, a.id);
+        assert_eq!(list[1].id, b.id);
+        assert!(list[0].pinned);
+        assert_eq!(list[0].updated_at, a_updated);
+
+        store.set_pinned(a.id, false).unwrap();
+        let list = store.list_notes().unwrap();
+        assert_eq!(list[0].id, b.id);
+        assert_eq!(list[1].id, a.id);
+    }
+
+    #[test]
+    fn locked_note_cannot_be_trashed_or_purged() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        store.save_note(note.id, "locked", "body", "text").unwrap();
+
+        store.set_locked(note.id, true).unwrap();
+        let err = store.trash_note(note.id).unwrap_err();
+        assert!(err.to_string().contains("note is locked"));
+
+        let list = store.list_notes().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].id, note.id);
+        assert!(list[0].locked);
+
+        store
+            .save_note(note.id, "locked edited", "body", "text")
+            .unwrap();
+        let loaded = store.load_note(note.id).unwrap().unwrap();
+        assert_eq!(loaded.title, "locked edited");
+
+        store.purge_trash(None).unwrap();
+        let list = store.list_notes().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].id, note.id);
+
+        store.set_locked(note.id, false).unwrap();
+        store.trash_note(note.id).unwrap();
+    }
+
+    #[test]
+    fn pin_and_lock_missing_or_trashed_note_is_error() {
+        let store = Store::open_in_memory().unwrap();
+        assert!(matches!(
+            store.set_pinned(999, true).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+        assert!(matches!(
+            store.set_locked(999, true).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+
+        let note = store.create_note(Kind::Doc).unwrap();
+        store.save_note(note.id, "trash", "body", "text").unwrap();
+        store.trash_note(note.id).unwrap();
+
+        assert!(matches!(
+            store.set_pinned(note.id, true).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+        assert!(matches!(
+            store.set_locked(note.id, true).unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
     }
 }
