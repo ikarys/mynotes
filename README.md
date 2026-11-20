@@ -23,12 +23,14 @@ Both are unsigned, so Windows SmartScreen warns on first launch: click
 
 ## Use
 
-- `Ctrl+N` new note, `Ctrl+Shift+M` new mind map, `Ctrl+W` close tab,
-  `Ctrl+Tab` next tab, `Ctrl+P` find a note (full-text search).
+- The notes list on the left shows every note, grouped by day; the icon at the
+  bottom of the left bar hides it.
+- `Ctrl+N` new note, `Ctrl+Shift+M` new mind map, `Ctrl+W` close the note,
+  `Ctrl+Tab` next note in the list, `Ctrl+P` find a note (full-text search).
 - `Ctrl+O` opens a `.md` or `.txt` file as a new note; `Ctrl+Shift+S` saves
   the note as Markdown or plain text.
-- Closing a tab keeps the note (find it again with `Ctrl+P`); `Move to trash`
-  in the `…` menu hides it; the Trash (same menu) restores it or erases it
+- Closing a note keeps it in the list; `Move to trash`
+  in the `…` menu hides it; the Trash (left bar) restores it or erases it
   for good, and notes left there are erased after 30 days.
 - `Ctrl+F` finds text in the note, `Ctrl+H` finds and replaces.
 - Select text to format it; paste images or Markdown directly.

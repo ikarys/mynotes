@@ -2,8 +2,8 @@
 	import { workspace } from './workspace.svelte';
 	import { sidebar } from './sidebar.svelte';
 	import { appMenu } from './AppMenu.svelte';
-	import Plus from '@lucide/svelte/icons/plus';
-	import Workflow from '@lucide/svelte/icons/workflow';
+	import FilePlus from '@lucide/svelte/icons/file-plus';
+	import GitBranchPlus from '@lucide/svelte/icons/git-branch-plus';
 	import Search from '@lucide/svelte/icons/search';
 	import PanelLeft from '@lucide/svelte/icons/panel-left';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -14,10 +14,10 @@
 
 <nav class="rail" aria-label="App">
 	<button class="tool" title="New note (Ctrl+N)" aria-label="New note" onclick={() => void workspace.newNote('doc')}>
-		<Plus size={16} />
+		<FilePlus size={16} />
 	</button>
 	<button class="tool" title="New mind map (Ctrl+Shift+M)" aria-label="New mind map" onclick={() => void workspace.newNote('mindmap')}>
-		<Workflow size={16} />
+		<GitBranchPlus size={16} />
 	</button>
 	<button class="tool" title="Find a note (Ctrl+P)" aria-label="Find a note" onclick={onsearch}>
 		<Search size={16} />

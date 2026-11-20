@@ -3,7 +3,7 @@
 	import { appReady } from './lib/api';
 	import { updates } from './lib/updates.svelte';
 	import { workspace } from './lib/workspace.svelte';
-	import TabBar from './lib/TabBar.svelte';
+	import TitleBar from './lib/TitleBar.svelte';
 	import Rail from './lib/Rail.svelte';
 	import NotesList from './lib/NotesList.svelte';
 	import QuickSwitcher from './lib/QuickSwitcher.svelte';
@@ -41,10 +41,10 @@
 		} else if (key === 'w' && !e.shiftKey && !e.altKey) {
 			if (e.repeat) return;
 			e.preventDefault();
-			if (workspace.activeId !== null) void workspace.close(workspace.activeId);
+			void workspace.close();
 		} else if (key === 'tab') {
 			e.preventDefault();
-			workspace.cycle(e.shiftKey ? -1 : 1);
+			void workspace.cycle(e.shiftKey ? -1 : 1);
 		} else if (key === 'p' && !e.shiftKey && !e.altKey) {
 			e.preventDefault();
 			switcherOpen = !switcherOpen;
@@ -71,7 +71,7 @@
 	});
 </script>
 
-<TabBar />
+<TitleBar />
 
 <div class="body">
 	<Rail onsearch={() => (switcherOpen = true)} />

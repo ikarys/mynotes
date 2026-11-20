@@ -1,0 +1,276 @@
+dialog.settings {
+	width: min(460px, 92vw);
+	padding: 0;
+	gap: 0;
+	max-height: calc(100vh - 32px);
+	overflow-y: auto;
+	background: var(--chrome);
+	color: var(--text);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	box-shadow: var(--shadow);
+}
+
+.settings .sheet-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text);
+}
+
+.settings-head {
+	padding: 14px 14px 6px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.tool {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--muted);
+	cursor: pointer;
+}
+
+.tool:hover {
+	background: var(--hover);
+	color: var(--text);
+}
+
+.tool:active {
+	background: var(--press);
+}
+
+.settings-body {
+	padding: 6px 20px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.settings-group {
+	display: flex;
+	flex-direction: column;
+}
+
+.settings-group-title {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--muted);
+	margin: 0 0 6px;
+}
+
+.settings-card {
+	background: var(--bg);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.settings-row {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-height: 52px;
+	padding: 8px 14px;
+	box-sizing: border-box;
+}
+
+.settings-row + .settings-row {
+	border-top: 1px solid var(--line);
+}
+
+.settings-text {
+	flex: 1;
+	min-width: 0;
+}
+
+.settings-label {
+	font-size: 13px;
+	color: var(--text);
+}
+
+.settings-hint {
+	font-size: 12px;
+	color: var(--muted);
+	margin-top: 2px;
+}
+
+.settings-preview {
+	border-top: 1px solid var(--line);
+	padding: 12px 14px;
+	color: var(--text);
+	font-family: var(--note-font);
+	font-size: var(--note-size);
+	line-height: 1.5;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.segmented {
+	display: inline-flex;
+	gap: 2px;
+	padding: 2px;
+	border-radius: 7px;
+	background: var(--hover);
+}
+
+.segmented button {
+	height: 26px;
+	padding: 0 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--muted);
+	font: inherit;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.segmented button:hover {
+	color: var(--text);
+}
+
+.segmented button[aria-checked='true'] {
+	background: var(--surface);
+	color: var(--text);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.settings-select,
+.settings-button,
+.stepper button,
+.settings-key {
+	height: 28px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--surface);
+	color: var(--text);
+	font: inherit;
+	font-size: 12px;
+	box-sizing: border-box;
+}
+
+.settings-select:hover,
+.settings-button:hover,
+.stepper button:hover,
+.settings-key:hover {
+	border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
+.settings-select {
+	width: 160px;
+	padding: 0 6px;
+}
+
+.settings-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 10px;
+	cursor: pointer;
+}
+
+.stepper {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.stepper button {
+	width: 28px;
+	padding: 0;
+	cursor: pointer;
+}
+
+.stepper button:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.stepper button:disabled:hover {
+	border-color: var(--line);
+}
+
+.stepper output {
+	min-width: 40px;
+	text-align: center;
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.settings-key {
+	padding: 0 8px;
+	min-width: 120px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+
+.settings-key.recording {
+	border-color: var(--accent);
+	color: var(--muted);
+}
+
+.settings-key kbd {
+	border-bottom-width: 1px;
+}
+
+.switch {
+	appearance: none;
+	width: 36px;
+	height: 20px;
+	margin: 0;
+	border-radius: 10px;
+	border: 1px solid var(--muted);
+	background: transparent;
+	position: relative;
+	cursor: pointer;
+	transition: background-color 120ms ease-out, border-color 120ms ease-out;
+	box-sizing: border-box;
+}
+
+.switch::before {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--muted);
+	transition: transform 120ms ease-out;
+}
+
+.switch:checked {
+	background: var(--accent);
+	border-color: var(--accent);
+}
+
+.switch:checked::before {
+	background: #fff;
+	transform: translateX(16px);
+}
+
+.tool:focus-visible,
+.segmented button:focus-visible,
+.settings-select:focus-visible,
+.settings-button:focus-visible,
+.stepper button:focus-visible,
+.settings-key:focus-visible,
+.switch:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
