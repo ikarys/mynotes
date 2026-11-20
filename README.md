@@ -4,9 +4,9 @@
 
 [![Vibecoding Convention](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ikarys/mynotes/main/audit/status.json)](VIBECODING.md)
 
-A Windows notepad that opens in about 0.3 s, waits in the tray at 0 % CPU and remembers your notes without files: rich text, pasted images and mind maps, local only. Built with Tauri 2 and Svelte 5.
+A Windows and Linux notepad that opens in about 0.3 s, waits in the tray at 0 % CPU and remembers your notes without files: rich text, pasted images and mind maps, local only. Built with Tauri 2 and Svelte 5.
 
-**[Download for Windows](https://github.com/ikarys/mynotes/releases/latest)** (2.9 MB installer) · [Website](https://ikarys.github.io/mynotes/)
+**[Download](https://github.com/ikarys/mynotes/releases/latest)** for Windows (2.9 MB installer) or Linux (AppImage, .deb) · [Website](https://ikarys.github.io/mynotes/)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/note-dark.png">
@@ -15,14 +15,25 @@ A Windows notepad that opens in about 0.3 s, waits in the tray at 0 % CPU and re
 
 Measured: opens in 324 ms (median of 7 launches, Windows 11, commit af44dda after v0.3.0), 0 % CPU at rest, 6.1 MB app, 2.9 MB installer; method in [VERIFICATION.md](VERIFICATION.md).
 
-## Install (Windows 10/11, x64)
+## Install
 
 Download from [Releases](https://github.com/ikarys/mynotes/releases):
+
+### Windows 10/11, x64
 
 - `…-setup.exe` installs for the current user (no admin rights), adds a Start menu entry and an uninstaller. Uninstalling removes the app, its shortcuts and its autostart entry. Your notes are kept unless you tick "Delete the application data".
 - `…-portable.exe` runs from anywhere, nothing installed.
 
 Both are unsigned, so Windows SmartScreen warns on first launch: click "More info", then "Run anyway". `SHA256SUMS` lets you check the download.
+
+### Linux, x86_64
+
+- `…-linux-x86_64.AppImage` runs from anywhere: make it executable, then run it. It updates itself from the app's … menu.
+- `…-linux-amd64.deb` is a Debian/Ubuntu package. Install with `sudo apt install ./mynotes-…-linux-amd64.deb`. Updates are downloaded as a new .deb; the app opens the download page when an update is out.
+- Requires a distribution at least as recent as Ubuntu 22.04 (glibc 2.35 or newer), x86_64. The AppImage needs FUSE 2 (`libfuse2` on Ubuntu 22.04+, `libfuse2t64` on 24.04).
+- Linux files are not code-signed; `SHA256SUMS` in the release lets you check the download.
+- The global shortcut (Ctrl+Alt+Space) works on X11 sessions only, not Wayland; on GNOME the tray icon needs the AppIndicator extension.
+- Notes are stored in `~/.local/share/ovh.iks-homelab.mynotes`.
 
 ## Use
 
