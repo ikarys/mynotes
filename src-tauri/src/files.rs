@@ -89,6 +89,51 @@ pub fn open_data_dir(app: tauri::AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
+fn dir_size(path: &std::path::Path) -> u64 {
+    let mut total = 0u64;
+    let entries = match std::fs::read_dir(path) {
+        Ok(entries) => entries,
+        Err(_) => return 0,
+    };
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(_) => continue,
+        };
+
+        let file_type = match entry.file_type() {
+            Ok(file_type) => file_type,
+            Err(_) => continue,
+        };
+
+        // Links are skipped so a loop or a target outside the folder is never counted.
+        if file_type.is_symlink() {
+            continue;
+        }
+
+        if file_type.is_dir() {
+            total = total.saturating_add(dir_size(entry.path().as_path()));
+            continue;
+        }
+
+        if file_type.is_file()
+            && let Ok(metadata) = entry.metadata()
+        {
+            total = total.saturating_add(metadata.len());
+        }
+    }
+
+    total
+}
+
+#[tauri::command]
+pub fn data_dir_size(app: tauri::AppHandle) -> Result<u64, String> {
+    use tauri::Manager;
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    Ok(dir_size(&dir))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -119,5 +164,35 @@ mod tests {
         assert!(is_markdown_ext(Path::new("a.Markdown")));
         assert!(!is_markdown_ext(Path::new("a.txt")));
         assert!(!is_markdown_ext(Path::new("a")));
+    }
+
+    #[test]
+    fn dir_size_sums_nested_files() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("files_test_{}_{}", std::process::id(), now));
+        let sub = root.join("sub");
+
+        std::fs::create_dir_all(&sub).expect("create test directories");
+        std::fs::write(root.join("top.bin"), [0u8; 3]).expect("write top-level file");
+        std::fs::write(sub.join("nested.bin"), [0u8; 5]).expect("write nested file");
+
+        assert_eq!(dir_size(&root), 8);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn dir_size_of_missing_path_is_zero() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        let missing =
+            std::env::temp_dir().join(format!("files_missing_{}_{}", std::process::id(), now));
+
+        assert_eq!(dir_size(&missing), 0);
     }
 }

@@ -118,3 +118,7 @@ export async function openTextFile(): Promise<OpenedFile | null> {
 export async function openDataDir(): Promise<void> {
 	await invoke('open_data_dir');
 }
+
+export async function dataDirSize(): Promise<number> {
+	return invoke<number>('data_dir_size');
+}

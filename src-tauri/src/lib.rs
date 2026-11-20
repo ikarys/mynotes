@@ -139,6 +139,7 @@ pub fn run() {
             files::save_text,
             files::open_text_file,
             files::open_data_dir,
+            files::data_dir_size,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

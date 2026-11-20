@@ -8,12 +8,24 @@
 	import { theme, type ThemeMode } from './theme.svelte';
 	import { typography, FONTS, MIN_SIZE, MAX_SIZE } from './typography.svelte';
 	import { updates } from './updates.svelte';
-	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir } from './api';
+	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir, dataDirSize } from './api';
 
 	let dialog: HTMLDialogElement | undefined = $state();
 	let shortcutButton: HTMLButtonElement | undefined = $state();
 	let hotkey: string = $state('');
 	let recording: boolean = $state(false);
+	let dataSize: string = $state('');
+
+	function formatBytes(bytes: number): string {
+		const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+		let value = bytes;
+		let unit = 0;
+		while (value >= 1024 && unit < units.length - 1) {
+			value /= 1024;
+			unit++;
+		}
+		return `${unit === 0 ? value : value.toFixed(1)} ${units[unit]}`;
+	}
 
 	const modes: { mode: ThemeMode; label: string; icon: typeof Sun }[] = [
 		{ mode: 'system', label: 'System', icon: Monitor },
@@ -23,6 +35,11 @@
 
 	export function show(): void {
 		dialog?.showModal();
+		dataDirSize()
+			.then((bytes) => {
+				dataSize = formatBytes(bytes);
+			})
+			.catch((err) => console.error(err));
 		getHotkey()
 			.then((value) => {
 				hotkey = value;
@@ -210,7 +227,7 @@
 
 				<div class="settings-row">
 					<div class="settings-text">
-						<div class="settings-label" id="set-data-folder">Data folder</div>
+						<div class="settings-label" id="set-data-folder">Data folder{#if dataSize} ({dataSize}){/if}</div>
 						<div class="settings-hint" id="set-data-folder-hint">Your notes stay on this PC.</div>
 					</div>
 					<button class="settings-button" aria-describedby="set-data-folder-hint" onclick={() => openDataDir().catch((err) => console.error(err))}>
