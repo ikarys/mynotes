@@ -67,9 +67,16 @@
 			console.error(err);
 		}
 
-		requestAnimationFrame(() => {
+		// app_ready must run once: a second call would show a `--hidden` autostart.
+		let signalled = false;
+		const signal = () => {
+			if (signalled) return;
+			signalled = true;
 			appReady().catch((err) => console.error(err));
-		});
+		};
+		requestAnimationFrame(signal);
+		// WebKitGTK runs no animation frame for a hidden window, so on Linux only this fires.
+		setTimeout(signal, 100);
 		updates.start();
 	});
 
