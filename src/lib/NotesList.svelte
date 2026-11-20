@@ -3,7 +3,7 @@
 	import { workspace } from './workspace.svelte';
 	import { sidebar } from './sidebar.svelte';
 	import type { NoteMeta } from './api';
-	import { relativeTime, dayGroup, excerptFrom } from './text';
+	import { relativeTime, dayGroup } from './text';
 	import KindIcon from './KindIcon.svelte';
 	import ChevronsLeft from '@lucide/svelte/icons/chevrons-left';
 
@@ -76,7 +76,6 @@
 					<h2 class="notes-group">{group.label}</h2>
 					<ul class="notes-items" role="list">
 						{#each group.items as meta (meta.id)}
-							{@const excerpt = excerptFrom(meta.excerpt)}
 							<li>
 								{#if editingId === meta.id}
 									<div class="note editing" class:active={meta.id === workspace.activeId}>
@@ -114,9 +113,6 @@
 											</span>
 											<span class="note-time">{relativeTime(meta.updated_at)}</span>
 										</span>
-										{#if excerpt}
-											<span class="note-excerpt">{excerpt}</span>
-										{/if}
 									</button>
 								{/if}
 							</li>

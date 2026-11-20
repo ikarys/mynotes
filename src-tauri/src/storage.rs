@@ -29,8 +29,6 @@ pub struct NoteMeta {
     pub kind: Kind,
     pub title: String,
     pub updated_at: i64,
-    /// Start of the plain text, so a list can show a preview without loading notes.
-    pub excerpt: String,
     /// True when a custom title is set, so the editor must not overwrite the shown title.
     pub renamed: bool,
 }
@@ -183,7 +181,7 @@ impl Store {
 
     pub fn list_trash(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, kind, coalesce(custom_title, title), updated_at, '',
+            "SELECT id, kind, coalesce(custom_title, title), updated_at,
                     custom_title IS NOT NULL
              FROM notes
              WHERE deleted_at IS NOT NULL
@@ -268,9 +266,8 @@ impl Store {
     pub fn list_notes(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
             "SELECT n.id, n.kind, coalesce(n.custom_title, n.title), n.updated_at,
-                    coalesce(substr(f.body, 1, 300), ''), n.custom_title IS NOT NULL
+                    n.custom_title IS NOT NULL
              FROM notes AS n
-             LEFT JOIN notes_fts AS f ON f.rowid = n.id
              WHERE n.deleted_at IS NULL
              ORDER BY n.updated_at DESC, n.id DESC",
         )?;
@@ -286,7 +283,7 @@ impl Store {
         };
         let mut stmt = self.conn.prepare(
             "SELECT n.id, n.kind, coalesce(n.custom_title, n.title), n.updated_at,
-                    substr(notes_fts.body, 1, 300), n.custom_title IS NOT NULL
+                    n.custom_title IS NOT NULL
              FROM notes_fts
              JOIN notes AS n ON n.id = notes_fts.rowid
              WHERE notes_fts MATCH ?1 AND n.deleted_at IS NULL
@@ -415,8 +412,7 @@ fn meta_from_row(row: &rusqlite::Row<'_>) -> Result<NoteMeta> {
         kind: kind_from_row(row, 1)?,
         title: row.get(2)?,
         updated_at: row.get(3)?,
-        excerpt: row.get(4)?,
-        renamed: row.get(5)?,
+        renamed: row.get(4)?,
     })
 }
 
@@ -480,27 +476,6 @@ mod tests {
         assert_eq!(list.len(), 2);
         assert_eq!(list[0].id, second.id);
         assert_eq!(list[1].id, first.id);
-    }
-
-    #[test]
-    fn list_notes_carries_a_bounded_excerpt() {
-        let store = Store::open_in_memory().unwrap();
-        let note = store.create_note(Kind::Doc).unwrap();
-        let empty = store.create_note(Kind::Doc).unwrap();
-        store
-            .save_note(
-                note.id,
-                "title",
-                "",
-                &format!("title\n{}", "x".repeat(1000)),
-            )
-            .unwrap();
-
-        let list = store.list_notes().unwrap();
-        let saved = list.iter().find(|m| m.id == note.id).unwrap();
-        assert!(saved.excerpt.starts_with("title\nxxx"));
-        assert_eq!(saved.excerpt.chars().count(), 300);
-        assert_eq!(list.iter().find(|m| m.id == empty.id).unwrap().excerpt, "");
     }
 
     #[test]

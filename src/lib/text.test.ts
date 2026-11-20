@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayGroup, excerptFrom, titleFrom } from './text';
+import { dayGroup, titleFrom } from './text';
 
 describe('titleFrom', () => {
 	it('skips blank lines', () => {
@@ -16,17 +16,6 @@ describe('titleFrom', () => {
 
 	it('returns empty string for empty input', () => {
 		expect(titleFrom('')).toBe('');
-	});
-});
-
-describe('excerptFrom', () => {
-	it('drops the title line and joins the rest', () => {
-		expect(excerptFrom('\n  Title\nfirst  line\n\nsecond')).toBe('first line second');
-	});
-
-	it('is empty when there is only a title', () => {
-		expect(excerptFrom('Title')).toBe('');
-		expect(excerptFrom('')).toBe('');
 	});
 });
 

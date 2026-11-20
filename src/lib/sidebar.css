@@ -147,16 +147,6 @@
 	white-space: nowrap;
 }
 
-.note-excerpt {
-	display: block;
-	padding-left: 20px;
-	font-size: 12px;
-	color: var(--muted);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
 .notes-empty {
 	flex: 1;
 	margin: 0;

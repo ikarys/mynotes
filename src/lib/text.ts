@@ -21,17 +21,6 @@ export function relativeTime(ms: number, now = Date.now()): string {
 	return rtf.format(Math.round(delta / (365 * 86_400_000)), 'year');
 }
 
-/** The text after the title line, on one line: the preview shown under a note's title. */
-export function excerptFrom(text: string): string {
-	const lines = text.split('\n');
-	const titleLine = lines.findIndex((line) => line.trim());
-	return lines
-		.slice(titleLine + 1)
-		.join(' ')
-		.replace(/\s+/g, ' ')
-		.trim();
-}
-
 export type DayGroup = 'Today' | 'Yesterday' | 'Earlier';
 
 /** Local calendar day, not a 24 h window: a note from 23:50 is "Yesterday" at 00:10. */
