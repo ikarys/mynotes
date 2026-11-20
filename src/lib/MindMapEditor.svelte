@@ -202,6 +202,9 @@
 				console.error(error);
 				workspace.notify('Save failed');
 			}
+		},
+		focus() {
+			mind?.container.focus({ preventScroll: true });
 		}
 	};
 

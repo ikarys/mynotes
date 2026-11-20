@@ -29,6 +29,7 @@ export interface NoteActions {
 	copyMarkdown(): Promise<void>;
 	saveAs(): Promise<void>;
 	exportPng?(): Promise<void>;
+	focus(): void;
 }
 
 class Workspace {

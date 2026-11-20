@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 	import { appReady } from './lib/api';
 	import { updates } from './lib/updates.svelte';
 	import { workspace } from './lib/workspace.svelte';
@@ -52,8 +53,13 @@
 		}
 	}
 
+	let unlistenFocus: UnlistenFn | undefined;
+
 	onMount(async () => {
 		window.addEventListener('keydown', onKeydown, true);
+		listen('focus-note', () => workspace.actions?.focus())
+			.then((fn) => (unlistenFocus = fn))
+			.catch((err) => console.error(err));
 
 		try {
 			await workspace.restore();
@@ -69,6 +75,7 @@
 
 	onDestroy(() => {
 		window.removeEventListener('keydown', onKeydown, true);
+		unlistenFocus?.();
 	});
 </script>
 

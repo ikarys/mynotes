@@ -188,7 +188,7 @@
 			window.addEventListener('blur', flush);
 			document.addEventListener('visibilitychange', onVisibilityChange);
 
-			actions = { copyMarkdown, saveAs };
+			actions = { copyMarkdown, saveAs, focus: () => editor?.commands.focus() };
 			workspace.setActions(actions);
 		} catch (err) {
 			console.error(err);
