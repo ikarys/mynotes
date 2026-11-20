@@ -5,6 +5,7 @@
 	import type { NoteMeta } from './api';
 	import { relativeTime, dayGroup } from './text';
 	import KindIcon from './KindIcon.svelte';
+	import { confirmer } from './confirm.svelte';
 	import ChevronsLeft from '@lucide/svelte/icons/chevrons-left';
 	import Pin from '@lucide/svelte/icons/pin';
 	import PinOff from '@lucide/svelte/icons/pin-off';
@@ -62,6 +63,16 @@
 			event.stopPropagation();
 			void finishRename(meta, null, true);
 		}
+	}
+
+	async function trash(meta: NoteMeta) {
+		const title = meta.title || 'Untitled';
+		const ok = await confirmer.ask(
+			'Move to trash?',
+			`"${title}" goes to the trash. You can restore it for 30 days.`,
+			'Move to trash'
+		);
+		if (ok) await workspace.trash(meta.id);
 	}
 
 	const countText = $derived(
@@ -146,9 +157,7 @@
 											aria-label="Move to trash"
 											title={meta.locked ? 'Unlock to move to trash' : 'Move to trash'}
 											disabled={meta.locked}
-											onclick={() => {
-												if (confirm(`Move "${meta.title || 'Untitled'}" to the trash?`)) void workspace.trash(meta.id);
-											}}
+											onclick={() => void trash(meta)}
 										>
 											<Trash2 size={14} />
 										</button>

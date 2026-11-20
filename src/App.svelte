@@ -10,6 +10,7 @@
 	import DocEditor from './lib/DocEditor.svelte';
 	import MindMapEditor from './lib/MindMapEditor.svelte';
 	import Toast from './lib/Toast.svelte';
+	import ConfirmDialog from './lib/ConfirmDialog.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Workflow from '@lucide/svelte/icons/workflow';
 	import './lib/theme.svelte';
@@ -110,3 +111,4 @@
 
 <QuickSwitcher bind:open={switcherOpen} />
 <Toast />
+<ConfirmDialog />

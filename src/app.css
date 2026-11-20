@@ -705,6 +705,33 @@ dialog.sheet[open] {
 	color: var(--text);
 }
 
+.confirm {
+	width: min(360px, 90vw);
+}
+
+.confirm-message {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.confirm-btn {
+	height: 28px;
+	padding: 0 12px;
+	font-size: 13px;
+}
+
+.sheet-btn.danger-solid {
+	border-color: var(--danger, #c4314b);
+	background: var(--danger, #c4314b);
+	color: #fff;
+}
+
+.sheet-btn.danger-solid:hover {
+	filter: brightness(1.1);
+}
+
 .sheet-btn:disabled {
 	opacity: 0.5;
 	cursor: default;

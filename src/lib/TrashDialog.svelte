@@ -2,6 +2,7 @@
 	import { listTrash, purgeNote, emptyTrash, type NoteMeta } from './api';
 	import { workspace } from './workspace.svelte';
 	import KindIcon from './KindIcon.svelte';
+	import { confirmer } from './confirm.svelte';
 
 	let dialog: HTMLDialogElement | undefined = $state();
 	let items: NoteMeta[] = $state([]);
@@ -29,7 +30,8 @@
 
 	async function remove(meta: NoteMeta): Promise<void> {
 		const title = meta.title || 'Untitled';
-		if (!confirm(`Erase "${title}" for good? This cannot be undone.`)) return;
+		if (!(await confirmer.ask('Delete forever?', `"${title}" will be erased. This cannot be undone.`, 'Delete forever')))
+			return;
 		try {
 			await purgeNote(meta.id);
 			items = items.filter((item) => item.id !== meta.id);
@@ -41,7 +43,14 @@
 
 	async function clearTrash(): Promise<void> {
 		if (items.length === 0) return;
-		if (!confirm('Erase every note in the trash for good? This cannot be undone.')) return;
+		if (
+			!(await confirmer.ask(
+				'Empty the trash?',
+				'Every note in the trash will be erased. This cannot be undone.',
+				'Empty trash'
+			))
+		)
+			return;
 		try {
 			await emptyTrash();
 			items = [];
