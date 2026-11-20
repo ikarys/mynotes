@@ -8,8 +8,8 @@
 	import ChevronsLeft from '@lucide/svelte/icons/chevrons-left';
 	import Pin from '@lucide/svelte/icons/pin';
 	import PinOff from '@lucide/svelte/icons/pin-off';
-	import Lock from '@lucide/svelte/icons/lock';
-	import LockOpen from '@lucide/svelte/icons/lock-open';
+	import Lock from '@lucide/svelte/icons/lock-keyhole';
+	import LockOpen from '@lucide/svelte/icons/lock-keyhole-open';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	const LIMIT = 200;
@@ -118,7 +118,7 @@
 											</span>
 											{#if meta.locked}
 												<span class="note-flag" role="img" aria-label="Locked" title="Locked">
-													<Lock size={12} />
+													<Lock size={14} />
 												</span>
 											{/if}
 											<span class="note-time">{relativeTime(meta.updated_at)}</span>
