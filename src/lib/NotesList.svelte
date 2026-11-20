@@ -142,11 +142,13 @@
 											{#if meta.locked}<LockOpen size={14} />{:else}<Lock size={14} />{/if}
 										</button>
 										<button
-											class="note-action"
+											class="note-action danger"
 											aria-label="Move to trash"
 											title={meta.locked ? 'Unlock to move to trash' : 'Move to trash'}
 											disabled={meta.locked}
-											onclick={() => workspace.trash(meta.id)}
+											onclick={() => {
+												if (confirm(`Move "${meta.title || 'Untitled'}" to the trash?`)) void workspace.trash(meta.id);
+											}}
 										>
 											<Trash2 size={14} />
 										</button>
