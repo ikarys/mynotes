@@ -16,7 +16,7 @@ layout: default
           <path d="M5 21h14"></path>
         </svg>
         Download for Windows
-        <small>2.2 MB</small>
+        <small>2.9 MB</small>
       </a>
       <span class="actions-note">Windows 10/11 x64 · free, MIT</span>
     </div>
@@ -33,7 +33,7 @@ layout: default
           </svg>
         </div>
       </div>
-      <figcaption>Light or dark: mynotes follows the Windows theme. Drag to compare.</figcaption>
+      <figcaption>Light or dark: mynotes follows the Windows theme, or the one you pick, with your font and size. Drag to compare.</figcaption>
     </figure>
   </div>
 </section>
@@ -48,7 +48,7 @@ layout: default
 
       <div class="speed-readout">
         <div class="speed-top">
-          <p class="speed-value" aria-label="313 milliseconds">313<span class="unit">ms</span></p>
+          <p class="speed-value" aria-label="324 milliseconds">324<span class="unit">ms</span></p>
           <button class="speed-replay" type="button">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
               <path d="M3 12a9 9 0 1 0 3-6.7"></path>
@@ -78,16 +78,16 @@ layout: default
         <dd>at rest. Not a single millisecond of processor time in 10 seconds, window open.</dd>
       </div>
       <div>
-        <dt>4.4 MB</dt>
-        <dd>The whole app. The installer is 2.2 MB, smaller than a phone photo.</dd>
+        <dt>6.1 MB</dt>
+        <dd>The whole app. The installer is 2.9 MB, smaller than a phone photo.</dd>
       </div>
       <div>
-        <dt>178 MB RAM</dt>
+        <dt>184 MB RAM</dt>
         <dd>most of it the Windows web view engine the app draws with.</dd>
       </div>
     </dl>
 
-    <p class="speed-note">Measured on 2026-11-19 with v0.2.0 portable on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
+    <p class="speed-note">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
   </div>
 </section>
 
@@ -97,7 +97,7 @@ layout: default
       <h2>Ideas branch out. So do your notes.</h2>
       <p>Any note can be a mind map. Build it from the keyboard, as fast as you think, and export it as a PNG when it is ready to share.</p>
       <ul class="kbd-list">
-        <li><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>M</kbd> new mind map</li>
+        <li><kbd>Ctrl</kbd>&nbsp;<kbd>Shift</kbd>&nbsp;<kbd>M</kbd> new mind map</li>
         <li><kbd>Tab</kbd> add a child, <kbd>Enter</kbd> add a sibling</li>
         <li><kbd>F2</kbd> rename, right-click for more</li>
       </ul>
@@ -128,6 +128,22 @@ layout: default
   </div>
 </section>
 
+<section class="section">
+  <div class="wrap feature">
+    <div class="feature-copy">
+      <h2>Paste an image, keep writing.</h2>
+      <p>Images go straight into the note with <kbd>Ctrl</kbd>&nbsp;<kbd>V</kbd>, between the text and checklists around them. They are saved with your notes, on your disk, and copy back out with the text.</p>
+    </div>
+
+    <div class="feature-media frame">
+      <picture>
+        <source srcset="{{ '/assets/screenshots/image-dark.png' | relative_url }}" media="(prefers-color-scheme: dark)">
+        <img src="{{ '/assets/screenshots/image-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
+      </picture>
+    </div>
+  </div>
+</section>
+
 <section class="section section--border">
   <div class="wrap">
     <h2>Everything a quick note needs, nothing that slows it.</h2>
@@ -139,19 +155,19 @@ layout: default
       </div>
       <div>
         <dt>Rich text and pasted images</dt>
-        <dd>Select text to format it. Paste a screenshot or Markdown straight in. Code blocks colour JSON and YAML. <kbd>Ctrl</kbd> <kbd>H</kbd> finds and replaces.</dd>
+        <dd>Select text to format it. Paste a screenshot or Markdown straight in. Code blocks colour JSON and YAML. <kbd>Ctrl</kbd>&nbsp;<kbd>H</kbd> finds and replaces.</dd>
       </div>
       <div>
         <dt>One shortcut away</dt>
-        <dd><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Space</kbd> shows or hides the window from anywhere. Closing it keeps mynotes in the tray; it reopens where you left it.</dd>
+        <dd><kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> shows or hides the window from anywhere. Closing it keeps mynotes in the tray; it reopens where you left it.</dd>
       </div>
       <div>
         <dt>Yours, on your disk</dt>
         <dd>No account, no cloud: the only network call is the update check, and Settings turns it off. Open <code>.md</code> or <code>.txt</code>, save back as Markdown or plain text.</dd>
       </div>
       <div>
-        <dt>Light or dark</dt>
-        <dd>Follows the Windows theme, or pick one. Choose the font and size of your notes.</dd>
+        <dt>Pin and lock</dt>
+        <dd>Pin a note to keep it at the top of the list. Lock it so it cannot be trashed by mistake; it stays editable. Both are one click on the note in the list.</dd>
       </div>
       <div>
         <dt>Updates itself</dt>
@@ -172,7 +188,7 @@ layout: default
           <path d="M5 21h14"></path>
         </svg>
         Download for Windows
-        <small>2.2 MB</small>
+        <small>2.9 MB</small>
       </a>
     </div>
 

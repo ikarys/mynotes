@@ -378,7 +378,7 @@ kbd {
 }
 
 .speed-fill {
-  width: 31.3%;
+  width: 32.4%;
   height: 100%;
   border-radius: inherit;
   background: var(--accent);
@@ -396,7 +396,7 @@ kbd {
 }
 
 .speed-readout.is-playing .speed-fill {
-  animation: speed-fill 313ms linear;
+  animation: speed-fill 324ms linear;
 }
 
 .speed-ticks {

@@ -2,7 +2,8 @@
 // `npx vite build && npx vite preview --port 5799`, then in headless Playwright at 1440x900:
 // clear localStorage first (a saved font or theme would leak into the shots),
 // page.addInitScript({ path: 'scripts/screenshot-mock.js' }), emulateMedia({ colorScheme }),
-// open /?note=1 (note), Ctrl+P and type "li" (search), /?note=2 (mind map).
+// page.route('**/demo/pasted.png', r => r.fulfill({ path: 'docs/logo.png' })),
+// open /?note=1 (note), Ctrl+P and type "li" (search), /?note=2 (mind map), /?note=4 (pasted image).
 (() => {
   const now = Date.now();
   const notes = new Map();
@@ -151,18 +152,20 @@
       },
       {
         type: 'paragraph',
-        content: [{ type: 'text', text: 'Reviewed the new dashboard layout and agreed to keep the sidebar collapsed by default. The main concern was density on small screens.' }]
-      },
-      {
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'Next steps are to prototype the filter panel, collect feedback from two users, and schedule a follow-up review.' }]
-      },
-      {
-        type: 'bulletList',
         content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Reduce table row height' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Add keyboard shortcuts for filters' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Clarify empty state copy' }] }] }
+          { type: 'text', text: 'Reviewed the new ' },
+          { type: 'text', marks: [{ type: 'bold' }], text: 'app icon' },
+          { type: 'text', text: '. Everyone liked the fennec; keep the orange, simplify the notebook at small sizes.' }
+        ]
+      },
+      // Served by a Playwright route (see the header): the real app stores pasted images as asset URLs.
+      { type: 'image', attrs: { src: '/demo/pasted.png', alt: 'New app icon' } },
+      {
+        type: 'taskList',
+        content: [
+          { type: 'taskItem', attrs: { checked: true }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Export the icon at 16, 32 and 256 px' }] }] },
+          { type: 'taskItem', attrs: { checked: false }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Update the favicon' }] }] },
+          { type: 'taskItem', attrs: { checked: false }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Retake the screenshots in light and dark' }] }] }
         ]
       }
     ]

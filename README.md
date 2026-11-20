@@ -6,14 +6,14 @@
 
 A Windows notepad that opens in about 0.3 s, waits in the tray at 0 % CPU and remembers your notes without files: rich text, pasted images and mind maps, local only. Built with Tauri 2 and Svelte 5.
 
-**[Download for Windows](https://github.com/ikarys/mynotes/releases/latest)** (2.2 MB) · [Website](https://ikarys.github.io/mynotes/)
+**[Download for Windows](https://github.com/ikarys/mynotes/releases/latest)** (2.9 MB installer) · [Website](https://ikarys.github.io/mynotes/)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/note-dark.png">
   <img src="docs/assets/screenshots/note-light.png" alt="A note with a checklist and a JSON code block, notes list grouped by day." width="100%">
 </picture>
 
-Measured: opens in 313 ms (median of 7 launches, Windows 11, v0.2.0), 0 % CPU at rest, 4.4 MB app, 2.2 MB installer; method in [VERIFICATION.md](VERIFICATION.md).
+Measured: opens in 324 ms (median of 7 launches, Windows 11, commit af44dda after v0.3.0), 0 % CPU at rest, 6.1 MB app, 2.9 MB installer; method in [VERIFICATION.md](VERIFICATION.md).
 
 ## Install (Windows 10/11, x64)
 
@@ -44,9 +44,14 @@ The notes list on the left shows every note, grouped by day; the icon at the bot
 | <kbd>Ctrl</kbd>+<kbd>,</kbd> | Open settings |
 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd> | Show or hide the window (changeable) |
 
-Closing a note keeps it in the list. `Move to trash` in the `…` menu hides it. The Trash (left bar) restores it or erases it for good, and notes left there are erased after 30 days.
+Hover a note in the list to pin it to the top, lock it against deletion (it stays editable) or move it to the trash. Closing a note keeps it in the list. `Move to trash` in the `…` menu hides it. The Trash (left bar) restores it or erases it for good, and notes left there are erased after 30 days.
 
 Select text to format it; paste images or Markdown directly.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/image-dark.png">
+  <img src="docs/assets/screenshots/image-light.png" alt="A meeting note with the pasted app icon between a paragraph and a checklist." width="100%">
+</picture>
 
 A <code>```markdown</code> code block has a Preview button to switch between its source and the rendered result. A code block's language (Markdown, JSON, YAML) can be changed from the selector at its top right; JSON and YAML are coloured.
 
