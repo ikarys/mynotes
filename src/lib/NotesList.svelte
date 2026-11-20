@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { workspace } from './workspace.svelte';
 	import { sidebar } from './sidebar.svelte';
 	import type { NoteMeta } from './api';
@@ -32,6 +33,32 @@
 		return result;
 	});
 
+	let editingId = $state<number | null>(null);
+
+	function focusSelect(node: HTMLInputElement) {
+		node.focus();
+		node.select();
+	}
+
+	async function finishRename(meta: NoteMeta, value: string | null, refocus: boolean) {
+		if (editingId !== meta.id) return;
+		editingId = null;
+		if (value !== null && value.trim() !== meta.title) await workspace.rename(meta.id, value);
+		if (refocus) {
+			await tick();
+			document.querySelector<HTMLElement>(`[data-note-id="${meta.id}"]`)?.focus();
+		}
+	}
+
+	function renameKeys(event: KeyboardEvent, meta: NoteMeta) {
+		const input = event.currentTarget as HTMLInputElement;
+		if (event.key === 'Enter') void finishRename(meta, input.value, true);
+		else if (event.key === 'Escape') {
+			event.stopPropagation();
+			void finishRename(meta, null, true);
+		}
+	}
+
 	const countText = $derived(
 		workspace.notes.length > LIMIT
 			? `Latest ${LIMIT} of ${workspace.notes.length} notes`
@@ -51,23 +78,47 @@
 						{#each group.items as meta (meta.id)}
 							{@const excerpt = excerptFrom(meta.excerpt)}
 							<li>
-								<button
-									class="note"
-									class:active={meta.id === workspace.activeId}
-									aria-current={meta.id === workspace.activeId ? 'true' : undefined}
-									onclick={() => workspace.open(meta)}
-								>
-									<span class="note-top">
-										<KindIcon kind={meta.kind} size={14} />
-										<span class="note-title" class:untitled={!meta.title}>
-											{meta.title ? meta.title : 'Untitled'}
+								{#if editingId === meta.id}
+									<div class="note editing" class:active={meta.id === workspace.activeId}>
+										<span class="note-top">
+											<KindIcon kind={meta.kind} size={14} />
+											<input
+												class="note-rename"
+												aria-label="Note title"
+												placeholder="Automatic title"
+												maxlength={200}
+												value={meta.title}
+												use:focusSelect
+												onkeydown={(event) => renameKeys(event, meta)}
+												onblur={(event) => void finishRename(meta, event.currentTarget.value, false)}
+											/>
 										</span>
-										<span class="note-time">{relativeTime(meta.updated_at)}</span>
-									</span>
-									{#if excerpt}
-										<span class="note-excerpt">{excerpt}</span>
-									{/if}
-								</button>
+									</div>
+								{:else}
+									<button
+										class="note"
+										class:active={meta.id === workspace.activeId}
+										aria-current={meta.id === workspace.activeId ? 'true' : undefined}
+										aria-keyshortcuts="F2"
+										data-note-id={meta.id}
+										onclick={() => workspace.open(meta)}
+										ondblclick={() => (editingId = meta.id)}
+										onkeydown={(event) => {
+											if (event.key === 'F2') editingId = meta.id;
+										}}
+									>
+										<span class="note-top">
+											<KindIcon kind={meta.kind} size={14} />
+											<span class="note-title" class:untitled={!meta.title}>
+												{meta.title ? meta.title : 'Untitled'}
+											</span>
+											<span class="note-time">{relativeTime(meta.updated_at)}</span>
+										</span>
+										{#if excerpt}
+											<span class="note-excerpt">{excerpt}</span>
+										{/if}
+									</button>
+								{/if}
 							</li>
 						{/each}
 					</ul>

@@ -309,7 +309,8 @@
 			element.addEventListener('focusout', onPlace);
 			element.addEventListener('focusin', onPlace);
 			instance.selectNode(instance.findEle(instance.nodeData.id));
-			instance.container.focus({ preventScroll: true });
+			// Loading is async: a rename started in the notes list meanwhile keeps the focus.
+			if (!(document.activeElement instanceof HTMLInputElement)) instance.container.focus({ preventScroll: true });
 			ready = true;
 			requestAnimationFrame(place);
 			window.addEventListener('blur', flushAutosave);

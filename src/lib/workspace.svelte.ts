@@ -2,6 +2,7 @@ import { tick } from 'svelte';
 import {
 	createNote,
 	trashNote,
+	renameNote,
 	purgeNote,
 	restoreNote,
 	getSession,
@@ -154,10 +155,29 @@ class Workspace {
 
 	// Not persisted: the session holds only ids, and this runs on every keystroke.
 	update(id: number, patch: { title?: string; empty?: boolean }): void {
+		const meta = this.notes.find((n) => n.id === id);
+		// Editors report the title derived from content; a renamed note keeps its own.
+		const { title, ...rest } = patch;
+		const keepTitle = title !== undefined && !meta?.renamed;
 		const current = this.current;
-		if (current && current.id === id) Object.assign(current, patch);
-		const meta = patch.title === undefined ? undefined : this.notes.find((n) => n.id === id);
-		if (meta && patch.title !== undefined) meta.title = patch.title;
+		if (current && current.id === id) Object.assign(current, keepTitle ? patch : rest);
+		if (meta && keepTitle) meta.title = title;
+	}
+
+	async rename(id: number, title: string): Promise<void> {
+		try {
+			const effective = await renameNote(id, title);
+			const current = this.current;
+			if (current && current.id === id) {
+				current.title = effective;
+				// A renamed note is no longer the untouched draft that leaving would erase.
+				current.empty = false;
+			}
+			await this.refreshNotes();
+		} catch (err) {
+			console.error(err);
+			this.notify('Rename failed');
+		}
 	}
 
 	// Saves are not routed through here, so the list is re-read when the user switches

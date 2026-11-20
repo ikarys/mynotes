@@ -8,6 +8,7 @@ export interface NoteMeta {
 	title: string;
 	updated_at: number;
 	excerpt: string;
+	renamed: boolean;
 }
 
 export interface Note extends NoteMeta {
@@ -39,6 +40,10 @@ export async function createNote(kind: Kind): Promise<Note> {
 
 export async function saveNote(id: number, title: string, content: string, text: string): Promise<void> {
 	await invoke('save_note', { id, title, content, text });
+}
+
+export async function renameNote(id: number, title: string): Promise<string> {
+	return invoke<string>('rename_note', { id, title });
 }
 
 export async function trashNote(id: number): Promise<void> {

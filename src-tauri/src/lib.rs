@@ -118,6 +118,7 @@ pub fn run() {
             commands::load_note,
             commands::create_note,
             commands::save_note,
+            commands::rename_note,
             commands::trash_note,
             commands::list_trash,
             commands::restore_note,

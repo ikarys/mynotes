@@ -5,6 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 pub type Result<T> = rusqlite::Result<T>;
 
 pub const TRASH_DAYS: i64 = 30;
+pub const MAX_TITLE_CHARS: usize = 200;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -30,6 +31,8 @@ pub struct NoteMeta {
     pub updated_at: i64,
     /// Start of the plain text, so a list can show a preview without loading notes.
     pub excerpt: String,
+    /// True when a custom title is set, so the editor must not overwrite the shown title.
+    pub renamed: bool,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -84,9 +87,10 @@ impl Store {
     }
 
     pub fn load_note(&self, id: i64) -> Result<Option<Note>> {
-        let mut stmt = self
-            .conn
-            .prepare("SELECT id, kind, title, content, updated_at FROM notes WHERE id = ?")?;
+        let mut stmt = self.conn.prepare(
+            "SELECT id, kind, coalesce(custom_title, title), content, updated_at
+                 FROM notes WHERE id = ?",
+        )?;
         let mut rows = stmt.query_map(params![id], |row| {
             Ok(Note {
                 id: row.get(0)?,
@@ -105,10 +109,10 @@ impl Store {
 
     pub fn save_note(&self, id: i64, title: &str, content: &str, text: &str) -> Result<()> {
         let tx = self.conn.unchecked_transaction()?;
-        let previous: i64 = tx.query_row(
-            "SELECT updated_at FROM notes WHERE id = ?",
+        let (previous, custom_title): (i64, Option<String>) = tx.query_row(
+            "SELECT updated_at, custom_title FROM notes WHERE id = ?",
             params![id],
-            |row| row.get(0),
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )?;
         let now = now_ms();
         let updated = std::cmp::max(now, previous.saturating_add(1));
@@ -116,13 +120,53 @@ impl Store {
             "UPDATE notes SET title = ?1, content = ?2, updated_at = ?3 WHERE id = ?4",
             params![title, content, updated, id],
         )?;
+        let fts_title = custom_title.unwrap_or_else(|| title.to_string());
         tx.execute("DELETE FROM notes_fts WHERE rowid = ?", params![id])?;
         tx.execute(
             "INSERT INTO notes_fts(rowid, title, body) VALUES (?1, ?2, ?3)",
-            params![id, title, text],
+            params![id, fts_title, text],
         )?;
         tx.commit()?;
         Ok(())
+    }
+
+    pub fn rename_note(&self, id: i64, title: &str) -> Result<String> {
+        let tx = self.conn.unchecked_transaction()?;
+        let normalized: String = title.split_whitespace().collect::<Vec<_>>().join(" ");
+        let normalized: String = normalized.chars().take(MAX_TITLE_CHARS).collect();
+        let custom_title = if normalized.is_empty() {
+            None
+        } else {
+            Some(normalized)
+        };
+        let updated = tx.execute(
+            "UPDATE notes SET custom_title = ?1 WHERE id = ?2 AND deleted_at IS NULL",
+            params![custom_title, id],
+        )?;
+        if updated == 0 {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
+        let body: String = match tx.query_row(
+            "SELECT body FROM notes_fts WHERE rowid = ?",
+            params![id],
+            |row| row.get(0),
+        ) {
+            Ok(body) => body,
+            Err(rusqlite::Error::QueryReturnedNoRows) => String::new(),
+            Err(err) => return Err(err),
+        };
+        tx.execute("DELETE FROM notes_fts WHERE rowid = ?", params![id])?;
+        let effective_title: String = tx.query_row(
+            "SELECT coalesce(custom_title, title) FROM notes WHERE id = ?",
+            params![id],
+            |row| row.get(0),
+        )?;
+        tx.execute(
+            "INSERT INTO notes_fts(rowid, title, body) VALUES (?1, ?2, ?3)",
+            params![id, effective_title, body],
+        )?;
+        tx.commit()?;
+        Ok(effective_title)
     }
 
     pub fn trash_note(&self, id: i64) -> Result<()> {
@@ -139,7 +183,9 @@ impl Store {
 
     pub fn list_trash(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, kind, title, updated_at, '' FROM notes
+            "SELECT id, kind, coalesce(custom_title, title), updated_at, '',
+                    custom_title IS NOT NULL
+             FROM notes
              WHERE deleted_at IS NOT NULL
              ORDER BY deleted_at DESC, id DESC",
         )?;
@@ -221,7 +267,8 @@ impl Store {
 
     pub fn list_notes(&self) -> Result<Vec<NoteMeta>> {
         let mut stmt = self.conn.prepare(
-            "SELECT n.id, n.kind, n.title, n.updated_at, coalesce(substr(f.body, 1, 300), '')
+            "SELECT n.id, n.kind, coalesce(n.custom_title, n.title), n.updated_at,
+                    coalesce(substr(f.body, 1, 300), ''), n.custom_title IS NOT NULL
              FROM notes AS n
              LEFT JOIN notes_fts AS f ON f.rowid = n.id
              WHERE n.deleted_at IS NULL
@@ -238,7 +285,8 @@ impl Store {
             return Ok(recent);
         };
         let mut stmt = self.conn.prepare(
-            "SELECT n.id, n.kind, n.title, n.updated_at, substr(notes_fts.body, 1, 300)
+            "SELECT n.id, n.kind, coalesce(n.custom_title, n.title), n.updated_at,
+                    substr(notes_fts.body, 1, 300), n.custom_title IS NOT NULL
              FROM notes_fts
              JOIN notes AS n ON n.id = notes_fts.rowid
              WHERE notes_fts MATCH ?1 AND n.deleted_at IS NULL
@@ -347,6 +395,10 @@ fn init(conn: &Connection) -> Result<()> {
         conn.execute("ALTER TABLE notes ADD COLUMN deleted_at INTEGER", [])?;
         conn.pragma_update(None, "user_version", 2)?;
     }
+    if user_version < 3 {
+        conn.execute("ALTER TABLE notes ADD COLUMN custom_title TEXT", [])?;
+        conn.pragma_update(None, "user_version", 3)?;
+    }
     Ok(())
 }
 
@@ -364,6 +416,7 @@ fn meta_from_row(row: &rusqlite::Row<'_>) -> Result<NoteMeta> {
         title: row.get(2)?,
         updated_at: row.get(3)?,
         excerpt: row.get(4)?,
+        renamed: row.get(5)?,
     })
 }
 
@@ -724,6 +777,80 @@ mod tests {
         assert!(store.is_referenced("needle").unwrap());
         assert!(store.is_referenced("abc needle").unwrap());
         assert!(!store.is_referenced("missing").unwrap());
+    }
+
+    #[test]
+    fn rename_overrides_derived_title_and_survives_save() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(note.id, "Derived", "content", "text")
+            .unwrap();
+        let updated_before = store.load_note(note.id).unwrap().unwrap().updated_at;
+
+        let renamed = store.rename_note(note.id, "  My\n  name ").unwrap();
+        assert_eq!(renamed, "My name");
+
+        let list = store.list_notes().unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].title, "My name");
+        assert!(list[0].renamed);
+        assert_eq!(list[0].updated_at, updated_before);
+
+        store
+            .save_note(note.id, "Other", "content", "text")
+            .unwrap();
+        let list = store.list_notes().unwrap();
+        assert_eq!(list[0].title, "My name");
+        assert!(list[0].renamed);
+
+        assert_eq!(store.search("name").unwrap().len(), 1);
+        assert_eq!(store.load_note(note.id).unwrap().unwrap().title, "My name");
+    }
+
+    #[test]
+    fn rename_to_blank_restores_derived_title() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(note.id, "Derived", "content", "text")
+            .unwrap();
+        store.rename_note(note.id, "Custom").unwrap();
+        let restored = store.rename_note(note.id, "   ").unwrap();
+        assert_eq!(restored, "Derived");
+        let list = store.list_notes().unwrap();
+        assert_eq!(list[0].title, "Derived");
+        assert!(!list[0].renamed);
+    }
+
+    #[test]
+    fn rename_caps_length() {
+        let store = Store::open_in_memory().unwrap();
+        let note = store.create_note(Kind::Doc).unwrap();
+        let long = "x".repeat(500);
+        let renamed = store.rename_note(note.id, &long).unwrap();
+        assert_eq!(renamed.chars().count(), MAX_TITLE_CHARS);
+        let list = store.list_notes().unwrap();
+        assert_eq!(list[0].title.chars().count(), MAX_TITLE_CHARS);
+    }
+
+    #[test]
+    fn rename_missing_or_trashed_note_is_error() {
+        let store = Store::open_in_memory().unwrap();
+        assert!(matches!(
+            store.rename_note(999, "title").unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
+
+        let note = store.create_note(Kind::Doc).unwrap();
+        store
+            .save_note(note.id, "trash", "body", "trash me")
+            .unwrap();
+        store.trash_note(note.id).unwrap();
+        assert!(matches!(
+            store.rename_note(note.id, "title").unwrap_err(),
+            rusqlite::Error::QueryReturnedNoRows
+        ));
     }
 
     #[test]

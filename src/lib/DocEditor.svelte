@@ -151,7 +151,8 @@
 				element,
 				extensions,
 				content,
-				autofocus: 'end'
+				// Loading is async: a rename started in the notes list meanwhile keeps the focus.
+				autofocus: document.activeElement instanceof HTMLInputElement ? false : 'end'
 			});
 
 			editor.setOptions({
