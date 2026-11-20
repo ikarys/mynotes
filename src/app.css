@@ -96,25 +96,9 @@ body,
 	user-select: none;
 }
 
-.titlebar-note {
+.titlebar-app {
 	flex: 1;
-	min-width: 0;
-	display: flex;
-	align-items: center;
-	gap: 8px;
 	padding-left: 14px;
-	color: var(--muted);
-}
-
-.titlebar-title {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	color: var(--text);
-}
-
-.titlebar-title.muted {
-	font-style: italic;
 	color: var(--muted);
 }
 
