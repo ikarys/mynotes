@@ -6,7 +6,10 @@
 
 <!-- Bare areas carry the drag region, so the bar moves the window. -->
 <header class="titlebar" data-tauri-drag-region>
-	<span class="titlebar-app" data-tauri-drag-region>mynotes - {version}</span>
+	<span class="titlebar-app" data-tauri-drag-region>
+		<img src="/favicon.png" alt="" width="18" height="18" draggable="false" />
+		mynotes - {version}
+	</span>
 	<AppMenu />
 	<WindowControls />
 </header>
