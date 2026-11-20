@@ -23,15 +23,19 @@ one names a check you can run yourself.
 | 2026-11-18 | see git log | 4.9 MB | not measured yet (needs Windows) | not measured yet |
 | 2026-11-19 | `opt-level = "z"` | 4.4 MB | not measured yet (needs Windows) | not measured yet |
 | 2026-11-19 | v0.2.0 portable | 4.4 MB | 313 ms median (301 to 421 ms) | 178 MB, misses the 80 MB target |
+| 2026-11-20 | `af44dda` release build | 6.1 MB | 324 ms median (306 to 372 ms) | 184 MB, misses the 80 MB target |
 
-How the v0.2.0 row was measured, on Windows 11, Ryzen 9 9950X3D:
+How the v0.2.0 and `af44dda` rows were measured, on Windows 11, Ryzen 9 9950X3D:
 
 - Start: time from launching the exe to the main window becoming visible.
   The window is shown only once the frontend calls `app_ready`, so visible
-  means ready to type. 7 launches; the files were already in the OS cache,
+  means ready to type. The script waits for the window titled `mynotes`:
+  the single-instance plugin opens a hidden window first, and waiting for
+  any window handle would stop the clock at about 30 ms. 7 launches; the files were already in the OS cache,
   so a first start after a reboot is slower and is not measured.
 - RAM: private memory summed over `mynotes.exe` and its 6 WebView2
-  processes, window open. `mynotes.exe` alone is 16 MB; the WebView2 engine
+  processes, window open. `mynotes.exe` alone is 16 MB (v0.2.0), 8.5 MB
+  (`af44dda`); the WebView2 engine
   makes up the rest, so the 80 MB target is not met.
 - CPU at rest: 0 ms of processor time over 10 s, window open.
 

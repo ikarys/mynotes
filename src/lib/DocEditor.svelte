@@ -151,7 +151,8 @@
 				element,
 				extensions,
 				content,
-				autofocus: 'end'
+				// Loading is async: a rename started in the notes list meanwhile keeps the focus.
+				autofocus: document.activeElement instanceof HTMLInputElement ? false : 'end'
 			});
 
 			editor.setOptions({
@@ -187,7 +188,7 @@
 			window.addEventListener('blur', flush);
 			document.addEventListener('visibilitychange', onVisibilityChange);
 
-			actions = { copyMarkdown, saveAs };
+			actions = { copyMarkdown, saveAs, focus: () => editor?.commands.focus() };
 			workspace.setActions(actions);
 		} catch (err) {
 			console.error(err);

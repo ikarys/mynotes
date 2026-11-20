@@ -1,19 +1,31 @@
 <script lang="ts">
-	import Keyboard from '@lucide/svelte/icons/keyboard';
+	import X from '@lucide/svelte/icons/x';
 	import Monitor from '@lucide/svelte/icons/monitor';
 	import Sun from '@lucide/svelte/icons/sun';
 	import Moon from '@lucide/svelte/icons/moon';
-	import HardDrive from '@lucide/svelte/icons/hard-drive';
+	import FolderOpen from '@lucide/svelte/icons/folder-open';
 	import { workspace } from './workspace.svelte';
 	import { theme, type ThemeMode } from './theme.svelte';
 	import { typography, FONTS, MIN_SIZE, MAX_SIZE } from './typography.svelte';
 	import { updates } from './updates.svelte';
-	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir } from './api';
+	import { getHotkey, setHotkey, suspendHotkey, resumeHotkey, openDataDir, dataDirSize } from './api';
 
 	let dialog: HTMLDialogElement | undefined = $state();
 	let shortcutButton: HTMLButtonElement | undefined = $state();
 	let hotkey: string = $state('');
 	let recording: boolean = $state(false);
+	let dataSize: string = $state('');
+
+	function formatBytes(bytes: number): string {
+		const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+		let value = bytes;
+		let unit = 0;
+		while (value >= 1024 && unit < units.length - 1) {
+			value /= 1024;
+			unit++;
+		}
+		return `${unit === 0 ? value : value.toFixed(1)} ${units[unit]}`;
+	}
 
 	const modes: { mode: ThemeMode; label: string; icon: typeof Sun }[] = [
 		{ mode: 'system', label: 'System', icon: Monitor },
@@ -23,6 +35,11 @@
 
 	export function show(): void {
 		dialog?.showModal();
+		dataDirSize()
+			.then((bytes) => {
+				dataSize = formatBytes(bytes);
+			})
+			.catch((err) => console.error(err));
 		getHotkey()
 			.then((value) => {
 				hotkey = value;
@@ -93,77 +110,132 @@
 </script>
 
 <dialog class="sheet settings" bind:this={dialog} onclose={stopRecording}>
-	<h2 class="sheet-title">Settings</h2>
-
-	<section>
-		<h3 class="menu-label" id="theme-label">Theme</h3>
-		<div class="segmented" role="radiogroup" aria-labelledby="theme-label">
-			{#each modes as m (m.mode)}
-				<button role="radio" aria-checked={theme.mode === m.mode} title={m.label} onclick={() => theme.set(m.mode)}>
-					<m.icon size={14} />
-					{m.label}
-				</button>
-			{/each}
-		</div>
-	</section>
-
-	<section>
-		<h3 class="menu-label" id="text-label">Note text</h3>
-		<div class="stepper" role="group" aria-labelledby="text-label">
-			<select aria-label="Font" value={typography.font} onchange={(event) => typography.setFont(event.currentTarget.value)}>
-				{#each FONTS as font (font.id)}
-					<option value={font.id}>{font.label}</option>
-				{/each}
-			</select>
-			<button
-				aria-label="Smaller text"
-				disabled={typography.size <= MIN_SIZE}
-				onclick={() => typography.setSize(typography.size - 1)}>−</button
-			>
-			<output aria-label="Text size">{typography.size}px</output>
-			<button
-				aria-label="Larger text"
-				disabled={typography.size >= MAX_SIZE}
-				onclick={() => typography.setSize(typography.size + 1)}>+</button
-			>
-		</div>
-	</section>
-
-	<section>
-		<h3 class="menu-label" id="shortcut-label">Show/hide shortcut</h3>
-		<button
-			class="sheet-btn setting-control"
-			aria-labelledby="shortcut-label"
-			bind:this={shortcutButton}
-			onclick={startRecording}
-			onkeydown={handleShortcutKey}
-			onblur={stopRecording}
-		>
-			<Keyboard size={14} />
-			{#if recording}
-				Press a shortcut…
-			{:else}
-				<kbd>{hotkey}</kbd>
-			{/if}
+	<header class="settings-head">
+		<h2 class="sheet-title">Settings</h2>
+		<button class="tool" aria-label="Close" title="Close (Esc)" onclick={() => dialog?.close()}>
+			<X size={16} />
 		</button>
-	</section>
+	</header>
 
-	<section>
-		<h3 class="menu-label">Updates</h3>
-		<label class="setting-check">
-			<input type="checkbox" checked={updates.auto} onchange={() => updates.toggleAuto()} />
-			Check for updates at start
-		</label>
-	</section>
+	<div class="settings-body">
+		<section class="settings-group" aria-labelledby="set-appearance">
+			<h3 class="settings-group-title" id="set-appearance">Appearance</h3>
+			<div class="settings-card">
+				<div class="settings-row">
+					<div class="settings-text">
+						<div class="settings-label">Theme</div>
+					</div>
+					<div class="segmented" role="radiogroup" aria-label="Theme">
+						{#each modes as m (m.mode)}
+							<button role="radio" aria-checked={theme.mode === m.mode} title={m.label} onclick={() => theme.set(m.mode)}>
+								<m.icon size={14} />
+								{m.label}
+							</button>
+						{/each}
+					</div>
+				</div>
 
-	<section>
-		<h3 class="menu-label">Data</h3>
-		<button class="sheet-btn setting-control" onclick={() => openDataDir().catch((err) => console.error(err))}>
-			<HardDrive size={14} /> Open data folder
-		</button>
-	</section>
+				<div class="settings-row">
+					<div class="settings-text">
+						<div class="settings-label" id="set-font">Font</div>
+						<div class="settings-hint" id="set-font-hint">For the text of your notes</div>
+					</div>
+					<select
+						class="settings-select"
+						aria-label="Font"
+						aria-describedby="set-font-hint"
+						value={typography.font}
+						onchange={(event) => typography.setFont(event.currentTarget.value)}
+					>
+						{#each FONTS as font (font.id)}
+							<option value={font.id}>{font.label}</option>
+						{/each}
+					</select>
+				</div>
 
-	<div class="sheet-footer">
-		<button class="sheet-btn" onclick={() => dialog?.close()}>Close</button>
+				<div class="settings-row">
+					<div class="settings-text">
+						<div class="settings-label">Text size</div>
+					</div>
+					<div class="stepper" role="group" aria-label="Text size">
+						<button
+							aria-label="Smaller text"
+							disabled={typography.size <= MIN_SIZE}
+							onclick={() => typography.setSize(typography.size - 1)}>−</button
+						>
+						<output aria-label="Text size">{typography.size}px</output>
+						<button
+							aria-label="Larger text"
+							disabled={typography.size >= MAX_SIZE}
+							onclick={() => typography.setSize(typography.size + 1)}>+</button
+						>
+					</div>
+				</div>
+
+				<div class="settings-preview" aria-hidden="true">
+					Saturday: eggs, coffee, call the plumber before noon.
+				</div>
+			</div>
+		</section>
+
+		<section class="settings-group" aria-labelledby="set-keyboard">
+			<h3 class="settings-group-title" id="set-keyboard">Keyboard</h3>
+			<div class="settings-card">
+				<div class="settings-row">
+					<div class="settings-text">
+						<div class="settings-label" id="set-shortcut">Show or hide mynotes</div>
+						<div class="settings-hint" id="set-shortcut-hint">Works from any app. Click, then press the new keys.</div>
+					</div>
+					<button
+						class="settings-key"
+						class:recording={recording}
+						aria-labelledby="set-shortcut"
+						aria-describedby="set-shortcut-hint"
+						bind:this={shortcutButton}
+						onclick={startRecording}
+						onkeydown={handleShortcutKey}
+						onblur={stopRecording}
+					>
+						{#if recording}
+							Press keys…
+						{:else}
+							<kbd>{hotkey}</kbd>
+						{/if}
+					</button>
+				</div>
+			</div>
+		</section>
+
+		<section class="settings-group" aria-labelledby="set-updates">
+			<h3 class="settings-group-title" id="set-updates">Updates and data</h3>
+			<div class="settings-card">
+				<div class="settings-row">
+					<div class="settings-text">
+						<div class="settings-label" id="set-updates-check">Check for updates at start</div>
+						<div class="settings-hint" id="set-updates-check-hint">The only time mynotes goes online.</div>
+					</div>
+					<input
+						type="checkbox"
+						role="switch"
+						class="switch"
+						checked={updates.auto}
+						onchange={() => updates.toggleAuto()}
+						aria-labelledby="set-updates-check"
+						aria-describedby="set-updates-check-hint"
+					/>
+				</div>
+
+				<div class="settings-row">
+					<div class="settings-text">
+						<div class="settings-label" id="set-data-folder">Data folder{#if dataSize} ({dataSize}){/if}</div>
+						<div class="settings-hint" id="set-data-folder-hint">Your notes stay on this PC.</div>
+					</div>
+					<button class="settings-button" aria-describedby="set-data-folder-hint" onclick={() => openDataDir().catch((err) => console.error(err))}>
+						<FolderOpen size={14} />
+						Open
+					</button>
+				</div>
+			</div>
+		</section>
 	</div>
 </dialog>

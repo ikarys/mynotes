@@ -1,0 +1,240 @@
+.rail {
+	flex: none;
+	width: 44px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 0;
+	background: var(--chrome);
+	border-right: 1px solid var(--line);
+}
+
+.rail-spacer {
+	flex: 1;
+}
+
+.rail .on {
+	position: relative;
+	color: var(--text);
+}
+
+.rail .on::before {
+	content: '';
+	position: absolute;
+	left: -7px;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	border-radius: 1px;
+	background: var(--accent);
+}
+
+.notes {
+	flex: none;
+	min-height: 0;
+	width: 248px;
+	display: flex;
+	flex-direction: column;
+	background: var(--bg);
+	border-right: 1px solid var(--line);
+}
+
+.notes-scroll {
+	flex: 1;
+	overflow-y: auto;
+	padding: 4px 6px;
+}
+
+.notes-group {
+	margin: 0;
+	padding: 10px 8px 4px;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--muted);
+}
+
+.notes-items {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.note {
+	position: relative;
+	display: block;
+	width: 100%;
+	padding: 6px 8px;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+	text-align: left;
+	transition: background-color 120ms ease-out;
+}
+
+.note:hover {
+	background: var(--hover);
+}
+
+.note.active {
+	background: var(--surface);
+}
+
+.note.active::before {
+	content: '';
+	position: absolute;
+	top: 8px;
+	bottom: 8px;
+	left: 0;
+	width: 2px;
+	border-radius: 1px;
+	background: var(--accent);
+}
+
+.note:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+
+.note-top {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.note-top svg {
+	flex: none;
+	color: var(--muted);
+}
+
+.note-title {
+	flex: 1;
+	overflow: hidden;
+	font-weight: 500;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.note-title.untitled {
+	color: var(--muted);
+	font-style: italic;
+}
+
+.note-rename {
+	flex: 1;
+	min-width: 0;
+	padding: 1px 4px;
+	margin: -2px -4px;
+	border: 1px solid var(--accent);
+	border-radius: 4px;
+	background: var(--bg);
+	color: var(--text);
+	font: inherit;
+	font-weight: 500;
+	outline: none;
+}
+
+.note-rename::placeholder {
+	color: var(--muted);
+	font-style: italic;
+}
+
+.notes-items > li {
+	position: relative;
+}
+
+.note-flag {
+	display: grid;
+	flex: none;
+	color: var(--muted);
+}
+
+.note-actions {
+	position: absolute;
+	top: 50%;
+	right: 6px;
+	display: flex;
+	gap: 2px;
+	transform: translateY(-50%);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 120ms ease-out;
+}
+
+.notes-items > li:hover .note-actions,
+.notes-items > li:focus-within .note-actions {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* The actions take the place of the time, which would otherwise show through. */
+.notes-items > li:hover .note-time,
+.notes-items > li:focus-within .note-time {
+	min-width: 70px;
+	visibility: hidden;
+}
+
+.note-action {
+	width: 22px;
+	height: 22px;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	border: none;
+	border-radius: 4px;
+	background: transparent;
+	color: var(--muted);
+	transition:
+		background-color 120ms ease-out,
+		color 120ms ease-out;
+}
+
+.note-action:hover:not(:disabled) {
+	background: var(--hover);
+	color: var(--text);
+}
+
+.note-action.danger:not(:disabled) {
+	color: var(--danger, #c4314b);
+}
+
+.note-action:disabled {
+	opacity: 0.35;
+}
+
+.note-action:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+
+.note-time {
+	font-size: 11px;
+	color: var(--muted);
+	white-space: nowrap;
+}
+
+.notes-empty {
+	flex: 1;
+	margin: 0;
+	padding: 16px 14px;
+	color: var(--muted);
+}
+
+.notes-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 32px;
+	padding: 0 6px 0 14px;
+	border-top: 1px solid var(--line);
+	font-size: 12px;
+	color: var(--muted);
+}
+
+.notes-count {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}

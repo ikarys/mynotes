@@ -136,6 +136,24 @@ pub fn save_note(
 }
 
 #[tauri::command]
+pub fn rename_note(id: i64, title: String, state: State<'_, AppState>) -> Result<String, String> {
+    let store = lock(&state.store)?;
+    store.rename_note(id, &title).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub fn set_pinned(id: i64, pinned: bool, state: State<'_, AppState>) -> Result<(), String> {
+    let store = lock(&state.store)?;
+    store.set_pinned(id, pinned).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+pub fn set_locked(id: i64, locked: bool, state: State<'_, AppState>) -> Result<(), String> {
+    let store = lock(&state.store)?;
+    store.set_locked(id, locked).map_err(|err| err.to_string())
+}
+
+#[tauri::command]
 pub fn trash_note(id: i64, state: State<'_, AppState>) -> Result<(), String> {
     let store = lock(&state.store)?;
     store.trash_note(id).map_err(|err| err.to_string())

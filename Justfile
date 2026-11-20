@@ -21,3 +21,8 @@ test:
 lint:
     cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings
     npm run check
+
+# docs/index.html is a Jekyll source: opened directly it shows raw front matter.
+# Preview the GitHub Pages site at http://127.0.0.1:4000/mynotes/.
+site:
+    docker run --rm -p 127.0.0.1:4000:4000 -v "$PWD/docs":/srv/jekyll:ro jekyll/jekyll:3.8 jekyll serve -s /srv/jekyll -d /tmp/site -H 0.0.0.0 --force_polling

@@ -1,0 +1,7 @@
+title: mynotes
+description: "A Windows notepad that opens in 0.3 s and remembers your notes without files: rich text, pasted images and mind maps, local only."
+url: https://ikarys.github.io
+baseurl: /mynotes
+repo: https://github.com/ikarys/mynotes
+exclude: [logo-source.png]
+markdown: kramdown

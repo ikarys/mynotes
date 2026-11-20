@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { titleFrom } from './text';
+import { dayGroup, titleFrom } from './text';
 
 describe('titleFrom', () => {
 	it('skips blank lines', () => {
@@ -16,5 +16,16 @@ describe('titleFrom', () => {
 
 	it('returns empty string for empty input', () => {
 		expect(titleFrom('')).toBe('');
+	});
+});
+
+describe('dayGroup', () => {
+	const now = new Date(2026, 10, 19, 0, 10).getTime();
+
+	it('uses calendar days, not 24 hour windows', () => {
+		expect(dayGroup(new Date(2026, 10, 19, 0, 5).getTime(), now)).toBe('Today');
+		expect(dayGroup(new Date(2026, 10, 18, 23, 50).getTime(), now)).toBe('Yesterday');
+		expect(dayGroup(new Date(2026, 10, 18, 0, 0).getTime(), now)).toBe('Yesterday');
+		expect(dayGroup(new Date(2026, 10, 17, 23, 59).getTime(), now)).toBe('Earlier');
 	});
 });

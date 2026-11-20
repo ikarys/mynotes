@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 	import { appReady } from './lib/api';
 	import { updates } from './lib/updates.svelte';
 	import { workspace } from './lib/workspace.svelte';
-	import TabBar from './lib/TabBar.svelte';
+	import TitleBar from './lib/TitleBar.svelte';
+	import Rail from './lib/Rail.svelte';
+	import NotesList from './lib/NotesList.svelte';
 	import QuickSwitcher from './lib/QuickSwitcher.svelte';
 	import DocEditor from './lib/DocEditor.svelte';
 	import MindMapEditor from './lib/MindMapEditor.svelte';
 	import Toast from './lib/Toast.svelte';
+	import ConfirmDialog from './lib/ConfirmDialog.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Workflow from '@lucide/svelte/icons/workflow';
 	import './lib/theme.svelte';
@@ -39,18 +43,23 @@
 		} else if (key === 'w' && !e.shiftKey && !e.altKey) {
 			if (e.repeat) return;
 			e.preventDefault();
-			if (workspace.activeId !== null) void workspace.close(workspace.activeId);
+			void workspace.close();
 		} else if (key === 'tab') {
 			e.preventDefault();
-			workspace.cycle(e.shiftKey ? -1 : 1);
+			void workspace.cycle(e.shiftKey ? -1 : 1);
 		} else if (key === 'p' && !e.shiftKey && !e.altKey) {
 			e.preventDefault();
 			switcherOpen = !switcherOpen;
 		}
 	}
 
+	let unlistenFocus: UnlistenFn | undefined;
+
 	onMount(async () => {
 		window.addEventListener('keydown', onKeydown, true);
+		listen('focus-note', () => workspace.actions?.focus())
+			.then((fn) => (unlistenFocus = fn))
+			.catch((err) => console.error(err));
 
 		try {
 			await workspace.restore();
@@ -66,41 +75,47 @@
 
 	onDestroy(() => {
 		window.removeEventListener('keydown', onKeydown, true);
+		unlistenFocus?.();
 	});
 </script>
 
-<TabBar onsearch={() => (switcherOpen = true)} />
+<TitleBar />
 
-<main class="pane">
-	{#if active?.kind === 'doc'}
-		{#key active.id}
-			<DocEditor id={active.id} />
-		{/key}
-	{:else if active?.kind === 'mindmap'}
-		{#key active.id}
-			<MindMapEditor id={active.id} />
-		{/key}
-	{:else}
-		<div class="empty-state">
-			<div class="empty-title">No note open</div>
-			<div class="empty-actions">
-				<button class="empty-button" onclick={() => void workspace.newNote('doc')}>
-					<Plus size={16} />
-					New note
-				</button>
-				<button class="empty-button" onclick={() => void workspace.newNote('mindmap')}>
-					<Workflow size={16} />
-					New mind map
-				</button>
+<div class="body">
+	<Rail onsearch={() => (switcherOpen = true)} />
+	<NotesList />
+	<main class="pane">
+		{#if active?.kind === 'doc'}
+			{#key active.id}
+				<DocEditor id={active.id} />
+			{/key}
+		{:else if active?.kind === 'mindmap'}
+			{#key active.id}
+				<MindMapEditor id={active.id} />
+			{/key}
+		{:else}
+			<div class="empty-state">
+				<div class="empty-title">No note open</div>
+				<div class="empty-actions">
+					<button class="empty-button" onclick={() => void workspace.newNote('doc')}>
+						<Plus size={16} />
+						New note
+					</button>
+					<button class="empty-button" onclick={() => void workspace.newNote('mindmap')}>
+						<Workflow size={16} />
+						New mind map
+					</button>
+				</div>
+				<div class="shortcuts">
+					<kbd>Ctrl+N</kbd>
+					<kbd>Ctrl+Shift+M</kbd>
+					<kbd>Ctrl+P</kbd>
+				</div>
 			</div>
-			<div class="shortcuts">
-				<kbd>Ctrl+N</kbd>
-				<kbd>Ctrl+Shift+M</kbd>
-				<kbd>Ctrl+P</kbd>
-			</div>
-		</div>
-	{/if}
-</main>
+		{/if}
+	</main>
+</div>
 
 <QuickSwitcher bind:open={switcherOpen} />
 <Toast />
+<ConfirmDialog />
