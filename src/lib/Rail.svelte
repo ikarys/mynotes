@@ -6,7 +6,6 @@
 	import GitBranchPlus from '@lucide/svelte/icons/git-branch-plus';
 	import Search from '@lucide/svelte/icons/search';
 	import PanelLeft from '@lucide/svelte/icons/panel-left';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Settings from '@lucide/svelte/icons/settings';
 
 	let { onsearch }: { onsearch: () => void } = $props();
@@ -27,7 +26,12 @@
 		<PanelLeft size={16} />
 	</button>
 	<button class="tool" title="Trash" aria-label="Trash" onclick={() => appMenu.trash?.()}>
-		<Trash2 size={16} />
+		<!-- Lucide has no wastebasket; drawn in its style so the bin reads differently from the delete action. -->
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+			<path d="M3 5h18" />
+			<path d="M5 5l1.6 15.2A2 2 0 0 0 8.6 22h6.8a2 2 0 0 0 2-1.8L19 5" />
+			<path d="M9.5 9l.5 9M14.5 9l-.5 9M12 9v9" />
+		</svg>
 	</button>
 	<button class="tool" title="Settings (Ctrl+,)" aria-label="Settings" onclick={() => appMenu.settings?.()}>
 		<Settings size={16} />
