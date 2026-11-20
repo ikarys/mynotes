@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+  <meta property="og:title" content="{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}">
+  <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+  <meta property="og:image" content="{{ '/assets/screenshots/note-dark.png' | absolute_url }}">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fdfcfa">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1c1b19">
+  <link rel="icon" href="{{ '/assets/icon.png' | relative_url }}" type="image/png">
+  <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      <img src="{{ '/assets/icon.png' | relative_url }}" alt="" width="28" height="28">
+      <span>mynotes</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="https://github.com/ikarys/mynotes/releases/latest">Download</a>
+      <a href="{{ site.repo }}">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    {{ content }}
+  </main>
+
+  <footer class="site-footer">
+    <p>mynotes is written with AI assistance. Every number on this page was measured on a release build; how each claim is checked is in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
+    <p>MIT licence · <a href="{{ site.repo }}">github.com/ikarys/mynotes</a> · <a href="https://github.com/ikarys/mynotes/blob/main/SECURITY.md">Security</a></p>
+  </footer>
+
+  <script>
+    (function () {
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var compare = document.querySelector('.compare');
+      var range = compare ? compare.querySelector('.compare-range') : null;
+      var compareTouched = false;
+
+      if (range) {
+        range.addEventListener('input', function () {
+          compareTouched = true;
+          compare.style.setProperty('--pos', range.value + '%');
+        });
+        range.addEventListener('pointerdown', function () {
+          compareTouched = true;
+        });
+      }
+
+      if (compare && range && 'IntersectionObserver' in window) {
+        var compareSeen = false;
+        var compareObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting && !compareSeen && !compareTouched && !reduced) {
+              compareSeen = true;
+              compareObserver.disconnect();
+
+              var start = null;
+              var duration = 1200;
+
+              function ease(t) {
+                return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+              }
+
+              function tick(now) {
+                if (start === null) start = now;
+                var t = (now - start) / duration;
+                if (t > 1) t = 1;
+
+                var p = t < 0.5 ? t * 2 : (1 - t) * 2;
+                var pos = 50 - 12 * ease(p);
+
+                range.value = String(Math.round(pos));
+                compare.style.setProperty('--pos', pos + '%');
+
+                if (t < 1) requestAnimationFrame(tick);
+              }
+
+              requestAnimationFrame(tick);
+            }
+          });
+        }, { threshold: 0.5 });
+
+        compareObserver.observe(compare);
+      }
+
+      var speed = document.querySelector('.speed');
+      var fill = speed ? speed.querySelector('.speed-fill') : null;
+      var replay = speed ? speed.querySelector('.speed-replay') : null;
+
+      function playSpeed() {
+        if (!fill) return;
+
+        if (reduced) {
+          fill.style.transform = 'scaleX(1)';
+          return;
+        }
+
+        if (fill.getAnimations) {
+          fill.getAnimations().forEach(function (animation) {
+            animation.cancel();
+          });
+        }
+
+        fill.style.transform = 'scaleX(0)';
+
+        if (fill.animate) {
+          fill.animate(
+            [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+            { duration: 313, easing: 'linear', fill: 'forwards' }
+          );
+        } else {
+          fill.style.transform = 'scaleX(1)';
+        }
+      }
+
+      if (fill) {
+        fill.style.transform = reduced ? 'scaleX(1)' : 'scaleX(0)';
+      }
+
+      if (replay) {
+        replay.addEventListener('click', playSpeed);
+      }
+
+      if (speed && fill) {
+        if ('IntersectionObserver' in window) {
+          var speedSeen = false;
+          var speedObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting && !speedSeen) {
+                speedSeen = true;
+                speedObserver.disconnect();
+                playSpeed();
+              }
+            });
+          }, { threshold: 0.6 });
+
+          speedObserver.observe(speed);
+        } else {
+          playSpeed();
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
