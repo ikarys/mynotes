@@ -99,7 +99,7 @@ kbd{display:inline-block;min-width:1.6em;padding:0 6px;border:1px solid var(--li
 .code code{background:none;padding:0}
 .code b{font-weight:400;color:var(--accent-text)}
 .code i{font-style:normal;color:var(--code-string)}
-.aside{margin-top:24px!important;padding-left:14px;border-left:2px solid var(--line);font-size:14px!important;color:var(--muted)}
+.aside{margin-top:24px!important;font-size:14px!important;color:var(--muted)}
 
 .shot{width:100%;height:auto;margin:22px 0;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(20,18,30,.1)}
 .figures{list-style:none;padding:0!important;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px 32px;margin:28px 0!important}
