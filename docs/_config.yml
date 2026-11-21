@@ -3,5 +3,5 @@ description: "A Windows notepad that opens in 0.3 s and remembers your notes wit
 url: https://ikarys.github.io
 baseurl: /mynotes
 repo: https://github.com/ikarys/mynotes
-exclude: [logo-source.png]
+exclude: [DESIGN.md, logo-source.png, icon-source.png]
 markdown: kramdown

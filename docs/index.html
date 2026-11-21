@@ -2,209 +2,89 @@
 layout: default
 ---
 
-<section class="hero">
-  <div class="wrap">
-    <img class="logo" src="{{ '/logo.png' | relative_url }}" alt="mynotes fennec fox logo" width="120" height="120">
-    <h1>The notepad that is <em>already open</em>.</h1>
-    <p class="lede">mynotes opens in 0.3 s, waits in the tray at 0 % CPU and appears on a shortcut. Write, sketch a mind map, close: it is saved.</p>
-
-    <div class="actions">
-      <a class="btn-primary" href="https://github.com/ikarys/mynotes/releases/latest">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M12 3v12"></path>
-          <path d="M7 10l5 5 5-5"></path>
-          <path d="M5 21h14"></path>
-        </svg>
-        Download for Windows
-        <small>2.9 MB</small>
-      </a>
-      <span class="actions-note">Windows 10/11 x64 · also for <a href="#install">Linux</a> · free, MIT</span>
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      <p class="brand"><img src="{{ '/assets/icon.png' | relative_url }}" alt="" width="28" height="28">mynotes</p>
+      <h1>Write it down now. Find it next month.</h1>
+      <p class="sub">mynotes is a free notepad for Windows and Linux. Every note is kept as you type, and three letters of search bring any of them back.</p>
+      <p class="cta">
+        <a class="btn" href="https://github.com/ikarys/mynotes/releases/latest"><svg width="18" height="18" aria-hidden="true" focusable="false"><use href="#i-download"></use></svg><span>Download for Windows <small>2.9 MB</small></span></a>
+        <a class="cta-alt" href="#install">Also for Linux</a>
+      </p>
     </div>
-
-    <figure class="compare" style="--pos:50%">
-      <div class="compare-view">
-        <img src="{{ '/assets/screenshots/note-light.png' | relative_url }}" alt="mynotes in light theme: a note with a checklist, a list and a JSON code block, the notes list grouped by day on the left" width="1440" height="900">
-        <img class="compare-dark" src="{{ '/assets/screenshots/note-dark.png' | relative_url }}" alt="The same note in dark theme" width="1440" height="900">
-        <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Compare light and dark themes">
-        <div class="compare-handle" aria-hidden="true">
-          <svg class="compare-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 6l-4 6 4 6"></path>
-            <path d="M15 6l4 6-4 6"></path>
-          </svg>
-        </div>
-      </div>
-      <figcaption>Light or dark: mynotes follows the system theme, or the one you pick, with your font and size. Drag to compare.</figcaption>
-    </figure>
+    <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox hugging a notepad" width="760" height="627" fetchpriority="high">
   </div>
-</section>
+</header>
 
-<section class="section speed section--border">
-  <div class="wrap">
-    <div class="speed-grid">
-      <div class="speed-copy">
-        <h2>Open before the thought is gone.</h2>
-        <p>No splash screen, no loading spinner, nothing busy in the background. The bar fills in exactly the time mynotes takes to open.</p>
-      </div>
+<div class="wrap">
+  <img class="shot shot--hero" src="{{ '/assets/screenshots/note-light.png' | relative_url }}" width="1440" height="900" alt="mynotes with a trip note open: a checklist, a list of places and a JSON code block, the notes list grouped by day on the left">
+</div>
 
-      <div class="speed-readout">
-        <div class="speed-top">
-          <p class="speed-value" aria-label="324 milliseconds">324<span class="unit">ms</span></p>
-          <button class="speed-replay" type="button">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-              <path d="M3 4v5h5"></path>
-            </svg>
-            Replay
-          </button>
-        </div>
+<main class="wrap">
+  <section class="point point--solo">
+    <h2>You never save, you never name a file.</h2>
+    <p>Every edit is written to disk as you type. Close the window mid-sentence; the sentence is there tomorrow. The days of <em>New Text Document (3).txt</em> are over.</p>
+    <p class="proof">Deleted notes wait 30 days in the Trash before they are erased.</p>
+  </section>
 
-        <div class="speed-track" aria-hidden="true">
-          <div class="speed-fill"></div>
-        </div>
-
-        <div class="speed-ticks" aria-hidden="true">
-          <span>launch</span>
-          <span>0.25 s</span>
-          <span>0.5 s</span>
-          <span>0.75 s</span>
-          <span>1 s</span>
-        </div>
-      </div>
+  <section class="point">
+    <div class="point-text">
+      <h2>Find any note in three letters.</h2>
+      <p>One search covers every note you ever wrote, open or closed, by the words inside it. You never named a file, so there is nothing to remember.</p>
     </div>
+    <img class="shot" src="{{ '/assets/screenshots/search-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The search open over a note, finding two notes that match">
+  </section>
 
-    <dl class="speed-stats">
+  <section class="point">
+    <div class="point-text">
+      <h2>Always one shortcut away, never in the way.</h2>
+      <p>A shortcut shows the window from any app, already drawn. The rest of the time mynotes waits in the tray and uses no processor time.</p>
+      <p class="proof">Measured on a release build: <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md#latest-measurements">how, and on which PC</a>.</p>
+    </div>
+    <ul class="figures">
+      <li><strong>5.3 ms</strong> from the shortcut to the window</li>
+      <li><strong>0 % CPU</strong> while it waits in the tray</li>
+      <li><strong>0.3 s</strong> to open from a cold start</li>
+    </ul>
+  </section>
+
+  <section class="point">
+    <div class="point-text">
+      <h2>More than plain text when you need it.</h2>
+      <p>Checklists, pasted screenshots, coloured JSON and YAML, and Markdown pasted straight in. Select a word to format it.</p>
+    </div>
+    <img class="shot" src="{{ '/assets/screenshots/image-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with a pasted image between a paragraph and a checklist">
+  </section>
+
+  <section class="point">
+    <div class="point-text">
+      <h2>When a note turns into a plan, make it a mind map.</h2>
+      <p>Any note can become a mind map, and it grows from the keyboard: Tab adds a branch, Enter adds a sibling. When it is ready to share, export it as a PNG.</p>
+    </div>
+    <img class="shot" src="{{ '/assets/screenshots/mindmap-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A mind map titled Q1 side projects with four coloured branches">
+  </section>
+
+  <section class="point point--solo">
+    <h2>Your notes stay on your PC.</h2>
+    <p>There is no account and no cloud. The only network call is the update check, and Settings turns it off. Notes open from and save back to <code>.md</code> or <code>.txt</code> whenever you want a file.</p>
+    <p class="proof">Free and open source under the MIT licence. <a href="{{ site.repo }}">Read the code</a>.</p>
+  </section>
+
+  <section class="install" id="install">
+    <h2>Install</h2>
+    <div class="install-grid">
       <div>
-        <dt>0 % CPU</dt>
-        <dd>at rest. Not a single millisecond of processor time in 10 seconds, window open.</dd>
-      </div>
-      <div>
-        <dt>6.1 MB</dt>
-        <dd>The whole app. The installer is 2.9 MB, smaller than a phone photo.</dd>
-      </div>
-      <div>
-        <dt>184 MB RAM</dt>
-        <dd>most of it the Windows web view engine the app draws with.</dd>
-      </div>
-    </dl>
-
-    <p class="speed-note">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap feature">
-    <div class="feature-copy">
-      <h2>Ideas branch out. So do your notes.</h2>
-      <p>Any note can be a mind map. Build it from the keyboard, as fast as you think, and export it as a PNG when it is ready to share.</p>
-      <ul class="kbd-list">
-        <li><kbd>Ctrl</kbd>&nbsp;<kbd>Shift</kbd>&nbsp;<kbd>M</kbd> new mind map</li>
-        <li><kbd>Tab</kbd> add a child, <kbd>Enter</kbd> add a sibling</li>
-        <li><kbd>F2</kbd> rename, right-click for more</li>
-      </ul>
-    </div>
-
-    <div class="feature-media frame">
-      <picture>
-        <source srcset="{{ '/assets/screenshots/mindmap-dark.png' | relative_url }}" media="(prefers-color-scheme: dark)">
-        <img src="{{ '/assets/screenshots/mindmap-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A mind map titled Q1 side projects with four coloured branches">
-      </picture>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap feature feature--mirror">
-    <div class="feature-media frame">
-      <picture>
-        <source srcset="{{ '/assets/screenshots/search-dark.png' | relative_url }}" media="(prefers-color-scheme: dark)">
-        <img src="{{ '/assets/screenshots/search-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The quick switcher open over a note, finding two notes that match the search">
-      </picture>
-    </div>
-
-    <div class="feature-copy">
-      <h2>Find anything with Ctrl P.</h2>
-      <p>Full-text search across every note you ever wrote, open or closed. The notes list on the left groups them by day, pinned notes first.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap feature">
-    <div class="feature-copy">
-      <h2>Paste an image, keep writing.</h2>
-      <p>Images go straight into the note with <kbd>Ctrl</kbd>&nbsp;<kbd>V</kbd>, between the text and checklists around them. They are saved with your notes, on your disk, and copy back out with the text.</p>
-    </div>
-
-    <div class="feature-media frame">
-      <picture>
-        <source srcset="{{ '/assets/screenshots/image-dark.png' | relative_url }}" media="(prefers-color-scheme: dark)">
-        <img src="{{ '/assets/screenshots/image-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
-      </picture>
-    </div>
-  </div>
-</section>
-
-<section class="section section--border">
-  <div class="wrap">
-    <h2>Everything a quick note needs, nothing that slows it.</h2>
-
-    <dl class="features-list">
-      <div>
-        <dt>Never asks to save</dt>
-        <dd>Every edit is written to a local database as you type, on blur and on close. Deleted notes wait 30 days in the Trash.</dd>
+        <h3>Windows 10 and 11</h3>
+        <p><strong>setup.exe</strong> installs for your user only, without admin rights. <strong>portable.exe</strong> runs from anywhere.</p>
+        <p class="note">Both are unsigned, so SmartScreen warns on first launch: click <em>More info</em>, then <em>Run anyway</em>.</p>
       </div>
       <div>
-        <dt>Rich text and pasted images</dt>
-        <dd>Select text to format it. Paste a screenshot or Markdown straight in. Code blocks colour JSON and YAML. <kbd>Ctrl</kbd>&nbsp;<kbd>H</kbd> finds and replaces.</dd>
+        <h3>Linux</h3>
+        <p>An <strong>AppImage</strong> that updates itself, or a <strong>.deb</strong>, for Ubuntu 22.04 or newer on x86_64.</p>
+        <p class="note">The AppImage needs <code>libfuse2</code>. On Wayland the global shortcut does not work.</p>
       </div>
-      <div>
-        <dt>One shortcut away</dt>
-        <dd><kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> shows or hides the window from anywhere. Closing it keeps mynotes in the tray; it reopens where you left it.</dd>
-      </div>
-      <div>
-        <dt>Yours, on your disk</dt>
-        <dd>No account, no cloud: the only network call is the update check, and Settings turns it off. Open <code>.md</code> or <code>.txt</code>, save back as Markdown or plain text.</dd>
-      </div>
-      <div>
-        <dt>Pin and lock</dt>
-        <dd>Pin a note to keep it at the top of the list. Lock it so it cannot be trashed by mistake; it stays editable. Both are one click on the note in the list.</dd>
-      </div>
-      <div>
-        <dt>Updates itself</dt>
-        <dd>The installed app updates from the … menu; each update is signature-checked.</dd>
-      </div>
-    </dl>
-  </div>
-</section>
-
-<section class="install" id="install">
-  <div class="wrap">
-    <div class="install-copy">
-      <h2>Install in a few seconds.</h2>
-      <a class="btn-primary" href="https://github.com/ikarys/mynotes/releases/latest">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M12 3v12"></path>
-          <path d="M7 10l5 5 5-5"></path>
-          <path d="M5 21h14"></path>
-        </svg>
-        Download
-        <small>Windows · Linux</small>
-      </a>
     </div>
-
-    <div class="install-details">
-      <p>Grab a file from the <a href="https://github.com/ikarys/mynotes/releases/latest">latest release</a>. On Windows 10/11:</p>
-      <ul class="install-list">
-        <li><strong>setup.exe</strong> installs for your user only, no admin rights, with a Start menu entry and an uninstaller.</li>
-        <li><strong>portable.exe</strong> runs from anywhere, nothing installed.</li>
-      </ul>
-      <p>Both are unsigned, so Windows SmartScreen warns on first launch: click <em>More info</em>, then <em>Run anyway</em>. Uninstalling keeps your notes unless you tick <em>Delete the application data</em>.</p>
-      <p>On Linux (Ubuntu 22.04 or newer, x86_64):</p>
-      <ul class="install-list">
-        <li><strong>AppImage</strong> runs from anywhere once made executable, and updates itself. It needs FUSE&nbsp;2 (<code>libfuse2</code>).</li>
-        <li><strong>.deb</strong> installs with <code>sudo apt install ./mynotes-…-linux-amd64.deb</code>; the app points you to each new version.</li>
-      </ul>
-      <p>On Wayland the <kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> shortcut does not work, and GNOME needs the AppIndicator extension for the tray icon. <code>SHA256SUMS</code> in the release lets you check any download.</p>
-    </div>
-  </div>
-</section>
+    <p class="cta"><a class="btn" href="https://github.com/ikarys/mynotes/releases/latest"><svg width="18" height="18" aria-hidden="true" focusable="false"><use href="#i-download"></use></svg><span>Download mynotes</span></a></p>
+  </section>
+</main>
