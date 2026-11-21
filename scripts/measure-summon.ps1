@@ -1,7 +1,9 @@
-# Times Ctrl+Alt+Space -> mynotes window visible, with mynotes already running in the tray.
-# Run from a Windows PowerShell console: powershell -ExecutionPolicy Bypass -File scripts\measure-summon.ps1
+# Times the global hotkey -> mynotes window visible, with mynotes already running in the tray.
+# Run from a Windows PowerShell console: powershell -ExecutionPolicy Bypass -File scripts\measure-summon.ps1 [-Hotkey Ctrl+Space]
+# -Hotkey must match the shortcut set in mynotes; another app owning the same chord steals the key presses.
 
 param(
+    [string]$Hotkey = 'Ctrl+Alt+Space',
     [int]$Runs = 15,
     [int]$PauseMs = 600
 )
@@ -68,22 +70,26 @@ public static class WinApi
         return shown;
     }
 
-    public static void SendHotkey()
+    public static void SendHotkey(byte[] keys)
     {
         const uint KEYEVENTF_KEYUP = 2;
-
-        keybd_event(0x11, 0, 0, UIntPtr.Zero);
-        keybd_event(0x12, 0, 0, UIntPtr.Zero);
-        keybd_event(0x20, 0, 0, UIntPtr.Zero);
-        keybd_event(0x20, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-        keybd_event(0x12, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-        keybd_event(0x11, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        for (int i = 0; i < keys.Length; i++) keybd_event(keys[i], 0, 0, UIntPtr.Zero);
+        for (int i = keys.Length - 1; i >= 0; i--) keybd_event(keys[i], 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
     }
 }
 '@
 
 if (-not ('WinApi' -as [type])) {
     Add-Type -TypeDefinition $csharp -Language CSharp
+}
+
+$vk = @{ ctrl = 0x11; control = 0x11; alt = 0x12; shift = 0x10; win = 0x5B; space = 0x20 }
+[byte[]]$keys = foreach ($name in $Hotkey.ToLower().Split('+')) {
+    $name = $name.Trim()
+    if ($vk.ContainsKey($name)) { $vk[$name] }
+    elseif ($name -match '^[a-z0-9]$') { [byte][char]$name.ToUpper() }
+    elseif ($name -match '^f([1-9]|1[0-2])$') { 0x6F + [int]$Matches[1] }
+    else { Write-Error "Unknown key '$name' in -Hotkey."; exit 1 }
 }
 
 $procs = Get-Process -Name mynotes -ErrorAction SilentlyContinue
@@ -108,7 +114,7 @@ function Ensure-Hidden {
     # Visible-but-unfocused windows need two toggles: first focuses, second hides.
     for ($attempt = 1; $attempt -le 3; $attempt++) {
         if (-not [WinApi]::IsShown($Pids)) { return $true }
-        [WinApi]::SendHotkey()
+        [WinApi]::SendHotkey($keys)
         if (Wait-Hidden -Pids $Pids -TimeoutMs 2000) { return $true }
     }
     return $false
@@ -133,7 +139,7 @@ for ($run = 1; $run -le $Runs; $run++) {
 
     Start-Sleep -Milliseconds $PauseMs
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    [WinApi]::SendHotkey()
+    [WinApi]::SendHotkey($keys)
 
     $shown = $false
     # Busy-poll so the measured interval is not inflated by a sleep.
@@ -154,7 +160,7 @@ for ($run = 1; $run -le $Runs; $run++) {
     }
 
     Start-Sleep -Milliseconds $PauseMs
-    [WinApi]::SendHotkey()
+    [WinApi]::SendHotkey($keys)
     if (-not (Wait-Hidden -Pids $pids -TimeoutMs 5000)) {
         # A show timeout can leave a hidden window toggled visible by the hide attempt.
         if (-not (Ensure-Hidden -Pids $pids)) {
