@@ -9,9 +9,10 @@
   <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
   <meta property="og:image" content="{{ '/assets/screenshots/note-dark.png' | absolute_url }}">
   <meta property="og:type" content="website">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fdfcfa">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1c1b19">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08090b">
   <link rel="icon" href="{{ '/assets/icon.png' | relative_url }}" type="image/png">
+  <link rel="preload" href="{{ '/assets/fonts/Oxanium.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
 </head>
 <body>
@@ -37,115 +38,58 @@
 
   <script>
     (function () {
-      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var bank = document.querySelector('.bank');
+      var fill = bank.querySelector('.bar-fill');
+      var counters = [].slice.call(document.querySelectorAll('[data-target]'));
 
-      var compare = document.querySelector('.compare');
-      var range = compare ? compare.querySelector('.compare-range') : null;
-      var compareTouched = false;
-
-      if (range) {
-        range.addEventListener('input', function () {
-          compareTouched = true;
-          compare.style.setProperty('--pos', range.value + '%');
+      // The HTML already shows the final digits (no-JS); here each tube gets all ten digits to light one at a time.
+      counters.forEach(function (c) {
+        c.tubes = [].map.call(c.querySelectorAll('.tube'), function (t) {
+          var h = '';
+          for (var d = 0; d < 10; d++) h += '<span class="d">' + d + '</span>';
+          t.innerHTML = h;
+          return t.querySelectorAll('.d');
         });
-        range.addEventListener('pointerdown', function () {
-          compareTouched = true;
+      });
+
+      function render(group, f) {
+        group.forEach(function (c) {
+          var s = String(Math.round(+c.dataset.target * f));
+          while (s.length < c.tubes.length) s = '0' + s;
+          c.tubes.forEach(function (ds, i) {
+            [].forEach.call(ds, function (d, k) { d.classList.toggle('on', k === +s[i]); });
+          });
         });
+        if (group === main) fill.style.transform = 'scaleX(' + f + ')';
       }
 
-      if (compare && range && 'IntersectionObserver' in window) {
-        var compareSeen = false;
-        var compareObserver = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting && !compareSeen && !compareTouched && !reduced) {
-              compareSeen = true;
-              compareObserver.disconnect();
-
-              var start = null;
-              var duration = 1200;
-
-              function ease(t) {
-                return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-              }
-
-              function tick(now) {
-                if (start === null) start = now;
-                var t = (now - start) / duration;
-                if (t > 1) t = 1;
-
-                var p = t < 0.5 ? t * 2 : (1 - t) * 2;
-                var pos = 50 - 12 * ease(p);
-
-                range.value = String(Math.round(pos));
-                compare.style.setProperty('--pos', pos + '%');
-
-                if (t < 1) requestAnimationFrame(tick);
-              }
-
-              requestAnimationFrame(tick);
-            }
-          });
-        }, { threshold: 0.5 });
-
-        compareObserver.observe(compare);
+      function run(group) {
+        cancelAnimationFrame(group.raf);
+        if (reduced) return render(group, 1);
+        var t0 = performance.now();
+        (function frame(t) {
+          var e = Math.min(324, t - t0);
+          render(group, e / 324);
+          if (e < 324) group.raf = requestAnimationFrame(frame);
+        })(t0);
       }
 
-      var speed = document.querySelector('.speed');
-      var fill = speed ? speed.querySelector('.speed-fill') : null;
-      var replay = speed ? speed.querySelector('.speed-replay') : null;
+      // The big bank and the stat tubes sit far apart, so each group counts when it scrolls into view.
+      var main = counters.filter(function (c) { return bank.contains(c); });
+      var stats = counters.filter(function (c) { return !bank.contains(c); });
+      bank.querySelector('.replay').addEventListener('click', function () { run(main); });
 
-      function playSpeed() {
-        if (!fill) return;
-
-        if (reduced) {
-          fill.style.transform = 'scaleX(1)';
-          return;
-        }
-
-        if (fill.getAnimations) {
-          fill.getAnimations().forEach(function (animation) {
-            animation.cancel();
-          });
-        }
-
-        fill.style.transform = 'scaleX(0)';
-
-        if (fill.animate) {
-          fill.animate(
-            [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
-            { duration: 324, easing: 'linear', fill: 'forwards' }
-          );
-        } else {
-          fill.style.transform = 'scaleX(1)';
-        }
-      }
-
-      if (fill) {
-        fill.style.transform = reduced ? 'scaleX(1)' : 'scaleX(0)';
-      }
-
-      if (replay) {
-        replay.addEventListener('click', playSpeed);
-      }
-
-      if (speed && fill) {
-        if ('IntersectionObserver' in window) {
-          var speedSeen = false;
-          var speedObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting && !speedSeen) {
-                speedSeen = true;
-                speedObserver.disconnect();
-                playSpeed();
-              }
-            });
-          }, { threshold: 0.6 });
-
-          speedObserver.observe(speed);
-        } else {
-          playSpeed();
-        }
-      }
+      [[main, bank], [stats, stats[0] && stats[0].closest('dl')]].forEach(function (g) {
+        if (!g[1]) return;
+        if (reduced) return render(g[0], 1);
+        render(g[0], 0);
+        if (!('IntersectionObserver' in window)) return run(g[0]);
+        var io = new IntersectionObserver(function (es) {
+          if (es[0].isIntersecting) { io.disconnect(); run(g[0]); }
+        }, { threshold: 0.6 });
+        io.observe(g[1]);
+      });
     })();
   </script>
 </body>
