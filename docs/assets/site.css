@@ -27,7 +27,9 @@ code{font:.88em var(--mono);background:var(--chrome);padding:1px 5px;border-radi
 .hero ::selection{background:#fff;color:var(--ink)}
 .hero :focus-visible{outline-color:#fff}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:32px}
-.brand{display:flex;align-items:center;gap:10px;margin:0 0 56px;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px 24px;margin-bottom:56px}
+.topbar a{color:#fff;font-weight:600}
+.brand{display:flex;align-items:center;gap:10px;margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em}
 .brand img{border-radius:6px}
 .hero h1{margin:0;max-width:11ch;font-size:clamp(46px,6.6vw,88px);line-height:.98;font-weight:800;letter-spacing:-.04em;text-wrap:balance}
 .sub{max-width:40ch;margin:28px 0 0;font-size:20px;line-height:1.5}
@@ -72,7 +74,7 @@ main{padding-top:56px}
   .wrap{padding:0 20px}
   .hero{padding:20px 0 120px}
   .hero-grid{grid-template-columns:1fr}
-  .brand{margin-bottom:36px}
+  .topbar{justify-content:flex-start;margin-bottom:36px}
   .sub{font-size:18px}
   .fennec{position:absolute;right:16px;top:12px;width:92px;margin:0}
   .hero{position:relative}
