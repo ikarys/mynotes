@@ -20,6 +20,23 @@ layout: default
 
     <div class="hero-side">
     <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox hugging a notepad" width="760" height="627" fetchpriority="high">
+      <div class="bank" data-ms="5.3">
+        <div class="bank-read" data-target="53" role="img" aria-label="5.3 milliseconds">
+          <div class="tubes"><span class="tube"><span class="d on">5</span></span><i class="dp"></i><span class="tube"><span class="d on">3</span></span></div>
+          <span class="unit">ms</span>
+        </div>
+        <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
+        <div class="bank-foot">
+          <p class="caption">shortcut → window shown</p>
+          <button class="replay" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+              <path d="M3 4v5h5"></path>
+            </svg>
+            Replay
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -72,14 +89,14 @@ layout: default
         <h2>Light enough to leave running.</h2>
         <p>No splash screen, no loading spinner, nothing busy in the background. Even started cold, mynotes opens in about a third of a second: the bar fills in exactly that time.</p>
       </div>
-      <div class="bank">
+      <div class="bank" data-ms="324">
         <div class="bank-read" data-target="324" role="img" aria-label="324 milliseconds">
           <div class="tubes"><span class="tube"><span class="d on">3</span></span><span class="tube"><span class="d on">2</span></span><span class="tube"><span class="d on">4</span></span></div>
           <span class="unit">ms</span>
         </div>
         <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
         <div class="bank-foot">
-          <p class="caption">launch → window shown</p>
+          <p class="caption">cold launch → window shown</p>
           <button class="replay" type="button">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
               <path d="M3 12a9 9 0 1 0 3-6.7"></path>
@@ -106,7 +123,7 @@ layout: default
       </div>
     </dl>
 
-    <p class="speed-note prose">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
+    <p class="speed-note prose">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. The shortcut was measured on 2026-11-21 with the installed v0.4.0, already in the tray: key press to window shown, median of 15 presses (4.5 to 17.2 ms). Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
   </div>
 </section>
 

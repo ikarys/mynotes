@@ -39,8 +39,6 @@
   <script>
     (function () {
       var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var bank = document.querySelector('.bank');
-      var fill = bank.querySelector('.bar-fill');
       var counters = [].slice.call(document.querySelectorAll('[data-target]'));
 
       // The HTML already shows the final digits (no-JS); here each tube gets all ten digits to light one at a time.
@@ -53,42 +51,47 @@
         });
       });
 
-      function render(group, f) {
-        group.forEach(function (c) {
+      // Each bank animates over the time it reports, so 5.3 ms is gone in a frame and 324 ms is seen filling.
+      var groups = [].map.call(document.querySelectorAll('.bank'), function (b) {
+        return { el: b, ms: +b.dataset.ms, fill: b.querySelector('.bar-fill'),
+          cs: counters.filter(function (c) { return b.contains(c); }) };
+      });
+      var loose = counters.filter(function (c) { return !c.closest('.bank'); });
+      if (loose.length) groups.push({ el: loose[0].closest('dl'), ms: 324, cs: loose });
+
+      function render(g, f) {
+        g.cs.forEach(function (c) {
           var s = String(Math.round(+c.dataset.target * f));
           while (s.length < c.tubes.length) s = '0' + s;
           c.tubes.forEach(function (ds, i) {
             [].forEach.call(ds, function (d, k) { d.classList.toggle('on', k === +s[i]); });
           });
         });
-        if (group === main) fill.style.transform = 'scaleX(' + f + ')';
+        if (g.fill) g.fill.style.transform = 'scaleX(' + f + ')';
       }
 
-      function run(group) {
-        cancelAnimationFrame(group.raf);
-        if (reduced) return render(group, 1);
+      function run(g) {
+        cancelAnimationFrame(g.raf);
+        if (reduced) return render(g, 1);
         var t0 = performance.now();
         (function frame(t) {
-          var e = Math.min(324, t - t0);
-          render(group, e / 324);
-          if (e < 324) group.raf = requestAnimationFrame(frame);
+          var e = Math.min(g.ms, t - t0);
+          render(g, e / g.ms);
+          if (e < g.ms) g.raf = requestAnimationFrame(frame);
         })(t0);
       }
 
-      // The big bank and the stat tubes sit far apart, so each group counts when it scrolls into view.
-      var main = counters.filter(function (c) { return bank.contains(c); });
-      var stats = counters.filter(function (c) { return !bank.contains(c); });
-      bank.querySelector('.replay').addEventListener('click', function () { run(main); });
-
-      [[main, bank], [stats, stats[0] && stats[0].closest('dl')]].forEach(function (g) {
-        if (!g[1]) return;
-        if (reduced) return render(g[0], 1);
-        render(g[0], 0);
-        if (!('IntersectionObserver' in window)) return run(g[0]);
+      // The groups sit far apart, so each one counts when it scrolls into view.
+      groups.forEach(function (g) {
+        var replay = g.el.querySelector('.replay');
+        if (replay) replay.addEventListener('click', function () { run(g); });
+        if (reduced) return render(g, 1);
+        render(g, 0);
+        if (!('IntersectionObserver' in window)) return run(g);
         var io = new IntersectionObserver(function (es) {
-          if (es[0].isIntersecting) { io.disconnect(); run(g[0]); }
+          if (es[0].isIntersecting) { io.disconnect(); run(g); }
         }, { threshold: 0.6 });
-        io.observe(g[1]);
+        io.observe(g.el);
       });
     })();
   </script>

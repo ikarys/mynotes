@@ -39,6 +39,15 @@ How the v0.2.0 and `af44dda` rows were measured, on Windows 11, Ryzen 9 9950X3D:
   makes up the rest, so the 80 MB target is not met.
 - CPU at rest: 0 ms of processor time over 10 s, window open.
 
+Summon time, measured 2026-11-21 with the installed v0.4.0 on the same PC:
+**5.3 ms median** (4.5 to 17.2 ms) over 15 presses, from the global hotkey to
+the main window visible, with mynotes already running in the tray.
+[`scripts/measure-summon.ps1`](scripts/measure-summon.ps1) re-runs it
+(`-Hotkey` takes the chord set in mynotes). Visible is the moment Windows
+reports the window shown; the web view is kept alive while hidden, so its
+content is already rendered, but the first screen refresh after that adds up
+to one frame.
+
 ## Not checked
 
 - The Linux AppImage and .deb are built by the release workflow but not
