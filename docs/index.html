@@ -6,7 +6,7 @@ layout: default
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <h1>Write it down now. Find it next month.</h1>
-      <p class="lede">Quick notes usually end up as Untitled tabs and <em>New Text Document (3).txt</em>. With mynotes you press <kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> in any app, type and close. Every note is kept, and <kbd>Ctrl</kbd>&nbsp;<kbd>P</kbd> finds it again.</p>
+      <p class="lede">Quick notes usually end up as Untitled tabs and <em>New Text Document (3).txt</em>. mynotes opens from any app with one shortcut. Type, close, and the note is kept; three letters of search bring it back.</p>
 
       <div class="actions">
         <a class="btn-primary" href="https://github.com/ikarys/mynotes/releases/latest">
@@ -19,7 +19,24 @@ layout: default
     </div>
 
     <div class="hero-side">
-    <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox hugging a notepad" width="760" height="627" fetchpriority="high">
+      <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox hugging a notepad" width="760" height="627" fetchpriority="high">
+      <figure class="mock" aria-label="The mynotes quick switcher: typing lis finds the note Weekend trip to Lisbon">
+        <div class="mock-search" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <span class="mock-q">lis</span><span class="caret"></span>
+        </div>
+        <ul class="mock-list" aria-hidden="true">
+          <li hidden><span>Groceries for Saturday</span><small>Today</small></li>
+          <li hidden><span>Call the plumber</span><small>Today</small></li>
+          <li class="top"><span>Weekend trip to <mark>Lis</mark>bon</span><small>Oct 12</small></li>
+          <li hidden><span>Lunch with Lina</span><small>Sep 30</small></li>
+          <li hidden><span>Ideas for the blog</span><small>Sep 18</small></li>
+        </ul>
+        <button class="replay" type="button" hidden>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+          Replay
+        </button>
+      </figure>
     </div>
   </div>
 </section>
@@ -27,7 +44,7 @@ layout: default
 <section class="section section--tight">
   <div class="wrap">
     <figure class="readout">
-      <img src="{{ '/assets/screenshots/note-dark.png' | relative_url }}" alt="mynotes in dark theme: a note with a checklist, a list and a JSON code block, the notes list grouped by day on the left" width="1440" height="900">
+      <img src="{{ '/assets/screenshots/note-light.png' | relative_url }}" alt="mynotes in light theme: a note with a checklist, a list and a JSON code block, the notes list grouped by day on the left" width="1440" height="900">
       <figcaption><kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> shows or hides the window from anywhere. mynotes follows the system theme, or the one you pick, with your font and size.</figcaption>
     </figure>
   </div>
@@ -36,12 +53,12 @@ layout: default
 <section class="section section--tight">
   <div class="wrap pair">
     <div class="pair-item">
-      <img class="shot" src="{{ '/assets/screenshots/search-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The quick switcher open over a note, finding two notes that match the search">
+      <img class="shot" src="{{ '/assets/screenshots/search-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The quick switcher open over a note, finding two notes that match the search">
       <h2>Type three letters, get the note back.</h2>
       <p><kbd>Ctrl</kbd>&nbsp;<kbd>P</kbd> searches every note you ever wrote, open or closed. You never named a file, so there is none to look for. The notes list on the left groups them by day, pinned notes first.</p>
     </div>
     <div class="pair-item">
-      <img class="shot" src="{{ '/assets/screenshots/image-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
+      <img class="shot" src="{{ '/assets/screenshots/image-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
       <h2>Paste an image, keep writing.</h2>
       <p>Images go straight into the note with <kbd>Ctrl</kbd>&nbsp;<kbd>V</kbd>, between the text and checklists around them. They are saved with your notes, on your disk, and copy back out with the text.</p>
     </div>
@@ -61,7 +78,7 @@ layout: default
         <li><kbd>F2</kbd> rename, right-click for more</li>
       </ul>
     </div>
-    <img class="shot shot--wide" src="{{ '/assets/screenshots/mindmap-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A mind map titled Q1 side projects with four coloured branches">
+    <img class="shot shot--wide" src="{{ '/assets/screenshots/mindmap-light.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A mind map titled Q1 side projects with four coloured branches">
   </div>
 </section>
 
@@ -69,58 +86,14 @@ layout: default
   <div class="wrap">
     <div class="prose">
       <h2>Light enough to leave running.</h2>
-      <p>mynotes waits in the tray at 0 % CPU, so the shortcut shows a window that is already drawn. Even started cold, it opens in about a third of a second. Each bar fills in exactly the time it reports.</p>
+      <p>mynotes waits in the tray at 0 % CPU, so the shortcut shows a window that is already drawn. Even started cold, it opens in about a third of a second.</p>
     </div>
-    <div class="banks">
-      <div class="bank" data-ms="5.3">
-        <div class="bank-read" data-target="53" role="img" aria-label="5.3 milliseconds">
-          <div class="tubes"><span class="tube"><span class="d on">5</span></span><i class="dp"></i><span class="tube"><span class="d on">3</span></span></div>
-          <span class="unit">ms</span>
-        </div>
-        <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
-        <div class="bank-foot">
-          <p class="caption">shortcut → window shown</p>
-          <button class="replay" type="button">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-              <path d="M3 4v5h5"></path>
-            </svg>
-            Replay
-          </button>
-        </div>
-      </div>
-      <div class="bank" data-ms="324">
-        <div class="bank-read" data-target="324" role="img" aria-label="324 milliseconds">
-          <div class="tubes"><span class="tube"><span class="d on">3</span></span><span class="tube"><span class="d on">2</span></span><span class="tube"><span class="d on">4</span></span></div>
-          <span class="unit">ms</span>
-        </div>
-        <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
-        <div class="bank-foot">
-          <p class="caption">cold launch → window shown</p>
-          <button class="replay" type="button">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-              <path d="M3 4v5h5"></path>
-            </svg>
-            Replay
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <dl class="stats">
-      <div>
-        <dt><span class="tubes mini" data-target="0" aria-hidden="true"><span class="tube"><span class="d on">0</span></span></span><span class="stat-label">0 % CPU</span></dt>
-        <dd>at rest. Not a single millisecond of processor time in 10 seconds, window open.</dd>
-      </div>
-      <div>
-        <dt><span class="tubes mini" data-target="61" aria-hidden="true"><span class="tube"><span class="d on">6</span></span><i class="dp"></i><span class="tube"><span class="d on">1</span></span></span><span class="stat-label">6.1 MB</span></dt>
-        <dd>The whole app. The installer is 2.9 MB, smaller than a phone photo.</dd>
-      </div>
-      <div>
-        <dt><span class="tubes mini" data-target="184" aria-hidden="true"><span class="tube"><span class="d on">1</span></span><span class="tube"><span class="d on">8</span></span><span class="tube"><span class="d on">4</span></span></span><span class="stat-label">184 MB RAM</span></dt>
-        <dd>most of it the Windows web view engine the app draws with.</dd>
-      </div>
+    <dl class="figures">
+      <div><dt>5.3 ms</dt><dd>from the shortcut to the window, with mynotes waiting in the tray</dd></div>
+      <div><dt>324 ms</dt><dd>from a cold launch to the window, ready to type</dd></div>
+      <div><dt>0 % CPU</dt><dd>at rest. Not a single millisecond of processor time in 10 seconds, window open.</dd></div>
+      <div><dt>6.1 MB</dt><dd>The whole app. The installer is 2.9 MB, smaller than a phone photo.</dd></div>
+      <div><dt>184 MB RAM</dt><dd>most of it the Windows web view engine the app draws with.</dd></div>
     </dl>
 
     <p class="speed-note prose">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. The shortcut was measured on 2026-11-21 with the installed v0.4.0, already in the tray: key press to window shown, median of 15 presses (4.5 to 17.2 ms). Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>

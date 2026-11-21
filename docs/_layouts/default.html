@@ -7,12 +7,12 @@
   <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
   <meta property="og:title" content="{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}">
   <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
-  <meta property="og:image" content="{{ '/assets/screenshots/note-dark.png' | absolute_url }}">
+  <meta property="og:image" content="{{ '/assets/screenshots/note-light.png' | absolute_url }}">
   <meta property="og:type" content="website">
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#08090b">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f6efe3">
   <link rel="icon" href="{{ '/assets/icon.png' | relative_url }}" type="image/png">
-  <link rel="preload" href="{{ '/assets/fonts/Oxanium.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ '/assets/fonts/Fredoka.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
 </head>
 <body>
@@ -38,61 +38,43 @@
 
   <script>
     (function () {
-      var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var counters = [].slice.call(document.querySelectorAll('[data-target]'));
-
-      // The HTML already shows the final digits (no-JS); here each tube gets all ten digits to light one at a time.
-      counters.forEach(function (c) {
-        c.tubes = [].map.call(c.querySelectorAll('.tube'), function (t) {
-          var h = '';
-          for (var d = 0; d < 10; d++) h += '<span class="d">' + d + '</span>';
-          t.innerHTML = h;
-          return t.querySelectorAll('.d');
-        });
+      var mock = document.querySelector('.mock');
+      if (!mock || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var q = mock.querySelector('.mock-q');
+      var items = [].map.call(mock.querySelectorAll('li'), function (li) {
+        var date = li.querySelector('small');
+        return { li: li, title: li.textContent.slice(0, -date.textContent.length), date: date.outerHTML };
       });
+      var word = q.textContent, timer;
 
-      // Each bank animates over the time it reports, so 5.3 ms is gone in a frame and 324 ms is seen filling.
-      var groups = [].map.call(document.querySelectorAll('.bank'), function (b) {
-        return { el: b, ms: +b.dataset.ms, fill: b.querySelector('.bar-fill'),
-          cs: counters.filter(function (c) { return b.contains(c); }) };
-      });
-      var loose = counters.filter(function (c) { return !c.closest('.bank'); });
-      if (loose.length) groups.push({ el: loose[0].closest('dl'), ms: 324, cs: loose });
-
-      function render(g, f) {
-        g.cs.forEach(function (c) {
-          var s = String(Math.round(+c.dataset.target * f));
-          while (s.length < c.tubes.length) s = '0' + s;
-          c.tubes.forEach(function (ds, i) {
-            [].forEach.call(ds, function (d, k) { d.classList.toggle('on', k === +s[i]); });
-          });
+      // Titles are fixed strings written in this page, so building the highlight markup from them is safe.
+      function show(typed) {
+        q.textContent = typed;
+        var first = true;
+        items.forEach(function (it) {
+          var i = it.title.toLowerCase().indexOf(typed);
+          it.li.hidden = i < 0;
+          it.li.classList.toggle('top', i >= 0 && first);
+          if (i < 0) return;
+          first = false;
+          it.li.innerHTML = '<span>' + it.title.slice(0, i) + (typed ? '<mark>' + it.title.substr(i, typed.length) + '</mark>' : '') + it.title.slice(i + typed.length) + '</span>' + it.date;
         });
-        if (g.fill) g.fill.style.transform = 'scaleX(' + f + ')';
       }
 
-      function run(g) {
-        cancelAnimationFrame(g.raf);
-        if (reduced) return render(g, 1);
-        var t0 = performance.now();
-        (function frame(t) {
-          var e = Math.min(g.ms, t - t0);
-          render(g, e / g.ms);
-          if (e < g.ms) g.raf = requestAnimationFrame(frame);
-        })(t0);
+      // The final state is in the HTML for no-JS readers; here it is typed one letter at a time, like the real switcher filters.
+      function play() {
+        clearTimeout(timer);
+        var n = 0;
+        show('');
+        (function step() {
+          timer = setTimeout(function () { show(word.slice(0, ++n)); if (n < word.length) step(); }, n ? 260 : 700);
+        })();
       }
 
-      // The groups sit far apart, so each one counts when it scrolls into view.
-      groups.forEach(function (g) {
-        var replay = g.el.querySelector('.replay');
-        if (replay) replay.addEventListener('click', function () { run(g); });
-        if (reduced) return render(g, 1);
-        render(g, 0);
-        if (!('IntersectionObserver' in window)) return run(g);
-        var io = new IntersectionObserver(function (es) {
-          if (es[0].isIntersecting) { io.disconnect(); run(g); }
-        }, { threshold: 0.6 });
-        io.observe(g.el);
-      });
+      var replay = mock.querySelector('.replay');
+      replay.hidden = false;
+      replay.addEventListener('click', play);
+      play();
     })();
   </script>
 </body>
