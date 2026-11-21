@@ -6,7 +6,7 @@ layout: default
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <h1>The notepad that is already open.</h1>
-      <p class="lede">mynotes opens in 0.3 s, waits in the tray at 0 % CPU and appears on a shortcut. Write, sketch a mind map, close: it is saved.</p>
+      <p class="lede">mynotes waits in the tray at 0 % CPU and appears on <kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd>. No file to name, nothing to save: write, close, and <kbd>Ctrl</kbd>&nbsp;<kbd>P</kbd> finds it later.</p>
 
       <div class="actions">
         <a class="btn-primary" href="https://github.com/ikarys/mynotes/releases/latest">
@@ -20,50 +20,7 @@ layout: default
 
     <div class="hero-side">
     <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox hugging a notepad" width="760" height="627" fetchpriority="high">
-    <div class="bank">
-      <div class="bank-read" data-target="324" role="img" aria-label="324 milliseconds">
-        <div class="tubes"><span class="tube"><span class="d on">3</span></span><span class="tube"><span class="d on">2</span></span><span class="tube"><span class="d on">4</span></span></div>
-        <span class="unit">ms</span>
-      </div>
-      <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
-      <div class="bank-foot">
-        <p class="caption">launch → window shown</p>
-        <button class="replay" type="button">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-            <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-            <path d="M3 4v5h5"></path>
-          </svg>
-          Replay
-        </button>
-      </div>
     </div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="prose">
-      <h2>Open before the thought is gone.</h2>
-      <p>No splash screen, no loading spinner, nothing busy in the background. The bar fills in exactly the time mynotes takes to open.</p>
-    </div>
-
-    <dl class="stats">
-      <div>
-        <dt><span class="tubes mini" data-target="0" aria-hidden="true"><span class="tube"><span class="d on">0</span></span></span><span class="stat-label">0 % CPU</span></dt>
-        <dd>at rest. Not a single millisecond of processor time in 10 seconds, window open.</dd>
-      </div>
-      <div>
-        <dt><span class="tubes mini" data-target="61" aria-hidden="true"><span class="tube"><span class="d on">6</span></span><i class="dp"></i><span class="tube"><span class="d on">1</span></span></span><span class="stat-label">6.1 MB</span></dt>
-        <dd>The whole app. The installer is 2.9 MB, smaller than a phone photo.</dd>
-      </div>
-      <div>
-        <dt><span class="tubes mini" data-target="184" aria-hidden="true"><span class="tube"><span class="d on">1</span></span><span class="tube"><span class="d on">8</span></span><span class="tube"><span class="d on">4</span></span></span><span class="stat-label">184 MB RAM</span></dt>
-        <dd>most of it the Windows web view engine the app draws with.</dd>
-      </div>
-    </dl>
-
-    <p class="speed-note prose">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
   </div>
 </section>
 
@@ -73,6 +30,21 @@ layout: default
       <img src="{{ '/assets/screenshots/note-dark.png' | relative_url }}" alt="mynotes in dark theme: a note with a checklist, a list and a JSON code block, the notes list grouped by day on the left" width="1440" height="900">
       <figcaption><kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> shows or hides the window from anywhere. mynotes follows the system theme, or the one you pick, with your font and size.</figcaption>
     </figure>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="wrap pair">
+    <div class="pair-item">
+      <img class="shot" src="{{ '/assets/screenshots/search-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The quick switcher open over a note, finding two notes that match the search">
+      <h2>No files. Ctrl P finds it.</h2>
+      <p>Every note is saved as you type, so there is nothing to name and nowhere to file it. Full-text search covers every note you ever wrote, open or closed. The notes list on the left groups them by day, pinned notes first.</p>
+    </div>
+    <div class="pair-item">
+      <img class="shot" src="{{ '/assets/screenshots/image-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
+      <h2>Paste an image, keep writing.</h2>
+      <p>Images go straight into the note with <kbd>Ctrl</kbd>&nbsp;<kbd>V</kbd>, between the text and checklists around them. They are saved with your notes, on your disk, and copy back out with the text.</p>
+    </div>
   </div>
 </section>
 
@@ -93,18 +65,48 @@ layout: default
   </div>
 </section>
 
-<section class="section section--tight">
-  <div class="wrap pair">
-    <div class="pair-item">
-      <img class="shot" src="{{ '/assets/screenshots/search-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The quick switcher open over a note, finding two notes that match the search">
-      <h2>Find anything with Ctrl P.</h2>
-      <p>Full-text search across every note you ever wrote, open or closed. The notes list on the left groups them by day, pinned notes first.</p>
+<section class="section">
+  <div class="wrap">
+    <div class="feature-head">
+      <div class="prose">
+        <h2>Light enough to leave running.</h2>
+        <p>No splash screen, no loading spinner, nothing busy in the background. Even started cold, mynotes opens in about a third of a second: the bar fills in exactly that time.</p>
+      </div>
+      <div class="bank">
+        <div class="bank-read" data-target="324" role="img" aria-label="324 milliseconds">
+          <div class="tubes"><span class="tube"><span class="d on">3</span></span><span class="tube"><span class="d on">2</span></span><span class="tube"><span class="d on">4</span></span></div>
+          <span class="unit">ms</span>
+        </div>
+        <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
+        <div class="bank-foot">
+          <p class="caption">launch → window shown</p>
+          <button class="replay" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+              <path d="M3 4v5h5"></path>
+            </svg>
+            Replay
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="pair-item">
-      <img class="shot" src="{{ '/assets/screenshots/image-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
-      <h2>Paste an image, keep writing.</h2>
-      <p>Images go straight into the note with <kbd>Ctrl</kbd>&nbsp;<kbd>V</kbd>, between the text and checklists around them. They are saved with your notes, on your disk, and copy back out with the text.</p>
-    </div>
+
+    <dl class="stats">
+      <div>
+        <dt><span class="tubes mini" data-target="0" aria-hidden="true"><span class="tube"><span class="d on">0</span></span></span><span class="stat-label">0 % CPU</span></dt>
+        <dd>at rest. Not a single millisecond of processor time in 10 seconds, window open.</dd>
+      </div>
+      <div>
+        <dt><span class="tubes mini" data-target="61" aria-hidden="true"><span class="tube"><span class="d on">6</span></span><i class="dp"></i><span class="tube"><span class="d on">1</span></span></span><span class="stat-label">6.1 MB</span></dt>
+        <dd>The whole app. The installer is 2.9 MB, smaller than a phone photo.</dd>
+      </div>
+      <div>
+        <dt><span class="tubes mini" data-target="184" aria-hidden="true"><span class="tube"><span class="d on">1</span></span><span class="tube"><span class="d on">8</span></span><span class="tube"><span class="d on">4</span></span></span><span class="stat-label">184 MB RAM</span></dt>
+        <dd>most of it the Windows web view engine the app draws with.</dd>
+      </div>
+    </dl>
+
+    <p class="speed-note prose">Measured on 2026-11-20 with a release build of commit af44dda (v0.3.0 plus pin, lock and trash) on Windows 11 (Ryzen 9 9950X3D): time from launch to the window shown ready, median of 7 launches with the files already in the system cache. RAM is the private memory of mynotes and its web view processes. A slower PC takes longer. Method and history in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
   </div>
 </section>
 
