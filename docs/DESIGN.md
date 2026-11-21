@@ -2,6 +2,7 @@
 
 The page is a mynotes window. The notes list on the left holds the site's sections as notes, grouped by day like the app. The open note on the right renders like the editor. The search box in the title bar filters the list.
 
+- Above the window, on the desk, one plain line says what mynotes is, the next says the window below is a working copy, then Download. Without it, visitors read the page as an online notes tool.
 - Desk: burnt orange `#b4530c`, white footer text on it (5.0:1).
 - Window: the app's own light tokens (`src/app.css`): chrome `#efede7`, background `#fdfcfa`, accent `#f7941d` with dark ink text, `#a85a00` for accent text.
 - Type: Hanken Grotesk only, self-hosted. The welcome note's title is the one large headline.

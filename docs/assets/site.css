@@ -22,10 +22,11 @@ a{color:var(--accent-text);text-underline-offset:.18em}
 .sprite{position:absolute;width:0;height:0;overflow:hidden}
 .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-.desk{position:relative;max-width:1240px;margin:0 auto;padding:150px 24px 0}
-.fennec{position:absolute;z-index:2;top:6px;right:clamp(140px,22%,300px);width:180px;height:auto;pointer-events:none}
+.desk{max-width:1240px;margin:0 auto;padding:0 24px}
+.stage{position:relative}
+.fennec{position:absolute;z-index:2;bottom:calc(100% - 6px);right:clamp(140px,22%,300px);width:180px;height:auto;pointer-events:none}
 
-.window{position:relative;z-index:1;display:flex;flex-direction:column;height:clamp(560px,calc(100dvh - 174px),880px);background:var(--bg);border-radius:8px;box-shadow:var(--shadow);overflow:clip}
+.window{position:relative;z-index:1;display:flex;flex-direction:column;height:clamp(560px,calc(100dvh - 190px),880px);background:var(--bg);border-radius:8px;box-shadow:var(--shadow);overflow:clip}
 
 /* Title bar */
 .titlebar{display:flex;align-items:center;gap:12px;height:46px;padding:0 0 0 14px;background:var(--chrome);border-bottom:1px solid var(--line);flex:none}
@@ -44,7 +45,13 @@ a{color:var(--accent-text);text-underline-offset:.18em}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:8px;background:var(--accent);color:var(--ink);font-weight:650;font-size:16px;text-decoration:none;white-space:nowrap}
 .btn:hover{background:#ffa53a}
 .btn small{font-weight:500;font-size:13px;opacity:.8}
-.btn--bar{padding:0 12px;height:30px;border-radius:6px;font-size:13px;gap:6px}
+.intro{display:grid;align-content:center;justify-items:start;gap:4px;max-width:calc(100% - 440px);min-height:174px;padding:24px 0 28px;color:#fff}
+.intro p{margin:0}
+.intro-what{font-size:22px;line-height:1.25;font-weight:500;letter-spacing:-.01em}
+.intro-what strong{font-weight:750}
+.intro-how{font-size:15px;opacity:.92}
+.btn--desk{margin-top:14px;background:#fff;color:var(--ink)}
+.btn--desk:hover{background:#ffe9cf}
 
 /* App body: rail, notes list, open note */
 .body{position:relative;display:grid;grid-template-columns:44px 260px minmax(0,1fr);flex:1;min-height:0}
@@ -115,16 +122,18 @@ kbd{display:inline-block;min-width:1.6em;padding:0 6px;border:1px solid var(--li
 /* Without JS the search and list toggle do nothing, so they are not offered. */
 html:not(.js) .search,html:not(.js) .list-toggle{visibility:hidden}
 
-@media (max-width:1000px){.wide{display:none}.controls svg{padding:0 10px}}
+@media (max-width:1100px){.intro{max-width:calc(100% - 260px)}.controls svg{padding:0 10px}}
 
 @media (max-width:760px){
-  .desk{padding:96px 10px 0}
+  .desk{padding:0 10px}
+  .intro{max-width:none;min-height:0;padding:20px 124px 26px 4px}
+  .intro-what{font-size:18px}
+  .intro-how{font-size:14px}
   .fennec{width:112px;right:28px}
   .window{height:auto;overflow:visible}
   .titlebar{flex-wrap:wrap;height:auto;gap:8px;padding:8px 10px;border-radius:8px 8px 0 0}
   .app-id{order:1;flex:1}
   .list-toggle{display:grid;order:0}
-  .btn--bar{order:2}
   .search{order:3;flex:1 1 100%}
   .controls,.rail{display:none}
   .body{display:block}

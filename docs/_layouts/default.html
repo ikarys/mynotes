@@ -30,8 +30,15 @@
   </svg>
 
   <div class="desk">
-    <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox, sitting on the window with its notepad" width="760" height="627" fetchpriority="high">
+    <header class="intro">
+      <p class="intro-what"><strong>mynotes</strong> is a free notepad app for Windows and Linux.</p>
+      <p class="intro-how">Below is its window, working in your browser: open a note in the list, or search.</p>
+      <a class="btn btn--desk" href="https://github.com/ikarys/mynotes/releases/latest"><svg width="18" height="18" aria-hidden="true" focusable="false"><use href="#i-download"></use></svg>Download the app</a>
+    </header>
+    <div class="stage">
+      <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox, sitting on the window with its notepad" width="760" height="627" fetchpriority="high">
     {{ content }}
+    </div>
     <footer class="site-footer">
       <p>mynotes is written with AI assistance. Every number on this page was measured on a release build; how each claim is checked is in <a href="https://github.com/ikarys/mynotes/blob/main/VERIFICATION.md">VERIFICATION.md</a>.</p>
       <p>MIT licence. Source on <a href="{{ site.repo }}">GitHub</a>, <a href="https://github.com/ikarys/mynotes/blob/main/SECURITY.md">security policy</a>.</p>
