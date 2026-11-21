@@ -5,8 +5,8 @@ layout: default
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <h1>The notepad that is already open.</h1>
-      <p class="lede">mynotes waits in the tray at 0 % CPU and appears on <kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd>. No file to name, nothing to save: write, close, and <kbd>Ctrl</kbd>&nbsp;<kbd>P</kbd> finds it later.</p>
+      <h1>Write it down now. Find it next month.</h1>
+      <p class="lede">Quick notes usually end up as Untitled tabs and <em>New Text Document (3).txt</em>. With mynotes you press <kbd>Ctrl</kbd>&nbsp;<kbd>Alt</kbd>&nbsp;<kbd>Space</kbd> in any app, type and close. Every note is kept, and <kbd>Ctrl</kbd>&nbsp;<kbd>P</kbd> finds it again.</p>
 
       <div class="actions">
         <a class="btn-primary" href="https://github.com/ikarys/mynotes/releases/latest">
@@ -20,23 +20,6 @@ layout: default
 
     <div class="hero-side">
     <img class="fennec" src="{{ '/assets/fennec.webp' | relative_url }}" alt="The mynotes fennec fox hugging a notepad" width="760" height="627" fetchpriority="high">
-      <div class="bank" data-ms="5.3">
-        <div class="bank-read" data-target="53" role="img" aria-label="5.3 milliseconds">
-          <div class="tubes"><span class="tube"><span class="d on">5</span></span><i class="dp"></i><span class="tube"><span class="d on">3</span></span></div>
-          <span class="unit">ms</span>
-        </div>
-        <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
-        <div class="bank-foot">
-          <p class="caption">shortcut → window shown</p>
-          <button class="replay" type="button">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-              <path d="M3 4v5h5"></path>
-            </svg>
-            Replay
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -54,8 +37,8 @@ layout: default
   <div class="wrap pair">
     <div class="pair-item">
       <img class="shot" src="{{ '/assets/screenshots/search-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="The quick switcher open over a note, finding two notes that match the search">
-      <h2>No files. Ctrl P finds it.</h2>
-      <p>Every note is saved as you type, so there is nothing to name and nowhere to file it. Full-text search covers every note you ever wrote, open or closed. The notes list on the left groups them by day, pinned notes first.</p>
+      <h2>Type three letters, get the note back.</h2>
+      <p><kbd>Ctrl</kbd>&nbsp;<kbd>P</kbd> searches every note you ever wrote, open or closed. You never named a file, so there is none to look for. The notes list on the left groups them by day, pinned notes first.</p>
     </div>
     <div class="pair-item">
       <img class="shot" src="{{ '/assets/screenshots/image-dark.png' | relative_url }}" width="1440" height="900" loading="lazy" alt="A meeting note with the pasted app icon between a paragraph and a checklist">
@@ -69,8 +52,8 @@ layout: default
   <div class="wrap">
     <div class="feature-head">
       <div class="prose">
-        <h2>Ideas branch out. So do your notes.</h2>
-        <p>Any note can be a mind map. Build it from the keyboard, as fast as you think, and export it as a PNG when it is ready to share.</p>
+        <h2>When a note turns into a plan, press Tab.</h2>
+        <p>Any note can become a mind map. <kbd>Tab</kbd> adds a branch, <kbd>Enter</kbd> a sibling, and the map exports as a PNG when it is ready to share.</p>
       </div>
       <ul class="kbd-list">
         <li><kbd>Ctrl</kbd>&nbsp;<kbd>Shift</kbd>&nbsp;<kbd>M</kbd> new mind map</li>
@@ -84,10 +67,27 @@ layout: default
 
 <section class="section">
   <div class="wrap">
-    <div class="feature-head">
-      <div class="prose">
-        <h2>Light enough to leave running.</h2>
-        <p>No splash screen, no loading spinner, nothing busy in the background. Even started cold, mynotes opens in about a third of a second: the bar fills in exactly that time.</p>
+    <div class="prose">
+      <h2>Light enough to leave running.</h2>
+      <p>mynotes waits in the tray at 0 % CPU, so the shortcut shows a window that is already drawn. Even started cold, it opens in about a third of a second. Each bar fills in exactly the time it reports.</p>
+    </div>
+    <div class="banks">
+      <div class="bank" data-ms="5.3">
+        <div class="bank-read" data-target="53" role="img" aria-label="5.3 milliseconds">
+          <div class="tubes"><span class="tube"><span class="d on">5</span></span><i class="dp"></i><span class="tube"><span class="d on">3</span></span></div>
+          <span class="unit">ms</span>
+        </div>
+        <div class="bar" aria-hidden="true"><div class="bar-fill"></div></div>
+        <div class="bank-foot">
+          <p class="caption">shortcut → window shown</p>
+          <button class="replay" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+              <path d="M3 4v5h5"></path>
+            </svg>
+            Replay
+          </button>
+        </div>
       </div>
       <div class="bank" data-ms="324">
         <div class="bank-read" data-target="324" role="img" aria-label="324 milliseconds">
